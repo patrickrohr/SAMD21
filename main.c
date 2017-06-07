@@ -8,22 +8,20 @@
 
 #include "sam.h"
 #include "FreeRTOS.h"
-#include "PortIO.h"
+#include "FreeRTOSConfig.h"
+#include "task.h"
+
+
+void task_blink(void * pvParameters); // is this bad practice?
 
 
 int main(void)
 {
-    /* Initialize the SAM system */
-    SystemInit();
+	/* Initialize the SAM system */
+	SystemInit();
+	
+	xTaskCreate(task_blink, "blink", 100, (void*) 1, tskIDLE_PRIORITY, NULL); // task function, name, stack_size, xyz, priority, reference
+	vTaskStartScheduler(); // this should never return
 
-	struct PortIO * port_io_ptr = port_io_init();
-	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
-
-    /* Replace with your application code */
-    while (1) 
-    {
-		port_io_toggle(port_io_ptr, 17);
-		unsigned int n = 10000;
-		while (n--);	
-    }
+	return 0;	
 }

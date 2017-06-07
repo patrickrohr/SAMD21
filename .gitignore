@@ -3,6 +3,8 @@ Debug/*
 Release/*
 *.cproj
 *.componentinfo.xml
+jlink.log
+jlink.config
 
 # Object files
 *.o
