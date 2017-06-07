@@ -1,3 +1,9 @@
+# Atmel Studio Ignores
+Debug/*
+Release/*
+*.cproj
+*.componentinfo.xml
+
 # Object files
 *.o
 *.ko
