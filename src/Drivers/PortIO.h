@@ -28,7 +28,7 @@ struct PortIO
 enum _port_io_direction {PORT_IO_INPUT, PORT_IO_OUTPUT};
 
 struct PortIO * port_io_init();
-void port_io_set_dir(struct PortIO * port_io_ptr, int pin, enum _port_io_direction dir);
-void port_io_toggle(struct PortIO * port_io_ptr, int pin);
+void port_io_set_dir(struct PortIO * this, int pin, enum _port_io_direction dir);
+void port_io_toggle(struct PortIO * this, int pin);
 
 #endif //__PORTIO_H__

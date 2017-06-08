@@ -14,15 +14,15 @@ struct PortIO * port_io_init()
 	return ((struct PortIO*)0x41004400);
 }
 
-void port_io_set_dir(struct PortIO * port_io_ptr, int pin, enum _port_io_direction dir)
+void port_io_set_dir(struct PortIO * this, int pin, enum _port_io_direction dir)
 {
 	if (dir)
-	port_io_ptr->DIRSET = (1<<pin);
+	this->DIRSET = (1<<pin);
 	else
-	port_io_ptr->DIRCLR = (1<<pin);
+	this->DIRCLR = (1<<pin);
 }
 
-void port_io_toggle(struct PortIO * port_io_ptr, int pin)
+void port_io_toggle(struct PortIO * this, int pin)
 {
-	port_io_ptr->OUTTGL = (1<<pin);
+	this->OUTTGL = (1<<pin);
 }

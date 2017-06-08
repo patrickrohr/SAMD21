@@ -2,17 +2,14 @@
  * SAMD21.c
  *
  * Created: 6/6/2017 8:36:51 PM
- * Author : patri
+ * Author : Patrick Rohr
  */ 
 
 
 #include "sam.h"
 #include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
 #include "task.h"
-
-
-void task_blink(void * pvParameters); // is this bad practice?
+#include "TaskBlink.h"
 
 
 int main(void)
@@ -20,7 +17,7 @@ int main(void)
 	/* Initialize the SAM system */
 	SystemInit();
 	
-	xTaskCreate(task_blink, "blink", 100, (void*) 1, tskIDLE_PRIORITY, NULL); // task function, name, stack_size, xyz, priority, reference
+	task_blink_start();
 	vTaskStartScheduler(); // this should never return
 
 	return 0;	
