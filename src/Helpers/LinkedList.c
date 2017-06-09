@@ -46,5 +46,22 @@ struct LinkedList * linked_list_push_back_node(struct LinkedList * this, void * 
 
 void linked_list_delete_node(struct LinkedList * this, struct Node * node_to_be_deleted)
 {
-	// TODO: implement
+	struct Node * node_iter = this->first;
+	if(node_iter != NULL) // if there is data in this list
+	{
+		do
+		{
+			if(node_iter == node_to_be_deleted)
+			{
+				// close the gap
+				node_iter->prev->next = node_iter->next;
+				node_iter->next->prev = node_iter->prev;
+				//free heap memory
+				vPortFree(node_iter);
+				return;
+			}
+			node_iter = node_iter->next;
+		} while(node_iter != NULL);
+
+	}
 }
