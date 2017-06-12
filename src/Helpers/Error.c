@@ -9,18 +9,30 @@
 #include "Error.h"
 
 
-struct Error * error_get_instance()
+// PRIVATE
+
+struct _Error
 {
-	static struct Error error_obj = {.error_bits = 0, .last_timestamp = 0};
+	uint16_t last_timestamp;
+	uint16_t error_bits;
+};
+
+
+// PUBLIC
+
+struct _Error * _error_get_instance()
+{
+	static struct _Error error_obj = {.error_bits = 0, .last_timestamp = 0};
 	return &error_obj;
 }
 
-void error_set(struct Error * this, enum error_codes error_code)
+void error_set(enum error_codes error_code)
 {
-	this->error_bits &= (1<<error_code);
+	_error_get_instance()->error_bits &= (1<<error_code);
 }
 
-void error_clear(struct Error * this)
+void error_clear()
 {
-	this->error_bits = 0;
+	_error_get_instance()->error_bits = 0;
 }
+

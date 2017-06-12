@@ -12,17 +12,12 @@
 	
 enum error_codes
 {
-	GENERIC_ERROR // placeholder until I have some actual errors. Please never ever use this. Thanks.
+	ERROR_LEVEL_FATAL, // placeholder until I have some actual errors. Please never ever use this. Thanks.
+	ERROR_BUFFER_POOL_MEMORY_LEAK
 };
 
-struct Error
-{
-	uint16_t last_timestamp;
-	uint16_t error_bits;
-};
-
-struct Error * error_get_instance();
-void error_set(struct Error * this, enum error_codes error_code);
-void error_clear(struct Error * this);
+// Singleton pattern
+void error_set(enum error_codes error_code);
+void error_clear();
 
 #endif
