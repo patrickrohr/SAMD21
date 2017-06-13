@@ -60,7 +60,7 @@ struct BufferPool * buffer_pool_create(int size, int count)
 {
 	struct BufferPool * buffer_pool_ptr = pvPortMalloc(sizeof(struct BufferPool));
 	
-	struct Buffer * prev_buffer_ptr; // used to set up linked list
+	struct Buffer * prev_buffer_ptr = NULL; // used to set up linked list. setting this to null so the stupid warning goes away...
 	for(int i = 0; i < count; i++)
 	{
 		// buffer_size is 0x4 bytes larger than the actual size plus struct buffer, since the void data pointer will be overwritten with data.
@@ -77,7 +77,10 @@ struct BufferPool * buffer_pool_create(int size, int count)
 		}
 		prev_buffer_ptr = buffer_ptr;
 	}
-	prev_buffer_ptr->next_ptr = NULL; // last element in list is not pointing anywhere
+	if (count > 0)
+	{
+		prev_buffer_ptr->next_ptr = NULL; // last element in list is not pointing anywhere
+	}
 
 	return buffer_pool_ptr;
 }
@@ -91,5 +94,5 @@ struct Packet * buffer_pool_get_packet(struct BufferPool * self)
 
 void buffer_pool_free_packet(struct BufferPool * self, struct Packet * packet_ptr)
 {
-	_buffer_pool_free_buffer(self, packet_ptr - offsetof(struct Buffer, data));
+	_buffer_pool_free_buffer(self, (struct Buffer *)(packet_ptr - offsetof(struct Buffer, data)));
 }

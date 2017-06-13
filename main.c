@@ -7,6 +7,7 @@
 
 
 #include "sam.h"
+#include "samd21g18a.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "TaskBlink.h"

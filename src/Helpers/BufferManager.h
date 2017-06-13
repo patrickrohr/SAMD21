@@ -20,7 +20,7 @@ Having a BufferManager will eventually give me the possibility to abstract away 
 buffer sizes and automatically choosing the most efficient buffer size for a certain data packet.
 At the moment, it pretty much serves as a 1-to-1 translation layer to BufferPool, but this WILL change.
 */
-struct Packet * buffer_manager_get_packet();
-void buffer_manager_free_packet(struct Packet * packet_ptr);
+void * buffer_manager_get_buffer_data();
+void buffer_manager_free_buffer_data(void * packet_data_ptr);
 
 #endif

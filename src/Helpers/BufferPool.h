@@ -29,12 +29,6 @@ struct Packet
 	void * data;
 };
 
-struct BPTest
-{
-	uint32_t test_number;
-};
-
-
 struct BufferPool * buffer_pool_create(int size, int count); // creates/allocates memory for buffer pool in heap and returns handle
 struct Packet * buffer_pool_get_packet(struct BufferPool * self); // allocates buffer inside buffer pool and returns handle to packet
 void buffer_pool_free_packet(struct BufferPool * self, struct Packet * packet_ptr);
