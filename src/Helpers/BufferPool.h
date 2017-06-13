@@ -10,6 +10,7 @@
 #define __BUFFER_POOL_H__
 
 #include <stdint.h>
+#include <stddef.h> // includes offsetof()
 
 // allocates and recycles memory in the heap to prevent memory fragmentation
 // buffers are organized as linked list
@@ -22,22 +23,21 @@ struct BufferPool
 	uint16_t count; // number of buffers
 };
 
-struct Buffer
-{
-	struct Buffer * next_ptr;
-	//enum buffer_data_type;
-	void * data; // this is as a reference for where the data will start, not an actual pointer. Will mostly contain Packet struct.
-};
-
 struct Packet
 {
 	uint32_t data_type; //typecast from enum packet_data_type
 	void * data;
 };
 
+struct BPTest
+{
+	uint32_t test_number;
+};
+
 
 struct BufferPool * buffer_pool_create(int size, int count); // creates/allocates memory for buffer pool in heap and returns handle
-struct Buffer * buffer_pool_get_buffer(struct BufferPool * self); // allocates buffer inside buffer pool and returns handle to buffer
-void buffer_pool_free_buffer(struct BufferPool * self, struct Buffer * buffer_ptr);
+struct Packet * buffer_pool_get_packet(struct BufferPool * self); // allocates buffer inside buffer pool and returns handle to packet
+void buffer_pool_free_packet(struct BufferPool * self, struct Packet * packet_ptr);
+
 
 #endif
