@@ -15,6 +15,13 @@
 
 // PRIVATE
 
+struct BufferPool
+{
+	struct Buffer * first_free_buffer_ptr; // points to first free buffer.
+	uint16_t size; // size of buffers
+	uint16_t count; // number of buffers
+};
+
 struct Buffer
 {
 	struct Buffer * next_ptr;
@@ -61,11 +68,13 @@ struct BufferPool * buffer_pool_create(int size, int count)
 	struct BufferPool * buffer_pool_ptr = pvPortMalloc(sizeof(struct BufferPool));
 	
 	struct Buffer * prev_buffer_ptr = NULL; // used to set up linked list. setting this to null so the stupid warning goes away...
+	int buffer_size = sizeof(struct Buffer) + size;
+	
 	for(int i = 0; i < count; i++)
 	{
 		// buffer_size is 0x4 bytes larger than the actual size plus struct buffer, since the void data pointer will be overwritten with data.
 		// this will leave enough room for four control bytes at the end of the buffer that serves as overwrite protection
-		int buffer_size = sizeof(struct Buffer) + size;
+		
 		struct Buffer * buffer_ptr = pvPortMalloc(buffer_size);
 
 		if (i == 0) // first element, therefore there is no previous element

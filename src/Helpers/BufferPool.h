@@ -15,13 +15,10 @@
 // allocates and recycles memory in the heap to prevent memory fragmentation
 // buffers are organized as linked list
 // if a new buffer is "allocated", the first buffer in the linked list will be used
-// recycled/freed buffers will be put at the back of the linked list
-struct BufferPool
-{
-	struct Buffer * first_free_buffer_ptr; // points to first free buffer.
-	uint16_t size; // size of buffers
-	uint16_t count; // number of buffers
-};
+// recycled/freed buffers will be put in front of the linked list
+
+struct Buffer;
+struct BufferPool;
 
 struct Packet
 {
