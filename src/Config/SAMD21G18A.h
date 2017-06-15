@@ -67,16 +67,6 @@ struct CTRLB_register
 	uint8_t : 8;
 };
 
-struct BAUD_register
-{
-	volatile uint16_t BAUD;
-};
-
-struct RXPL_register
-{
-	volatile uint8_t RXPL;
-};
-
 struct INT_register
 {
 	volatile uint8_t DRE : 1;
@@ -127,8 +117,8 @@ struct SERCOM {
 	struct CTRLA_register CTRLA;
 	struct CTRLB_register CTRLB;
 	uint32_t : 32; //reserved
-	struct BAUD_register BAUD;
-	struct RXPL_register RXPL;
+	volatile uint16_t BAUD;
+	volatile uint8_t RXPL;
 	uint8_t : 8; //reserved
 	uint32_t : 32; //reserved
 	struct INT_register INTENCLR;
@@ -149,3 +139,5 @@ struct SERCOM {
 
 
 #define SERCOM0 ((struct SERCOM *)0x42000800UL)
+#define SERCOM2 ((struct SERCOM *)0x42001000UL)
+#define SERCOM4 ((struct SERCOM *)0x42001800UL)
