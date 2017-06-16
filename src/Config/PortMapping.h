@@ -16,7 +16,7 @@ It is my vision for this file to eventually define all the port mappings of
 my particular setup and act as an abstraction layer towards SAMD21G18A.h
 */
 
-#define SERCOM_PIN_0_1		SERCOM2
+#define SERCOM_PIN_0_1		SERCOM0
 #define SERCOM_PIN_0_1_RX	0x3
 #define SERCOM_PIN_0_1_TX	0x2
 

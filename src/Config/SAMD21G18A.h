@@ -114,7 +114,7 @@ struct DATA_register
 };
 
 struct SERCOM {
-	struct CTRLA_register CTRLA;
+	volatile uint32_t CTRLA;
 	struct CTRLB_register CTRLB;
 	uint32_t : 32; //reserved
 	volatile uint16_t BAUD;
@@ -134,10 +134,48 @@ struct SERCOM {
 	struct DATA_register DATA;
 	uint16_t : 16; //reserved
 	uint32_t : 32; //reserved
-	//uint8_t DBGCTRL;
+	uint8_t DBGCTRL;
 };
 
 
 #define SERCOM0 ((struct SERCOM *)0x42000800UL)
 #define SERCOM2 ((struct SERCOM *)0x42001000UL)
 #define SERCOM4 ((struct SERCOM *)0x42001800UL)
+
+
+
+
+// Clock
+
+struct GCLK
+{
+	volatile uint32_t OTHER_TODO;
+	volatile uint32_t GENCTRL;
+	volatile uint32_t GENDIV;
+};
+
+struct GENCTRL_register
+{
+	volatile uint8_t ID : 4;
+	uint8_t : 4;
+	volatile uint8_t SRC : 5;
+	uint8_t : 3;
+	volatile uint8_t GENEN : 1;
+	volatile uint8_t IDC : 1;
+	volatile uint8_t OOV : 1;
+	volatile uint8_t OE : 1;
+	volatile uint8_t DIVSEL : 1;
+	volatile uint8_t RUNSTDBY : 1;
+	uint8_t : 2;
+	uint8_t : 8;
+};
+
+struct GENDIV_register
+{
+	volatile uint8_t ID : 4;
+	uint8_t : 4;
+
+	volatile uint16_t DIV;
+
+	uint8_t : 8;
+};

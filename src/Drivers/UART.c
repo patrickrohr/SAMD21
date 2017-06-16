@@ -6,6 +6,7 @@
 */ 
 
 #include "UART.h"
+#include "PortIO.h"
 //#include "samd21g18a.h" // do not include this anymore, leaving this here for reference purposes
 #include "PortMapping.h"
 
@@ -34,7 +35,8 @@ use SERCOM0 for UART on pins 0/1
 
 void _uart_init(struct SERCOM * self)
 {
-	self->CTRLA.MODE = 0x0; // configure USART with external clock
+/*
+	self->CTRLA.MODE = 0x1; // configure USART with external clock
 	self->CTRLA.CMODE = 0; // communication mode -> asynchronous, cause doofi would use synchronous
 	self->CTRLA.RXPO = SERCOM_PIN_0_1_RX; // sercom pad to use for receiver
 	self->CTRLA.TXPO = SERCOM_PIN_0_1_TX; // sercom pad to use for transmitter
@@ -45,17 +47,41 @@ void _uart_init(struct SERCOM * self)
 	self->BAUD = 9600; // baud rate to be used
 	self->CTRLB.RXEN = 1; // receiver enable
 	self->CTRLB.TXEN = 1; // transmitter enable
+	self->INTENSET.TXC = 1;
+	*/
 }
 
 void _uart_reset(struct SERCOM * self)
 {
-	self->CTRLA.SWRST = 1;
+	// debugging...
+	/*
+	GENDIV.ID = // gen clock generator that will be selected
+	GENDIV.DIV = // division factor
+	GENCTRL.ID 
+	*/
+
+	struct GENCTRL_register genctrl = {.ID = 0x01, .GENEN = 1}; // SERCOM2_CORE, 0x14 is SERCOM0_CORE
+	struct GENDIV_register gendiv = {.ID = 0x01, .DIV = 0x8};
+
+	struct GCLK * gclk = (struct GCLK *)0x40000C00;
+
+	struct PortIO * port_io_ptr = port_io_init();
+	port_io_set_dir(port_io_ptr, 10, PORT_IO_OUTPUT);
+	port_io_set_dir(port_io_ptr, 11, PORT_IO_INPUT);
+
+
+
+	self->CTRLA &= (1<<1);
+	self->CTRLA &= (1<<2);
+	return;
+	//self->CTRLA.SWRST = 1;
+	//while(self->CTRLA.SWRST || self->SYNCBUSY.SWRST); // wait for reset to complete
 }
 
 void _uart_enable(struct SERCOM * self)
 {
 	// must be called very last, otherwise registers are read only
-	self->CTRLA.ENABLE = 1; // enable SERCOM
+	//self->CTRLA.ENABLE = 1; // enable SERCOM
 }
 
 
@@ -74,5 +100,5 @@ struct SERCOM * uart_create(struct SERCOM * uart_addr)
 
 void uart_send(struct SERCOM * self, char data)
 {
-	self->DATA.DATA = data - '0'; // char to int
+	self->DATA.DATA = 0x41; // char to int
 }

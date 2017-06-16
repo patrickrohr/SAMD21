@@ -13,6 +13,9 @@
 
 #include "BufferManager.h"
 
+#include "UART.h"
+#include "PortMapping.h"
+
 //#include "BufferPool.h"
 
 
@@ -43,17 +46,21 @@ void task_blink_run(void * pvParameters)
 	struct PortIO * port_io_ptr = port_io_init();
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
+	struct SERCOM * uart = uart_create(SERCOM2);
+
+
 	for(;;)
 	{
-		struct BufferTest * test = buffer_manager_get_buffer_data();
-		buffer_manager_free_buffer_data(test);
+		uart_send(uart, 'a');
+		//struct BufferTest * test = buffer_manager_get_buffer_data();
+		//buffer_manager_free_buffer_data(test);
 
 		//struct Buffer * b = buffer_pool_get_buffer(buffer_pool_ptr); // this should cause an error
 		//buffer_pool_free_buffer(buffer_pool_ptr, b);
 		//test_number->test_number += 500;
-		bt->delay += 500;
+		//bt->delay += 500;
 		port_io_toggle(port_io_ptr, 17);
-		vTaskDelay(bt->delay / portTICK_PERIOD_MS);
-		
+		//size_t asdf = xPortGetFreeHeapSize(); //960 last time I checked
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }

@@ -12,6 +12,12 @@
 #include "TaskBlink.h"
 
 
+void SERCOM2_Handler(void)
+{
+	for(;;);
+	return;
+}
+
 int main(void)
 {
 	/* Initialize the SAM system */
