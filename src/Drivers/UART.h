@@ -8,9 +8,12 @@
 #ifndef __UART_H__
 #define __UART_H__
 
-struct SERCOM;
+#include "samd21.h"
 
-struct SERCOM * uart_create(struct SERCOM * uart_addr);
-void uart_send(struct SERCOM * self, char data);
+//struct SERCOM;
+
+//struct SERCOM * uart_create(struct SERCOM * uart_addr);
+Sercom * uart_create();
+void uart_send(Sercom * self, char data);
 
 #endif

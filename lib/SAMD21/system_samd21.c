@@ -51,6 +51,8 @@
 
 uint32_t SystemCoreClock = __SYSTEM_CLOCK;/*!< System Clock Frequency (Core Clock)*/
 
+
+
 /**
  * Initialize the system
  *
@@ -65,8 +67,8 @@ void SystemInit(void)
 	NVMCTRL->CTRLB.bit.RWS = NVMCTRL_CTRLB_RWS_HALF_Val ;
 
 	/* Turn on the digital interface clock */
-	PM->APBAMASK.reg |= PM_APBAMASK_GCLK ;
-
+	PM->APBAMASK.reg |= PM_APBAMASK_GCLK;
+	
 
 	#if defined(CRYSTALLESS)
 
@@ -305,6 +307,8 @@ void SystemInit(void)
 	* 9) Disable automatic NVM write operations
 	*/
 	NVMCTRL->CTRLB.bit.MANW = 1;
+
+
 	return;
 }
 

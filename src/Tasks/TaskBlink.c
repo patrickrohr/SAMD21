@@ -46,7 +46,7 @@ void task_blink_run(void * pvParameters)
 	struct PortIO * port_io_ptr = port_io_init();
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
-	struct SERCOM * uart = uart_create(SERCOM2);
+	Sercom * uart = uart_create(SERCOM4);
 
 
 	for(;;)
