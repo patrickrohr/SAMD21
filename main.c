@@ -12,11 +12,11 @@
 #include "TaskBlink.h"
 
 
-void SERCOM2_Handler(void)
+/*void SERCOM2_Handler(void)
 {
-	for(;;);
+	//for(;;);
 	return;
-}
+}*/
 
 int main(void)
 {

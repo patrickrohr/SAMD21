@@ -33,6 +33,12 @@ use SERCOM0 for UART on pins 0/1
 
 // PRIVATE
 
+// waits for CTRLB, ENABLE, or SWRST sync to happen
+void _uart_sync(Sercom * self)
+{
+	while(self->USART.SYNCBUSY.reg);
+}
+
 void _uart_init(Sercom * self)
 {
 	self->USART.CTRLA.bit.MODE = 0x1;
@@ -49,10 +55,10 @@ void _uart_init(Sercom * self)
 	_uart_sync(self);
 
 	// calculate baud rate. TODO, put in own function.
-	int baud_rate = 9600;
-	uint32_t baud_val = 65536 * (1.0 - 3.0 * baud_rate / 32768.0);
+	//int baud_rate = 9600;
+	//uint64_t baud_val = 65536.0 - 65536.0 * 3.0 * baud_rate / 48000000.0;
 	
-	self->USART.BAUD.bit.BAUD = baud_val;//0xF5CC; // Baud Rate of 9600 with 3 samples per bit
+	self->USART.BAUD.bit.BAUD = 0xFFD8;//0xF5CC; // Baud Rate of 9600 with 3 samples per bit
 	_uart_sync(self);
 	self->USART.CTRLB.bit.RXEN = 1;
 	self->USART.CTRLB.bit.TXEN = 1;
@@ -76,9 +82,9 @@ void _uart_reset(Sercom * self)
 	//struct GCLK * gclk = (struct GCLK *)0x40000C00;
 
 	// SET PORT DIRECTION
-	struct PortIO * port_io_ptr = port_io_init();
-	port_io_set_dir(port_io_ptr, 10, PORT_IO_OUTPUT);
-	port_io_set_dir(port_io_ptr, 11, PORT_IO_INPUT);
+	//struct PortIO * port_io_ptr = port_io_init();
+	//port_io_set_dir(port_io_ptr, 10, PORT_IO_OUTPUT);
+	//port_io_set_dir(port_io_ptr, 11, PORT_IO_INPUT);
 
 
 
@@ -95,12 +101,8 @@ void _uart_enable(Sercom * self)
 {
 	// must be called very last, otherwise registers are read only
 	//self->CTRLA.ENABLE = 1; // enable SERCOM
-}
-
-// waits for CTRLB, ENABLE, or SWRST sync to happen
-void _uart_sync(Sercom * self)
-{
-	while(self->USART.SYNCBUSY.reg); 
+	self->USART.CTRLA.bit.ENABLE = 1;
+	_uart_sync(self);
 }
 
 
@@ -110,29 +112,32 @@ void _uart_sync(Sercom * self)
 // right now, this is somewhat singleton "by design" (or accident, *cough*). I should change this... Yet another TODO!
 Sercom * uart_create()
 {
-	Sercom * sercom = SERCOM2;
+	// Port Init -- TODO: possibly put this in portio driver.
+	PORT->Group[0].PINCFG[10].bit.PMUXEN = 1; // TX port PA10
+	PORT->Group[0].PINCFG[11].bit.PMUXEN = 1; // RX port PA11
+	PORT->Group[0].PMUX[5].reg = PORT_PMUX_PMUXE_C | PORT_PMUX_PMUXO_C; // set to peripheral function C (SERCOM)
+
+
+	Sercom * sercom = SERCOM0;
 	
 	// Turn on SERCOM 
-	// TODO: turn on right SERCOM... Which I think is SERCOM2?!? Can anyone confirm this? Anyone?
-	PM->APBCMASK.reg |= (PM_APBCMASK_PAC2 | PM_APBCMASK_SERCOM2);
+	// TODO: turn on right SERCOM... SERCOM0!!!!
+	PM->APBCMASK.reg |= (PM_APBCMASK_PAC2 | PM_APBCMASK_SERCOM0);
 
 	// move this stuff to function
 	// enable XOSC
-	SYSCTRL->XOSC.reg =
-		SYSCTRL_XOSC_STARTUP(0x8u) // startup time (256 cycles), figure out best value here: TODO!
+	//SYSCTRL->XOSC.reg =
+	//	SYSCTRL_XOSC_STARTUP(0x8u) // startup time (256 cycles), figure out best value here: TODO!
 		//| SYSCTRL_XOSC_GAIN_4 // gain, not used since I'm trying to use ampgc
-		| SYSCTRL_XOSC_AMPGC(1); // automatic amplitude gain control
-	SYSCTRL->XOSC.bit.ENABLE = 1;
-	while(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_XOSCRDY) == 0); // wait for the oscillator to stabilize
+	//	| SYSCTRL_XOSC_AMPGC(1); // automatic amplitude gain control
+	//SYSCTRL->XOSC.bit.ENABLE = 1;
+	//while(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_XOSCRDY) == 0); // wait for the oscillator to stabilize
 
 
-	SYSCTRL->XOSC32K.reg = SYSCTRL_XOSC32K_STARTUP( 0x6u ) | /* cf table 15.10 of product datasheet in chapter 15.8.6 */
-	SYSCTRL_XOSC32K_XTALEN | SYSCTRL_XOSC32K_EN32K ;
-	SYSCTRL->XOSC32K.bit.ENABLE = 1 ; /* separate call, as described in chapter 15.6.3 */
+	// configure sercom clock to run off generic clock source 7 (DFLL48M)
 
-	// configure sercom clock to run off generic clock source 5 (XOSC32K)
-	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(SERCOM2_GCLK_ID_CORE) | GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN(0); // must be single 16-bit write
-
+	// generic clock generator 0 (system main clock) uses 48MHz DFLL
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(SERCOM0_GCLK_ID_CORE) | GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN(0x0); // must be single 16-bit write
 	
 	// reset UART before initializing
 	_uart_reset(sercom);

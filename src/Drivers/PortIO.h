@@ -10,25 +10,14 @@
 #define __PORTIO_H__
 
 #include <stdint.h>
+#include "samd21.h" // TODO: refactor so this is all we are using here, get rid of struct.
 
-struct PortIO
-{
-		volatile uint32_t DIR;
-		volatile uint32_t DIRCLR;
-		volatile uint32_t DIRSET;
-		volatile uint32_t DIRTGL;
-		volatile uint32_t OUT;
-		volatile uint32_t OUTCLR;
-		volatile uint32_t OUTSET;
-		volatile uint32_t OUTTGL;
-		volatile uint32_t IN;
-		volatile uint32_t CTRL;
-};
 
 enum _port_io_direction {PORT_IO_INPUT, PORT_IO_OUTPUT};
+enum _port_io_ports {PORT_A, PORT_B};
 
-struct PortIO * port_io_init();
-void port_io_set_dir(struct PortIO * this, int pin, enum _port_io_direction dir);
-void port_io_toggle(struct PortIO * this, int pin);
+PortGroup * port_io_init();
+void port_io_set_dir(PortGroup * self, int pin, enum _port_io_direction dir);
+void port_io_toggle(PortGroup * self, int pin);
 
 #endif //__PORTIO_H__

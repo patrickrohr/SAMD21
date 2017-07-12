@@ -9,20 +9,20 @@
 #include "PortIO.h"
 
 // TODO: take address out of here.
-struct PortIO * port_io_init()
+PortGroup * port_io_init(int port_group)
 {
-	return ((struct PortIO*)0x41004400);
+	return &PORT->Group[port_group];
 }
 
-void port_io_set_dir(struct PortIO * this, int pin, enum _port_io_direction dir)
+void port_io_set_dir(PortGroup * self, int pin, enum _port_io_direction dir)
 {
 	if (dir)
-	this->DIRSET = (1<<pin);
+		self->DIRSET.reg = (1 << pin);
 	else
-	this->DIRCLR = (1<<pin);
+		self->DIRCLR.reg = (1<<pin);
 }
 
-void port_io_toggle(struct PortIO * this, int pin)
+void port_io_toggle(PortGroup * self, int pin)
 {
-	this->OUTTGL = (1<<pin);
+	self->OUTTGL.reg = (1<<pin);
 }

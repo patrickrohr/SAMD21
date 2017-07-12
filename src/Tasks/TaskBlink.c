@@ -16,6 +16,8 @@
 #include "UART.h"
 #include "PortMapping.h"
 
+#include "samd21.h"
+
 //#include "BufferPool.h"
 
 
@@ -43,7 +45,7 @@ void task_blink_run(void * pvParameters)
 	struct BufferTest * bt = buffer_manager_get_buffer_data();
 	bt->delay = 500;
 
-	struct PortIO * port_io_ptr = port_io_init();
+	PortGroup * port_io_ptr = port_io_init(PORT_A);
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
 	Sercom * uart = uart_create(SERCOM4);
@@ -59,8 +61,8 @@ void task_blink_run(void * pvParameters)
 		//buffer_pool_free_buffer(buffer_pool_ptr, b);
 		//test_number->test_number += 500;
 		//bt->delay += 500;
-		port_io_toggle(port_io_ptr, 17);
+		//port_io_toggle(port_io_ptr, 17);
 		//size_t asdf = xPortGetFreeHeapSize(); //960 last time I checked
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		//vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
