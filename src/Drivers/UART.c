@@ -112,6 +112,19 @@ void _uart_enable(Sercom * self)
 // right now, this is somewhat singleton "by design" (or accident, *cough*). I should change this... Yet another TODO!
 Sercom * uart_create()
 {
+
+	// TX pullup output
+	PORT->Group[0].PINCFG[10].bit.PULLEN = 1;
+	PORT->Group[0].PINCFG[10].bit.INEN	= 0;
+	PORT->Group[0].OUTSET.reg = (1 << 10);
+	PORT->Group[0].DIRCLR.reg = (1 << 10);
+
+	// RX pullup input
+	PORT->Group[0].PINCFG[11].bit.PULLEN = 1;
+	PORT->Group[0].PINCFG[11].bit.INEN	= 1;
+	PORT->Group[0].OUTSET.reg = (1 << 11);
+	PORT->Group[0].DIRCLR.reg = (1 << 11);
+
 	// Port Init -- TODO: possibly put this in portio driver.
 	PORT->Group[0].PINCFG[10].bit.PMUXEN = 1; // TX port PA10
 	PORT->Group[0].PINCFG[11].bit.PMUXEN = 1; // RX port PA11
@@ -150,5 +163,5 @@ Sercom * uart_create()
 
 void uart_send(Sercom * self, char data)
 {
-	self->USART.DATA.reg = data; // char to int
+	self->USART.DATA.reg = 0xFF; // char to int
 }
