@@ -58,8 +58,12 @@ void _uart_init(Sercom * self)
 	//int baud_rate = 9600;
 	//uint64_t baud_val = 65536.0 - 65536.0 * 3.0 * baud_rate / 48000000.0;
 	
-	
-	self->USART.BAUD.bit.BAUD = 0xFFD8;//0xF5CC; // Baud Rate of 9600 with 16 samples per bit
+	uint64_t baudrate = 115200;
+	self->USART.BAUD.reg = (uint16_t) (65535 - (65535 * (16 * (baudrate))) / SystemCoreClock);
+	//62924
+	//65325
+	//65496
+	//self->USART.BAUD.bit.BAUD = 32800;//0xF5CC; // Baud Rate of 9600 with 16 samples per bit
 	_uart_sync(self);
 	self->USART.CTRLB.bit.RXEN = 1;
 	self->USART.CTRLB.bit.TXEN = 1;
@@ -168,5 +172,5 @@ Sercom * uart_create()
 
 void uart_send(Sercom * self, char data)
 {
-	self->USART.DATA.reg = 0xFF; // char to int
+	self->USART.DATA.reg = 0x5A; // should be "Z" // char to int 
 }
