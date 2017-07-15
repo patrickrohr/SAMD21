@@ -43,8 +43,8 @@ void _uart_init(Sercom * self)
 {
 	self->USART.CTRLA.bit.MODE = 0x1;
 	self->USART.CTRLA.bit.CMODE = 0x0;
-	self->USART.CTRLA.bit.RXPO = 0x3;
-	self->USART.CTRLA.bit.TXPO = 0x2;
+	self->USART.CTRLA.bit.RXPO = 0x3; // 0x3 = pad 3
+	self->USART.CTRLA.bit.TXPO = 0x1; // 0x1 = pad 2 - this is not a mistake!!
 	_uart_sync(self);
 	self->USART.CTRLB.bit.CHSIZE = 0x0;
 	_uart_sync(self);
@@ -58,7 +58,8 @@ void _uart_init(Sercom * self)
 	//int baud_rate = 9600;
 	//uint64_t baud_val = 65536.0 - 65536.0 * 3.0 * baud_rate / 48000000.0;
 	
-	self->USART.BAUD.bit.BAUD = 0xFFD8;//0xF5CC; // Baud Rate of 9600 with 3 samples per bit
+	
+	self->USART.BAUD.bit.BAUD = 0xFFD8;//0xF5CC; // Baud Rate of 9600 with 16 samples per bit
 	_uart_sync(self);
 	self->USART.CTRLB.bit.RXEN = 1;
 	self->USART.CTRLB.bit.TXEN = 1;
@@ -114,20 +115,21 @@ Sercom * uart_create()
 {
 
 	// TX pullup output
-	PORT->Group[0].PINCFG[10].bit.PULLEN = 1;
-	PORT->Group[0].PINCFG[10].bit.INEN	= 0;
+	//PORT->Group[0].PINCFG[10].bit.PULLEN = 1;
+	//PORT->Group[0].PINCFG[10].bit.INEN	= 0;
+	PORT->Group[0].DIRSET.reg = (1 << 10);
 	PORT->Group[0].OUTSET.reg = (1 << 10);
-	PORT->Group[0].DIRCLR.reg = (1 << 10);
 
 	// RX pullup input
-	PORT->Group[0].PINCFG[11].bit.PULLEN = 1;
+	//PORT->Group[0].PINCFG[11].bit.PULLEN = 1;
 	PORT->Group[0].PINCFG[11].bit.INEN	= 1;
-	PORT->Group[0].OUTSET.reg = (1 << 11);
-	PORT->Group[0].DIRCLR.reg = (1 << 11);
+	//PORT->Group[0].OUTSET.reg = (1 << 11);
+	//PORT->Group[0].DIRCLR.reg = (1 << 11);
 
 	// Port Init -- TODO: possibly put this in portio driver.
 	PORT->Group[0].PINCFG[10].bit.PMUXEN = 1; // TX port PA10
 	PORT->Group[0].PINCFG[11].bit.PMUXEN = 1; // RX port PA11
+
 	PORT->Group[0].PMUX[5].reg = PORT_PMUX_PMUXE_C | PORT_PMUX_PMUXO_C; // set to peripheral function C (SERCOM)
 
 
@@ -135,7 +137,8 @@ Sercom * uart_create()
 	
 	// Turn on SERCOM 
 	// TODO: turn on right SERCOM... SERCOM0!!!!
-	PM->APBCMASK.reg |= (PM_APBCMASK_PAC2 | PM_APBCMASK_SERCOM0);
+	PM->APBCMASK.reg |= PM_APBCMASK_PAC2;
+	
 
 	// move this stuff to function
 	// enable XOSC
@@ -154,6 +157,8 @@ Sercom * uart_create()
 	
 	// reset UART before initializing
 	_uart_reset(sercom);
+
+	PM->APBCMASK.reg |= PM_APBCMASK_SERCOM0;
 	// initialize new UART
 	_uart_init(sercom);
 	// enable last

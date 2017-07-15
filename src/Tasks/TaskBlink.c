@@ -48,7 +48,7 @@ void task_blink_run(void * pvParameters)
 	PortGroup * port_io_ptr = port_io_init(PORT_A);
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
-	Sercom * uart = uart_create(SERCOM4);
+	Sercom * uart = uart_create();
 
 
 	for(;;)
