@@ -13,7 +13,10 @@
 enum error_codes
 {
 	ERROR_LEVEL_FATAL, // placeholder until I have some actual errors. Please never ever use this. Thanks.
-	ERROR_BUFFER_POOL_MEMORY_LEAK
+	ERROR_BUFFER_POOL_MEMORY_LEAK,
+	ERROR_UART_PAD_MISMATCH_TX,
+	ERROR_UART_PAD_MISMATCH_RX,
+	ERROR_UART_PORT_NOT_CONFIGURABLE
 };
 
 // Singleton pattern

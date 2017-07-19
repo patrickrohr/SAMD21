@@ -48,7 +48,10 @@ void task_blink_run(void * pvParameters)
 	PortIO_t * port_io_ptr = port_io_create(PORT_A);
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
-	Sercom * uart_ptr = uart_create(SERCOM0, 11, 10);
+	// making this static so it lives in the bss section.
+	static UART_t _uart;
+	UART_t * uart_ptr = uart_populate_handle(&_uart, UART0, 11, 10);
+	uart_create(uart_ptr);
 
 
 	for(;;)
