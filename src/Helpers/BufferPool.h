@@ -17,18 +17,18 @@
 // if a new buffer is "allocated", the first buffer in the linked list will be used
 // recycled/freed buffers will be put in front of the linked list
 
-struct Buffer;
-struct BufferPool;
+/* Linus would hate me for this. But damn peer pressure */
+typedef struct BufferPool BufferPool_t;
 
-struct Packet
+typedef struct
 {
 	uint32_t data_type; //typecast from enum packet_data_type
 	void * data;
-};
+} Packet_t;
 
-struct BufferPool * buffer_pool_create(int size, int count); // creates/allocates memory for buffer pool in heap and returns handle
-struct Packet * buffer_pool_get_packet(struct BufferPool * self); // allocates buffer inside buffer pool and returns handle to packet
-void buffer_pool_free_packet(struct BufferPool * self, struct Packet * packet_ptr);
+BufferPool_t * buffer_pool_create(int size, int count); // creates/allocates memory for buffer pool in heap and returns handle
+Packet_t * buffer_pool_get_packet(BufferPool_t * self); // allocates buffer inside buffer pool and returns handle to packet
+void buffer_pool_free_packet(BufferPool_t * self, Packet_t * packet_ptr);
 
 
 #endif

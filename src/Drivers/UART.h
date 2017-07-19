@@ -8,12 +8,13 @@
 #ifndef __UART_H__
 #define __UART_H__
 
+#include "BufferPool.h" // I don't know if I want to include this here. Is this good design? Right now, the Packet definition is in here so I have to...
 #include "samd21.h"
 
-//struct SERCOM;
+/* for consistency only... */
+typedef Sercom UART_t;
 
-//struct SERCOM * uart_create(struct SERCOM * uart_addr);
-Sercom * uart_create();
-void uart_send(Sercom * self, char data);
+UART_t * uart_create(UART_t * serial_port, int pin_rx, int pin_tx);
+void uart_send(UART_t * self, char data);
 
 #endif

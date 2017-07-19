@@ -45,15 +45,15 @@ void task_blink_run(void * pvParameters)
 	struct BufferTest * bt = buffer_manager_get_buffer_data();
 	bt->delay = 500;
 
-	PortGroup * port_io_ptr = port_io_init(PORT_A);
+	PortIO_t * port_io_ptr = port_io_create(PORT_A);
 	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
-	Sercom * uart = uart_create();
+	Sercom * uart_ptr = uart_create(SERCOM0, 11, 10);
 
 
 	for(;;)
 	{
-		uart_send(uart, 'a');
+		uart_send(uart_ptr, 'a');
 		//struct BufferTest * test = buffer_manager_get_buffer_data();
 		//buffer_manager_free_buffer_data(test);
 

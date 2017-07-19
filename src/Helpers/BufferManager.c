@@ -16,7 +16,7 @@ const int _BUFFER_MANAGER_BUFFER_SIZE = 100;
 const int _BUFFER_MANAGER_BUFFER_COUNT = 5;
 
 struct _BufferManager {
-	struct BufferPool * buffer_pool_ptr;
+	BufferPool_t * buffer_pool_ptr;
 };
 
 struct _BufferManager * _buffer_manager_get_instance()
@@ -32,7 +32,9 @@ struct _BufferManager * _buffer_manager_get_instance()
 }
 
 // PUBLIC
-// returns buffer packet data address that can be casted into whatever data type it is
+/* This is a Singleton Class.
+*  returns buffer packet data address that can be casted into whatever data type it is
+*/
 void * buffer_manager_get_buffer_data()
 {
 	return &buffer_pool_get_packet(_buffer_manager_get_instance()->buffer_pool_ptr)->data;
@@ -41,5 +43,5 @@ void * buffer_manager_get_buffer_data()
 void buffer_manager_free_buffer_data(void * packet_data_ptr)
 {
 	
-	buffer_pool_free_packet(_buffer_manager_get_instance()->buffer_pool_ptr, (struct Packet *)(packet_data_ptr - offsetof(struct Packet, data)));
+	buffer_pool_free_packet(_buffer_manager_get_instance()->buffer_pool_ptr, (Packet_t *)(packet_data_ptr - offsetof(Packet_t, data)));
 }
