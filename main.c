@@ -12,13 +12,9 @@
 #include "TaskTX.h"
 #include "TaskBlink.h"
 #include "UART.h"
+#include "IRQ.h"
 
 
-/*void SERCOM2_Handler(void)
-{
-	//for(;;);
-	return;
-}*/
 
 int main(void)
 {

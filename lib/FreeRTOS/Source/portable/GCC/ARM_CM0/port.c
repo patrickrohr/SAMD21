@@ -75,7 +75,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Constants required to manipulate the NVIC. */
+/* Constants required to manipulate the 
+. */
 #define portNVIC_SYSTICK_CTRL		( ( volatile uint32_t *) 0xe000e010 )
 #define portNVIC_SYSTICK_LOAD		( ( volatile uint32_t *) 0xe000e014 )
 #define portNVIC_INT_CTRL			( ( volatile uint32_t *) 0xe000ed04 )

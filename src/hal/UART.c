@@ -124,14 +124,20 @@ void _uart_init(UART_t * self)
 	self->port->CTRLB.bit.TXEN = 1;
 	_uart_sync(self);
 
+	
+
+	self->port->INTENSET.reg = SERCOM_USART_INTENSET_RXC;
+	//self->port->INTENSET.bit.RXS;
+	//self->port->INTENSET.bit.RXBRK;
+	_uart_sync(self);
 
 	//self->port->INTENSET.bit.TXC = 1; // Transmitter interrupt enabled
-	_uart_sync(self);
 
 	// FINALLY! Enable UART
 	// must be called very last, otherwise registers are read only
 	self->port->CTRLA.bit.ENABLE = 1;
 	_uart_sync(self);
+
 }
 
 
@@ -174,6 +180,8 @@ void uart_init(UART_t * self, uint16_t pin_rx, uint16_t pin_tx)
 	// now configure peripheral clock...
 	_uart_peripheral_clock_init(self);
 	
+	NVIC_EnableIRQ(SERCOM0_IRQn);
+
 	// initialize new UART
 	_uart_init(self);
 
@@ -187,7 +195,7 @@ void uart_send(UART_t * self, char data)
 {
 	// wait for empty data register
 	while(!self->port->INTFLAG.bit.DRE); 
-	self->port->DATA.reg = data; // char to int. Looks weird, according to the internet that's fine. I'm a millennial, so internet == truth.
+	self->port->DATA.reg = SERCOM_USART_DATA_DATA(data); // char to int. Looks weird, according to the internet that's fine. I'm a millennial, so internet == truth.
 }
 
 void uart_send_packet(UART_t * self, Packet_t * packet)
