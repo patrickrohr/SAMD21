@@ -32,7 +32,7 @@
  * Initial system clock frequency. The System RC Oscillator (RCSYS) provides
  *  the source for the main clock at chip startup.
  */
-#define __SYSTEM_CLOCK    (48000000) // probably not used
+#define __SYSTEM_CLOCK    (48000000)
 
 // from arduino source, embarassing, I know.
 // Frequency of the board main oscillator

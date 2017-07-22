@@ -11,12 +11,14 @@
 #include "timers.h"
 #include "PortIO.h"
 
-#include "BufferManager.h"
+#include "PacketManager.h"
 
 #include "UART.h"
 #include "PortMapping.h"
 
 #include "samd21.h"
+
+#include <string.h>
 
 //#include "BufferPool.h"
 
@@ -42,21 +44,25 @@ void task_blink_run(void * pvParameters)
 	test_number = (void *) &buffer_ptr->data;
 	test_number->test_number = 1000;
 	*/
-	struct BufferTest * bt = buffer_manager_get_buffer_data();
-	bt->delay = 500;
+	//struct BufferTest * bt = buffer_manager_get_buffer_data();
+	//bt->delay = 500;
 
-	PortIO_t * port_io_ptr = port_io_create(PORT_A);
-	port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
+	//PortIO_t * port_io_ptr = port_io_create(PORT_A);
+	//port_io_set_dir(port_io_ptr, 17, PORT_IO_OUTPUT);
 
-	// making this static so it lives in the bss section.
-	static UART_t _uart;
-	UART_t * uart_ptr = uart_populate_handle(&_uart, UART0, 11, 10);
-	uart_create(uart_ptr);
+	UART_t * uart_ptr = uart_get_instance(UART0);
+	Packet_t *  packet = packet_manager_get_packet();
+	packet->data_type = PACKET_TYPE_TEXT;
 
+	TextPacket_t * text_packet = (TextPacket_t *) &(packet->data);
+	
+	char * string = "Hello World";
+	strcpy(&text_packet->text, string);
+	text_packet->length = strlen(string);
 
 	for(;;)
 	{
-		uart_send(uart_ptr, 'a');
+		uart_send_packet(uart_ptr, packet);
 		//struct BufferTest * test = buffer_manager_get_buffer_data();
 		//buffer_manager_free_buffer_data(test);
 
@@ -66,6 +72,6 @@ void task_blink_run(void * pvParameters)
 		//bt->delay += 500;
 		//port_io_toggle(port_io_ptr, 17);
 		//size_t asdf = xPortGetFreeHeapSize(); //960 last time I checked
-		//vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
