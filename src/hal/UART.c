@@ -8,17 +8,21 @@
 #include "UART.h"
 #include "PortIO.h"
 #include "Error.h"
-#include "PacketManager.h"
+#include "BufferPool.h"
+#include "PacketType.h"
 #include "FreeRTOS.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define RES 0xFF
 
 // PRIVATE
 /* Hidden UART Handle */
+//TODO: be consistent with ptr naming
 struct _UART {
 	SercomUsart * port;
 	Packet_t * packet_rx;
+	QueueHandle_t q_rx;
 	Packet_t * packet_tx;
 	void * packet_rx_ptr;
 	uint16_t packet_rx_length;
@@ -26,6 +30,7 @@ struct _UART {
 	uint16_t pin_tx;
 	uint16_t number;
 	uint32_t status;
+	SemaphoreHandle_t semaphore_rx;
 };
 
 
@@ -124,11 +129,8 @@ void _uart_init(UART_t * self)
 	self->port->CTRLB.bit.TXEN = 1;
 	_uart_sync(self);
 
-	
-
+	/* Enable RX Complete interrupt */
 	self->port->INTENSET.reg = SERCOM_USART_INTENSET_RXC;
-	//self->port->INTENSET.bit.RXS;
-	//self->port->INTENSET.bit.RXBRK;
 	_uart_sync(self);
 
 	//self->port->INTENSET.bit.TXC = 1; // Transmitter interrupt enabled
@@ -164,10 +166,11 @@ bool uart_is_init(UART_t * self)
 	return (self->status & (1 << UART_INITIALIZED));
 }
 
-void uart_init(UART_t * self, uint16_t pin_rx, uint16_t pin_tx)
+void uart_init(UART_t * self, uint16_t pin_rx, uint16_t pin_tx, SemaphoreHandle_t semaphore_rx)
 {
 	self->pin_rx = pin_rx;
 	self->pin_tx = pin_tx;
+	self->semaphore_rx = semaphore_rx; // semaphore to be used between rx isr and task rx
 	
 	// pin rx: 11, pin tx: 10
 	// initialize and turn on port
@@ -195,7 +198,16 @@ void uart_send(UART_t * self, char data)
 {
 	// wait for empty data register
 	while(!self->port->INTFLAG.bit.DRE); 
-	self->port->DATA.reg = SERCOM_USART_DATA_DATA(data); // char to int. Looks weird, according to the internet that's fine. I'm a millennial, so internet == truth.
+	self->port->DATA.reg = data;
+}
+
+
+void uart_send_string(UART_t * self, char * data)
+{
+	for(int i = 0; i < strlen(data); ++i)
+	{
+		uart_send(self, data[i]);
+	}
 }
 
 void uart_send_packet(UART_t * self, Packet_t * packet)
@@ -203,28 +215,39 @@ void uart_send_packet(UART_t * self, Packet_t * packet)
 	switch(packet->data_type)
 	{
 		case PACKET_TYPE_TEXT: ;
-			TextPacket_t * text_packet = (TextPacket_t *) &packet->data;
+			TextPacket_t * text_packet = (TextPacket_t *) &(packet->data);
 			
 			// put in its own function to clean this up...
 			for(int i = 0; i < text_packet->length; i++)
 			{
-				uart_send(self, *(&text_packet->text + i));
+				char letter =  *((char*)(&(text_packet->text) + i));
+				uart_send(self, letter);
 			}
 			break;
 	}
 }
 
-/*
-TODO:
-Hardware config.h
-	- UART setting
-	- baud rate
-	- clean config file for hardware so its portable
+void uart_set_q_rx(UART_t * self, QueueHandle_t q_rx)
+{
+	self->q_rx = q_rx;
+}
 
-main loop is doing all the setup of the system, including hardware
-	- setup uart 
-	- setup dma
+QueueHandle_t * uart_get_q_rx(UART_t * self)
+{
+	return self->q_rx;
+}
 
-	typically all systems set up hardware first
+void uart_set_packet_rx(UART_t * self, Packet_t * packet)
+{
+	self->packet_rx = packet;
+}
 
-*/
+Packet_t * uart_get_packet_rx(UART_t * self)
+{
+	return self->packet_rx;
+}
+
+SemaphoreHandle_t uart_get_semaphore_rx(UART_t * self)
+{
+	return self->semaphore_rx;
+}

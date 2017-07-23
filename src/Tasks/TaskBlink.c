@@ -12,6 +12,7 @@
 #include "PortIO.h"
 
 #include "PacketManager.h"
+#include "PacketType.h"
 
 #include "UART.h"
 #include "PortMapping.h"
@@ -57,7 +58,7 @@ void task_blink_run(void * pvParameters)
 	TextPacket_t * text_packet = (TextPacket_t *) &(packet->data);
 	
 	char * string = "Hello World";
-	strcpy(&text_packet->text, string);
+	strcpy((char *)&text_packet->text, string);
 	text_packet->length = strlen(string);
 
 	for(;;)

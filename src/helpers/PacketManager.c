@@ -8,12 +8,13 @@
 
 #include "PacketManager.h"
 #include "BufferPool.h"
-#include "stdbool.h"
+#include "GlobalConfig.h"
+#include <stdbool.h>
 
 
 // PRIVATE
-const int _PACKET_MANAGER_BUFFER_SIZE = 100;
-const int _PACKET_MANAGER_BUFFER_COUNT = 5;
+//const int _PACKET_MANAGER_BUFFER_SIZE = 100;
+//const int _PACKET_MANAGER_BUFFER_COUNT = 5;
 
 struct _PacketManager {
 	BufferPool_t * buffer_pool_ptr;
@@ -25,7 +26,8 @@ struct _PacketManager * _packet_manager_get_instance()
 	static struct _PacketManager packet_manager_obj;
 	if(!initialized)
 	{
-		packet_manager_obj.buffer_pool_ptr = buffer_pool_create(_PACKET_MANAGER_BUFFER_SIZE, _PACKET_MANAGER_BUFFER_COUNT);
+		int buffer_size = MAX_PACKET_DATA_LENGTH + offsetof(Packet_t, data);
+		packet_manager_obj.buffer_pool_ptr = buffer_pool_create(buffer_size, BUFFER_COUNT);
 		initialized = true;
 	}
 	return &packet_manager_obj;

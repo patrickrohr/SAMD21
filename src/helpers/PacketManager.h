@@ -10,13 +10,6 @@
 
 #include "BufferPool.h"
 
-typedef enum {PACKET_TYPE_TEXT} PacketType_enum;
-
-typedef struct {
-	uint32_t length;
-	char text;
-} TextPacket_t;
-
 
 Packet_t * packet_manager_get_packet();
 void packet_manager_free_packet(Packet_t * packet_ptr);

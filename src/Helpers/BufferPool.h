@@ -22,7 +22,7 @@ typedef struct BufferPool BufferPool_t;
 
 typedef struct
 {
-	uint32_t data_type; //typecast from enum packet_data_type
+	uint32_t data_type;
 	void * data;
 } Packet_t;
 
