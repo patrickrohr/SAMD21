@@ -45,7 +45,7 @@ void task_rx_run(void * pvParameters)
 		while(!xSemaphoreTake(sema, (TickType_t) 1000)); // wait for semaphore to become available
 
 		/* do some fancy packet processing magic? */
-		if(xQueueReceive(in_q, &packet_received_ptr, (TickType_t) 10)) // how many ticks to wait?
+		while(xQueueReceive(in_q, &packet_received_ptr, (TickType_t) 10)) // how many ticks to wait?
 		{
 			// At this point I'm wondering why I even use Queues, since I already have a pointer to the packet inside of here...
 			uart_set_packet_rx(uart_ptr, packet_manager_get_packet()); // set new packet.

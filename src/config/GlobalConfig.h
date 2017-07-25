@@ -5,5 +5,6 @@
 *  Author: Patrick Rohr
 */ 
 
+#define DEBUG_MODE 1
 #define MAX_PACKET_DATA_LENGTH 100
 #define BUFFER_COUNT 5

@@ -20,6 +20,17 @@ struct _PacketManager {
 	BufferPool_t * buffer_pool_ptr;
 };
 
+#if DEBUG_MODE
+	struct BufferDebug {
+		void * next_addr;
+		char data[MAX_PACKET_DATA_LENGTH + 12]; // has to be manually updated
+	};
+
+	struct BufferPoolDebug {
+		struct BufferDebug buffers[BUFFER_COUNT];
+	};
+#endif
+
 struct _PacketManager * _packet_manager_get_instance()
 {
 	static bool initialized = false;
