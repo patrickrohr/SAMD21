@@ -1,6 +1,6 @@
 # Folders
 build/*
-vendor/
 
-# Exceptions (should probably move this...)
-!vendor/SAMD21/
+# TODO:
+# Ignore subdirectories: vendor
+# Move vendor/SAMD21 to different folder
