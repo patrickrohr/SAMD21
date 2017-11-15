@@ -9,6 +9,7 @@
 #include "GlobalConfig.h"
 #include <string.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 const int max_text_packet_data_length = MAX_PACKET_DATA_LENGTH - offsetof(TextPacket_t, text);
 

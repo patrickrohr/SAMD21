@@ -9,7 +9,7 @@
 #define __UART_H__
 
 #include "BufferPool.h" // I don't know if I want to include this here. Is this good design? Right now, the Packet definition is in here so I have to...
-#include "samd21.h"
+#include "cmsis.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "queue.h"

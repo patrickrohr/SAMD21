@@ -1,0 +1,10 @@
+TODO:
+- git clone vendors on make if they don't exist (FreeRTOS and cmsis-core):
+
+clone specific FreeRTOS tags from here: https://github.com/cjlano/freertos.git
+
+git clone https://github.com/ARMmbed/cmsis-core-atmel-samcortexm0p-samd21.git
+git clone https://github.com/ARMmbed/cmsis-core.git
+
+Toolchain:
+gcc-arm-none-eabi
