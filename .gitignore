@@ -1,5 +1,6 @@
 # Folders
-build/*
+build
+vendor
 
 # TODO:
 # Ignore subdirectories: vendor
