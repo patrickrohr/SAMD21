@@ -7,7 +7,7 @@ project(samd21 C)
 add_definitions(-D__ATSAMD21G18A__)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_SOURCE_DIR}/vendor/SAMD21/samd21g18a_flash.ld")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_SOURCE_DIR}/etc/linker_files/samd21g18a_flash.ld")
 
 
 
