@@ -1,7 +1,3 @@
 # Folders
-build/*
-vendor/*
-
-# TODO:
-# Ignore subdirectories: vendor
-# Move vendor/SAMD21 to different folder
+build
+vendor
