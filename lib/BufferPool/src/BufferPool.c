@@ -4,9 +4,6 @@
 
 #include "BufferPool.h"
 
-// random int to protect us against buffer overflows
-// TODO: make this settable
-
 typedef struct
 {
     Buffer_t* first_free_buffer_ptr;

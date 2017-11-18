@@ -16,8 +16,13 @@
  * Note: Make sure both values gBufferSize and gBufferCount are divisible
  * by 4 for alignment reasons.
 **************************************************************/
+#ifndef BUFFER_SIZE
 #define BUFFER_SIZE 100
+#endif
+
+#ifndef BUFFER_COUNT
 #define BUFFER_COUNT 10
+#endif
 
 
 typedef struct Buffer
