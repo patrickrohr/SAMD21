@@ -25,11 +25,9 @@
 #endif
 
 
-typedef struct Buffer
+typedef struct
 {
-    struct Buffer* next_ptr;
-   char data[BUFFER_SIZE];
-    uint32_t overflow_protection;
+    void* data;
 } Buffer_t;
 
 /*!************************************************************

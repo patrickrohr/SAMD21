@@ -4,11 +4,22 @@
 
 #include "BufferPool.h"
 
+/*!************************************************************
+ * Private Buffer type
+ * Publicly visible Buffer_ hides implementation of _Buffer
+**************************************************************/
+typedef struct _Buffer
+{
+    struct _Buffer* next_ptr;
+    char data[BUFFER_SIZE];
+    uint32_t overflow_protection;
+} BufferImpl_t;
+
 typedef struct
 {
-    Buffer_t* first_free_buffer_ptr;
+    BufferImpl_t* first_free_buffer_ptr;
     uint32_t free_buffer_count; // number of free buffers
-    Buffer_t buffers[BUFFER_COUNT];
+    BufferImpl_t buffers[BUFFER_COUNT];
 } BufferPool_t;
 
 /*!************************************************************
@@ -17,16 +28,27 @@ typedef struct
 **************************************************************/
 static BufferPool_t gBufferPool;
 
+// Private functions.
+// TODO: to clean this up I should probably move this to a private header file
+Buffer_t* to_buffer(BufferImpl_t* buffer_impl_ptr);
+BufferImpl_t* to_buffer_impl(Buffer_t* buffer_ptr);
+
+/*!************************************************************
+ * @brief      Initializes all Buffers inside of the BufferPool.
+ *             
+ * @date       November 23, 2017
+ * @author     Patrick Rohr
+**************************************************************/
 void buffer_pool_init()
 {
     // init buffer pool
     gBufferPool.free_buffer_count = BUFFER_COUNT;
 
-    Buffer_t* prev_buffer_ptr = 0;
+    BufferImpl_t* prev_buffer_ptr = 0;
     // now create linked list of buffers
     for (int i = 0; i < BUFFER_COUNT; ++i)
     {
-        Buffer_t* buffer_ptr = &gBufferPool.buffers[i];
+        BufferImpl_t* buffer_ptr = &gBufferPool.buffers[i];
         // use overflow protection address as overflow protection value.
         buffer_ptr->overflow_protection = (uint32_t)&buffer_ptr->overflow_protection;
         if (prev_buffer_ptr != 0)
@@ -48,10 +70,10 @@ void buffer_pool_init()
 Buffer_t* buffer_pool_get_buffer()
 {
     --(gBufferPool.free_buffer_count);
-    Buffer_t* buffer_ptr = gBufferPool.first_free_buffer_ptr;
+    BufferImpl_t* buffer_ptr = gBufferPool.first_free_buffer_ptr;
     gBufferPool.first_free_buffer_ptr = buffer_ptr->next_ptr;
     buffer_ptr->next_ptr = 0;
-    return buffer_ptr;
+    return to_buffer(buffer_ptr);
 }
 
 /*!************************************************************
@@ -64,8 +86,9 @@ Buffer_t* buffer_pool_get_buffer()
 void buffer_pool_free_buffer(Buffer_t* buffer_ptr)
 {
     ++(gBufferPool.free_buffer_count);
-    buffer_ptr->next_ptr = gBufferPool.first_free_buffer_ptr;
-    gBufferPool.first_free_buffer_ptr = buffer_ptr;
+    BufferImpl_t* buffer_impl_ptr = to_buffer_impl(buffer_ptr);
+    buffer_impl_ptr->next_ptr = gBufferPool.first_free_buffer_ptr;
+    gBufferPool.first_free_buffer_ptr = buffer_impl_ptr;
 }
 
 /*!************************************************************
@@ -76,7 +99,8 @@ void buffer_pool_free_buffer(Buffer_t* buffer_ptr)
 **************************************************************/
 int buffer_pool_check_overflow_protection(Buffer_t * buffer_ptr)
 {
-    return (buffer_ptr->overflow_protection == (uint32_t)&buffer_ptr->overflow_protection);
+    BufferImpl_t* buffer_impl_ptr = to_buffer_impl(buffer_ptr);
+    return (buffer_impl_ptr->overflow_protection == (uint32_t)&(buffer_impl_ptr->overflow_protection));
 }
 
 
@@ -93,4 +117,14 @@ unsigned int buffer_pool_get_buffer_count()
 unsigned int buffer_pool_get_free_count()
 {
     return gBufferPool.free_buffer_count;
+}
+
+Buffer_t* to_buffer(BufferImpl_t* buffer_impl_ptr)
+{
+    return (Buffer_t*)(buffer_impl_ptr->data);
+}
+
+BufferImpl_t* to_buffer_impl(Buffer_t* buffer_ptr)
+{
+    return (BufferImpl_t*)(buffer_ptr - sizeof(BufferImpl_t*));
 }
