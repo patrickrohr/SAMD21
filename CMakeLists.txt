@@ -17,7 +17,6 @@ set(SOURCES
     src/hal/PortIO.c
     src/hal/UART.c
     # Helpers
-    src/helpers/BufferPool.c 
     src/helpers/Error.c 
     src/helpers/HDLCPacket.c 
     src/helpers/PacketManager.c 
@@ -45,6 +44,7 @@ set(SOURCES
     )
 
 set(INCLUDE_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}
     # FreeRTOS
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/FreeRTOS/Source/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/FreeRTOS/Source/portable/GCC/ARM_CM0/
@@ -71,4 +71,8 @@ set(INCLUDE_DIR
 add_executable(samd21 ${SOURCES})
 include_directories(${INCLUDE_DIR})
 
-target_compile_options(samd21 PRIVATE -O0 -mtune=cortex-m0 -mthumb -march=armv6-m)
+target_compile_options(samd21 PUBLIC -O0 -mtune=cortex-m0 -mthumb -march=armv6-m)
+
+# TODO: use find library
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/BufferPool)
+target_link_libraries(samd21 PUBLIC BufferPool)
