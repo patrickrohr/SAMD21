@@ -4,3 +4,7 @@ vendor
 
 # Files
 .swp
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
