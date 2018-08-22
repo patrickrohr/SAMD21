@@ -1,36 +1,22 @@
 vendor_dir = vendor
 build_dir = build
-toolchain = ~/Projects/SAMD21/toolchain_samd21g18a.cmake
+toolchain = ./toolchain_samd21g18a.cmake
 
 
-all: $(vendor_dir)/cmsis-core-atmel-samcortexm0p-samd21 $(vendor_dir)/FreeRTOS $(build_dir)
+all: $(build_dir)
 	cd $(build_dir) && make
 
-_dependencies: | $(vendor_dir)/cmsis-core-atmel-samcortexm0p-samd21 $(vendor_dir)/FreeRTOS
+test:
+	@echo "TODO: Implement Unit Tests"
 
 $(build_dir):
 	mkdir $(build_dir)
-	cd $(build_dir) && cmake -DCMAKE_TOOLCHAIN_FILE=$(toolchain) ..
+	cd $(build_dir) && cmake -DCMAKE_TOOLCHAIN_FILE=$(toolchain) $(PWD)
 
 $(vendor_dir):
 	mkdir $(vendor_dir)
 
-
-$(vendor_dir)/cmsis-core: | $(vendor_dir)
-	git clone -b v1.2.0 --depth 1 https://github.com/ARMmbed/cmsis-core.git $(vendor_dir)
-
-$(vendor_dir)/cmsis-core-atmel-samcortexm0p-samd21: | $(vendor_dir)/cmsis-core
-	git clone -b master --depth 1 https://github.com/ARMmbed/cmsis-core-atmel-samcortexm0p-samd21.git $(vendor_dir)
-
-$(vendor_dir)/FreeRTOS: | $(vendor_dir)
-	git clone -b V9.0.0 --depth 1 https://github.com/cjlano/freertos.git $(vendor_dir)
-	mv $(vendor_dir)/freertos/FreeRTOS $(vendor_dir)/FreeRTOS
-	rm -rf $(vendor_dir)/freertos
-
 distclean:
 	rm -rf $(build_dir)
 
-maintainer-clean: distclean
-	rm -rf $(vendor_dir)
-
-.PHONY: all distclean maintainer-clean
+.PHONY: all test distclean
