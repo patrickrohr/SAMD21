@@ -1,4 +1,4 @@
-# Copyrights: Patrick Rohr, 2017
+# Copyright Patrick Rohr, 2017-2018
 
 cmake_minimum_required(VERSION 3.5.1)
 

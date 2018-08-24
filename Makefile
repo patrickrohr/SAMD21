@@ -1,22 +1,17 @@
-vendor_dir = vendor
-build_dir = build
-toolchain = ./toolchain_samd21g18a.cmake
+# Copyright Patrick Rohr, 2018
 
+all: LocalFactory TargetDebug TargetRelease
 
-all: $(build_dir)
-	cd $(build_dir) && make
+LocalFactory: Workspace/LocalFactory
+	cd $< && cmake ${PWD}
 
-test:
-	@echo "TODO: Implement Unit Tests"
+TargetDebug: Workspace/TargetDebug
+	cd $< && cmake -DCMAKE_TOOLCHAIN_FILE=${PWD}/Configurations/SAMD21/toolchain_samd21g18a.cmake -DDEBUG=1 ${PWD}
 
-$(build_dir):
-	mkdir $(build_dir)
-	cd $(build_dir) && cmake -DCMAKE_TOOLCHAIN_FILE=$(toolchain) $(PWD)
+TargetRelease: Workspace/TargetRelease
+	cd $< && cmake -DCMAKE_TOOLCHAIN_FILE=${PWD}/Configurations/SAMD21/toolchain_samd21g18a.cmake ${PWD}
 
-$(vendor_dir):
-	mkdir $(vendor_dir)
+Workspace/%:
+	mkdir -p $@
 
-distclean:
-	rm -rf $(build_dir)
-
-.PHONY: all test distclean
+.PHONY: all LocalFactory TargetDebug TargetRelease
