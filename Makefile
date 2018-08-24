@@ -1,8 +1,8 @@
 # Copyright Patrick Rohr, 2018
 
-all: LocalFactory TargetDebug TargetRelease
+all: HostCI TargetDebug TargetRelease
 
-LocalFactory: Workspace/LocalFactory
+HostCI: Workspace/HostCI
 	cd $< && cmake ${PWD}
 
 TargetDebug: Workspace/TargetDebug
@@ -14,4 +14,4 @@ TargetRelease: Workspace/TargetRelease
 Workspace/%:
 	mkdir -p $@
 
-.PHONY: all LocalFactory TargetDebug TargetRelease
+.PHONY: all HostCI TargetDebug TargetRelease

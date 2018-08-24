@@ -1,9 +1,6 @@
 # Folders
-build
-vendor
-
-# Files
-.swp
+Workspace
+REMOVE_*
 
 # Sublime
 *.sublime-project
