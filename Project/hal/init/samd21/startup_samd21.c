@@ -113,16 +113,16 @@ const DeviceVectors exception_table = {
         .pfnReset_Handler       = (void*) Reset_Handler,
         .pfnNMI_Handler         = (void*) NMI_Handler,
         .pfnHardFault_Handler   = (void*) HardFault_Handler,
-        .pvReservedM12          = (void*) (0UL), /* Reserved */
-        .pvReservedM11          = (void*) (0UL), /* Reserved */
-        .pvReservedM10          = (void*) (0UL), /* Reserved */
-        .pvReservedM9           = (void*) (0UL), /* Reserved */
-        .pvReservedM8           = (void*) (0UL), /* Reserved */
-        .pvReservedM7           = (void*) (0UL), /* Reserved */
-        .pvReservedM6           = (void*) (0UL), /* Reserved */
+        .pfnReservedM12          = (void*) (0UL), /* Reserved */
+        .pfnReservedM11          = (void*) (0UL), /* Reserved */
+        .pfnReservedM10          = (void*) (0UL), /* Reserved */
+        .pfnReservedM9           = (void*) (0UL), /* Reserved */
+        .pfnReservedM8           = (void*) (0UL), /* Reserved */
+        .pfnReservedM7           = (void*) (0UL), /* Reserved */
+        .pfnReservedM6           = (void*) (0UL), /* Reserved */
         .pfnSVC_Handler         = (void*) SVC_Handler,
-        .pvReservedM4           = (void*) (0UL), /* Reserved */
-        .pvReservedM3           = (void*) (0UL), /* Reserved */
+        .pfnReservedM4           = (void*) (0UL), /* Reserved */
+        .pfnReservedM3           = (void*) (0UL), /* Reserved */
         .pfnPendSV_Handler      = (void*) PendSV_Handler,
         .pfnSysTick_Handler     = (void*) SysTick_Handler,
 
@@ -137,7 +137,7 @@ const DeviceVectors exception_table = {
 #ifdef ID_USB
         .pfnUSB_Handler         = (void*) USB_Handler,            /*  7 Universal Serial Bus */
 #else
-        .pvReserved7            = (void*) (0UL),                  /*  7 Reserved */
+        .pfnReserved7            = (void*) (0UL),                  /*  7 Reserved */
 #endif
         .pfnEVSYS_Handler       = (void*) EVSYS_Handler,          /*  8 Event System Interface */
         .pfnSERCOM0_Handler     = (void*) SERCOM0_Handler,        /*  9 Serial Communication Interface 0 */
@@ -147,12 +147,12 @@ const DeviceVectors exception_table = {
 #ifdef ID_SERCOM4
         .pfnSERCOM4_Handler     = (void*) SERCOM4_Handler,        /* 13 Serial Communication Interface 4 */
 #else
-        .pvReserved13           = (void*) (0UL),                  /* 13 Reserved */
+        .pfnReserved13           = (void*) (0UL),                  /* 13 Reserved */
 #endif
 #ifdef ID_SERCOM5
         .pfnSERCOM5_Handler     = (void*) SERCOM5_Handler,        /* 14 Serial Communication Interface 5 */
 #else
-        .pvReserved14           = (void*) (0UL),                  /* 14 Reserved */
+        .pfnReserved14           = (void*) (0UL),                  /* 14 Reserved */
 #endif
         .pfnTCC0_Handler        = (void*) TCC0_Handler,           /* 15 Timer Counter Control 0 */
         .pfnTCC1_Handler        = (void*) TCC1_Handler,           /* 16 Timer Counter Control 1 */
@@ -163,35 +163,35 @@ const DeviceVectors exception_table = {
 #ifdef ID_TC6
         .pfnTC6_Handler         = (void*) TC6_Handler,            /* 21 Basic Timer Counter 3 */
 #else
-        .pvReserved21           = (void*) (0UL),                  /* 21 Reserved */
+        .pfnReserved21           = (void*) (0UL),                  /* 21 Reserved */
 #endif
 #ifdef ID_TC7
         .pfnTC7_Handler         = (void*) TC7_Handler,            /* 22 Basic Timer Counter 4 */
 #else
-        .pvReserved22           = (void*) (0UL),                  /* 22 Reserved */
+        .pfnReserved22           = (void*) (0UL),                  /* 22 Reserved */
 #endif
 #ifdef ID_ADC
         .pfnADC_Handler         = (void*) ADC_Handler,            /* 23 Analog Digital Converter */
 #else
-        .pvReserved23           = (void*) (0UL),                  /* 23 Reserved */
+        .pfnReserved23           = (void*) (0UL),                  /* 23 Reserved */
 #endif
 #ifdef ID_AC
         .pfnAC_Handler          = (void*) AC_Handler,             /* 24 Analog Comparators */
 #else
-        .pvReserved24           = (void*) (0UL),                  /* 24 Reserved */
+        .pfnReserved24           = (void*) (0UL),                  /* 24 Reserved */
 #endif
 #ifdef ID_DAC
         .pfnDAC_Handler         = (void*) DAC_Handler,            /* 25 Digital Analog Converter */
 #else
-        .pvReserved25           = (void*) (0UL),                  /* 25 Reserved */
+        .pfnReserved25           = (void*) (0UL),                  /* 25 Reserved */
 #endif
 #ifdef ID_PTC
         .pfnPTC_Handler         = (void*) PTC_Handler,            /* 26 Peripheral Touch Controller */
 #else
-        .pvReserved26           = (void*) (0UL),                  /* 26 Reserved */
+        .pfnReserved26           = (void*) (0UL),                  /* 26 Reserved */
 #endif
         .pfnI2S_Handler         = (void*) I2S_Handler,            /* 27 Inter-IC Sound Interface */
-        .pvReserved28           = (void*) (0UL)                   /* 28 Reserved */
+        // .pvReserved28           = (void*) (0UL)                   /* 28 Reserved */
 };
 
 /**
