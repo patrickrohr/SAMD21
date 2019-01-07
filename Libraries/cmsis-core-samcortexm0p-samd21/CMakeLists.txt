@@ -17,9 +17,15 @@ FetchContent_GetProperties(cmsis_samd21_download)
 if (NOT cmsis_samd21_download_POPULATED)
     FetchContent_Populate(cmsis_samd21_download)
 
-    add_library(cmsis_samd21 INTERFACE)
+    add_library(cmsis_samd21 STATIC)
 
-    target_include_directories(cmsis_samd21 INTERFACE
+    target_sources(cmsis_samd21 PRIVATE
+        ${cmsis_samd21_download_SOURCE_DIR}/source/cmsis_nvic.c
+        ${cmsis_samd21_download_SOURCE_DIR}/source/TARGET_SAMD21G18A/TOOLCHAIN_GCC_ARM/startup_samd21.c
+        ${cmsis_samd21_download_SOURCE_DIR}/source/cmsis/TARGET_SAMD21/source/system_samd21.c
+    )
+
+    target_include_directories(cmsis_samd21 PUBLIC
         ${cmsis_samd21_download_SOURCE_DIR}/source
         ${cmsis_samd21_download_SOURCE_DIR}/source/TARGET_SAMD21G18A/TOOLCHAIN_GCC_ARM
         ${cmsis_samd21_download_SOURCE_DIR}/source/cmsis/TARGET_SAMD21/source
@@ -31,5 +37,5 @@ if (NOT cmsis_samd21_download_POPULATED)
         ${cmsis_samd21_download_SOURCE_DIR}/source/preprocessor
     )
 
-    target_link_libraries(cmsis_samd21 INTERFACE cmsis_core)
+    target_link_libraries(cmsis_samd21 PUBLIC cmsis_core)
 endif()

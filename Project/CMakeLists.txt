@@ -4,12 +4,8 @@ cmake_minimum_required(VERSION 3.9.1)
 
 project(app)
 
-set(MCU "samd21")
-
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/app/main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/hal/init/${MCU}/startup_samd21.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/hal/init/${MCU}/system_samd21.c
     )
 
 add_executable(app ${SOURCES})
