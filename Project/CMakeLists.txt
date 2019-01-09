@@ -10,7 +10,7 @@ set(SOURCES
 
 add_executable(app ${SOURCES})
 
-target_link_libraries(app PRIVATE cmsis_samd21)
+target_link_libraries(app PRIVATE cmsis_samd21 samd21_peripherals)
 
 # TODO: Clean up
 add_custom_command(
