@@ -11,12 +11,20 @@
 #include <stdint.h>
 
 /*!************************************************************
+ * TODOs:
+ *  - Hide implementation of Gclk_t
+ *  - Add low-power and sleep settings
+ *  - Add functionality to support changing clock source
+ *  - Add functionality to support changing division factor
+**************************************************************/
+
+/*!************************************************************
  * Generic Clock Controller Handle
 **************************************************************/
 typedef struct
 {
-    uint8_t m_uGclkId;            // Generic Clock Control Generator ID
-    uint8_t m_uGclkSource;        // Clock source
+    uint8_t  m_uGclkId;           // Generic Clock Control Generator ID
+    uint8_t  m_uGclkSource;       // Clock source
     uint16_t m_uGclkGenDiv;       // Division Factor
     uint32_t m_uGclkGenCtrlFlags; // Generator Control Flags
 } Gclk_t;
