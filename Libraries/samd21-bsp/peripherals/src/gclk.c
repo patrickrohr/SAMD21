@@ -18,29 +18,9 @@
  *   (CLKCTRL)         (GENCTRL & GENDIV)
 **************************************************************/
 
-// TODO: Consider moving sysctrl functions into a separate file.
-void _dfll_ctrl_sync()
-{
-    while ((SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0);    // Wait for DFLL synchronization complete
-}
+// Private declarations
+static void _gclk_get_defaults(Gclk_t* self, enum ClockSource eGclkSource);
 
-unsigned g_uCpuFrequency = 48000;
-int _sysctrl_init_dfll48()
-{
-    // See Errata 9905 - write to DFLLCTRL before using it
-    SYSCTRL->DFLLCTRL.reg = 0;
-    _dfll_ctrl_sync();
-
-    SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_MUL(g_uCpuFrequency);
-
-    // TODO: make these values compile time options
-    // Set DFLL for USB Clock Recovery Mode, Bypass Coarse Lock, Disable Chill Cycle,
-    //   Fine calibration register locks (stable) after fine lock
-    SYSCTRL->DFLLCTRL.reg = SYSCTRL_DFLLCTRL_ENABLE | SYSCTRL_DFLLCTRL_USBCRM |
-                            SYSCTRL_DFLLCTRL_BPLCKC | SYSCTRL_DFLLCTRL_CCDIS | SYSCTRL_DFLLCTRL_STABLE;
-    _dfll_ctrl_sync();
-    return 0;
-}
 
 void gclk_init(Gclk_t* self, uint8_t uId, enum ClockSource eGclkSource)
 {
@@ -83,18 +63,8 @@ void gclk_enable(const Gclk_t* self)
 {
     assert(self);
 
-    // TODO: make sure clock source is on
-    switch (self->m_uGclkSource)
-    {
-    case eDFLL48M:
-        // TODO: sysctrl_init(eDFLL48M)
-        _sysctrl_init_dfll48();
-        break;
-
-    default:
-        assert(0);
-        break;
-    }
+    // Initialize Clock Source
+    clock_init(eDFLL48M);
 
     GCLK->GENDIV.reg  = GCLK_GENDIV_ID(self->m_uGclkId) | GCLK_GENDIV_DIV(self->m_uGclkGenDiv);
     GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(self->m_uGclkId) | GCLK_GENCTRL_SRC(self->m_uGclkSource) |
