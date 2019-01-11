@@ -23,7 +23,7 @@
 #define CONFIG_OSC32K_WRITELOCK     0
 // These bits select start-up time for the oscillator according to Table 16-10 in the Datasheet.
 // TODO: no idea what's best to use here
-#define CONFIG_OSC32K_STARTUP       0x4
+#define CONFIG_OSC32K_STARTUP       0x0
 // The On Demand operation mode allows an oscillator to be enabled or disabled
 // depending on peripheral clock requests. 1 enables on demand.
 #define CONFIG_OSC32K_ONDEMAND      1
