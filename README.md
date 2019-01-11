@@ -1,21 +1,15 @@
 # SAMD21
 
-UART Implementation on ATSAMD21G18A micro.
-Or at least that's what it once was.
+Work in progress board support package for ATSAMD21. This project also includes a 'barebones' build system based on the GNU toolchain.
 
-At this point this has become the project for all things SAMD21.
-
-Right now, this doesn't do much, but the build system is (was :)) pretty darn clean.
-
-You can build the project on your system using:
+You can build the project by `make`ing one of the following Configuration targets:
 
 `make all` - Builds all configurations
-
-`make HostCI` - Builds host configuration (Yeah, that's a dream. But maybe useful to just build libs for a unit test environment?)
 
 `make TargetDebug` - Builds target debug configuration
 
 `make TargetRelease` - Builds target release configuration
 
-Things to come: Hopefully something that's actually useful :)
-But for now, let me have fun with cmake already.
+`make HostCI` - Builds host configuration (Yeah, that's a dream. But maybe useful to just build libs for a unit test environment?)
+
+Then navigate to the newly created `Workspace/[SELECTED_CONFIGURATION]` and build using `make`.
