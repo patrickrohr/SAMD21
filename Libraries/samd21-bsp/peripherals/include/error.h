@@ -10,7 +10,7 @@
 // TODO: Implement assert
 // The dream is for this function to provide some kind of debug information in some blocked off memory region
 #define assert(value)    do { \
-        while (!value);       \
+        while (!(value));       \
 } while (0)
 
 #define E_ERROR              1

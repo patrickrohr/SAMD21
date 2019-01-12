@@ -65,29 +65,32 @@ void clock_init(enum ClockSource eSource)
 #if CONFIG_DFLL48M_ENABLED
     case eDFLL48M:
     {
-// TODO!!!!!!!
-//         // See Errata 9905 - write to DFLLCTRL before using it
-//         SYSCTRL->DFLLCTRL.reg = 0;
-//         while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+        // See Errata 9905 - write to DFLLCTRL before using it
+        SYSCTRL->DFLLCTRL.reg = 0;
+        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 
-//         // Open-Loop Config
-//         uint32_t uCoarse = (*((uint32_t*)FUSES_DFLL48M_COARSE_CAL_ADDR) & FUSES_DFLL48M_COARSE_CAL_Msk) >> FUSES_DFLL48M_COARSE_CAL_Pos;
-//         uint32_t uFine   = (*((uint32_t*)FUSES_DFLL48M_FINE_CAL_ADDR) & FUSES_DFLL48M_FINE_CAL_Msk) >> FUSES_DFLL48M_FINE_CAL_Pos;
-//         SYSCTRL->DFLLVAL.reg = SYSCTRL_DFLLVAL_COARSE(uCoarse) | SYSCTRL_DFLLVAL_FINE(uFine);
+        uint32_t uCoarse = (*((uint32_t*)FUSES_DFLL48M_COARSE_CAL_ADDR) & FUSES_DFLL48M_COARSE_CAL_Msk) >> FUSES_DFLL48M_COARSE_CAL_Pos;
+        uint32_t uFine   = (*((uint32_t*)FUSES_DFLL48M_FINE_CAL_ADDR) & FUSES_DFLL48M_FINE_CAL_Msk) >> FUSES_DFLL48M_FINE_CAL_Pos;
 
-// # if 1 == CONFIG_DFLL48M_OPENLOOP
-//         // TODO: Enable...
-// # endif
+        // TODO: INVESTIGATION: Somehow setting this causes hard fault when enabling clock...
+        // SYSCTRL->DFLLVAL.reg = SYSCTRL_DFLLVAL_COARSE(uCoarse) | SYSCTRL_DFLLVAL_FINE(uFine);
 
-//         // 48000 because USBCRM expects a 1000Hz pulse. This needs to be fixed
-//         SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_MUL(48000);
+        // Open loop configuration
+        // Setting CSTEP and FSTEP to max values
+        SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_MUL(1465); // Calculate from reference clock 1465
 
-//         // TODO: make these values compile time options
-//         // Set DFLL for USB Clock Recovery Mode, Bypass Coarse Lock, Disable Chill Cycle,
-//         // Fine calibration register locks (stable) after fine lock
-//         SYSCTRL->DFLLCTRL.reg = SYSCTRL_DFLLCTRL_ENABLE | SYSCTRL_DFLLCTRL_USBCRM |
-//                                 SYSCTRL_DFLLCTRL_BPLCKC | SYSCTRL_DFLLCTRL_CCDIS | SYSCTRL_DFLLCTRL_STABLE;
-//         while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+
+        SYSCTRL->DFLLCTRL.reg = SYSCTRL_DFLLCTRL_ENABLE; // TODO: Configure this correctly.
+        //
+        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+
+        // Closed loop configuration
+        // SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP(10) |
+        //                        SYSCTRL_DFLLMUL_FSTEP(500);
+
+        // // Close the loop
+        SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_MODE;
+        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
         break;
     }
 #endif

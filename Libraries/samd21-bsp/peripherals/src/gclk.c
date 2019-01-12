@@ -69,6 +69,8 @@ void gclk_enable_generator(const Gclk_t* self)
 
     GCLK->GENDIV.reg = GCLK_GENDIV_ID(self->m_uGclkId) |
                        GCLK_GENDIV_DIV(self->m_uGclkGenDiv);
+                       
+    while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 
     GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(self->m_uGclkId) |
                         GCLK_GENCTRL_SRC(self->m_uGclkSource) |
@@ -78,9 +80,12 @@ void gclk_enable_generator(const Gclk_t* self)
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 }
 
-void gclk_enable_mux(const Gclk_t* self, enum ClockPeripheral eClockPeripheral)
+void gclk_enable_peripheral_channel(const Gclk_t* self, enum ClockPeripheral eClockPeripheral)
 {
+    assert(eClockPeripheral < _eINVALID);
+
     GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(eClockPeripheral) |
                         GCLK_CLKCTRL_GEN(self->m_uGclkId) |
                         GCLK_CLKCTRL_CLKEN;
+    while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 }
