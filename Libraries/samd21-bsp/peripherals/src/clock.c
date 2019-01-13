@@ -46,17 +46,14 @@ void clock_init(enum ClockSource eSource)
         // TODO: Exercise for tomorrow: use internal 32k oscillator as a source for DFLL48M
         uint32_t uCalib = (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >> FUSES_OSC32K_CAL_Pos;
 
-        // TODO: Make this one atomic 32bit write
-        // TODO: in config.h, prefer a generic CONFIG_XYZ_REG_FLAGS to keep it simpler
-        SYSCTRL->OSC32K.bit.CALIB = uCalib;
-
-        SYSCTRL->OSC32K.bit.WRTLOCK  = CONFIG_OSC32K_WRITELOCK;
-        SYSCTRL->OSC32K.bit.STARTUP  = CONFIG_OSC32K_STARTUP;
-        SYSCTRL->OSC32K.bit.ONDEMAND = CONFIG_OSC32K_ONDEMAND;
-        SYSCTRL->OSC32K.bit.RUNSTDBY = CONFIG_OSC32K_RUNSTANDBY;
-
-        SYSCTRL->OSC32K.bit.EN32K  = 1;
-        SYSCTRL->OSC32K.bit.ENABLE = 1;
+        // TODO: This still likes to fail sometimes, play with startup value?
+        SYSCTRL->OSC32K.reg = SYSCTRL_OSC32K_CALIB(uCalib) |
+                              SYSCTRL_OSC32K_STARTUP(0x6) |
+                              (1 & CONFIG_OSC32K_WRITELOCK) << SYSCTRL_OSC32K_WRTLOCK_Pos |
+                              (1 & CONFIG_OSC32K_ONDEMAND) << SYSCTRL_OSC32K_ONDEMAND_Pos |
+                              (1 & CONFIG_OSC32K_RUNSTANDBY) << SYSCTRL_OSC32K_RUNSTDBY_Pos |
+                              SYSCTRL_OSC32K_EN32K |
+                              SYSCTRL_OSC32K_ENABLE;
 
         while (!SYSCTRL->PCLKSR.bit.OSC32KRDY);
         break;

@@ -23,6 +23,7 @@
  *             should be routed to.
  * @date       January 10, 2019
  * @author     Patrick Rohr
+ * @todo       These enums are awkwardly named, rename them.
 **************************************************************/
 enum ClockPeripheral
 {
@@ -63,45 +64,39 @@ enum ClockPeripheral
     eGCLK_PTC,
     eGCLK_I2S_0,
     eGCLK_I2S_1,
-    
+
     _eINVALID
 };
 
 /*!************************************************************
- * Generic Clock Controller Handle
+ * @brief      Initialize Generic Clock Controller
+ * @date       January 13, 2019
+ * @author     Patrick Rohr
 **************************************************************/
-typedef struct
-{
-    uint8_t  m_uGclkId;           // Generic Clock Control Generator ID
-    uint8_t  m_uGclkSource;       // Clock source
-    uint16_t m_uGclkGenDiv;       // Division Factor
-    uint32_t m_uGclkGenCtrlFlags; // Generator Control Flags
-} Gclk_t;
-
+void gclk_init();
 
 /*!************************************************************
- * @brief      Initialize Generic Clock Controller
- * @param      self         The handle
- * @param[in]  uId          The Generic Clock Controller ID. 0 is the reference for DFLL48M
+ * @brief      Configure Generic Clock Controller
+ * @param[in]  uId          The Generic Clock Controller ID. 0 is CPU Clock.
  * @param[in]  eGclkSource  The \enum ClockSource
  * @date       January 8, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_init(Gclk_t* self, uint8_t uId, enum ClockSource eGclkSource);
+void gclk_configure(uint8_t uId, enum ClockSource eGclkSource);
 
 /*!************************************************************
  * @brief      Enable Generic Clock Generator
- * @param[in]  self  The handle
+ * @param[in]  uId  The Generetar ID
  * @date       January 8, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_enable_generator(const Gclk_t* self);
+void gclk_enable_generator(uint8_t uId);
 
 /*!************************************************************
  * @brief      Enables Generic Clock Multiplexer
- * @param[in]  self       The object
- * @param[in]  <unnamed>  { parameter_description }
- * @date       January 10, 2019
+ * @param[in]  uId               The u identifier
+ * @param[in]  eClockPeripheral  The e clock peripheral
+ * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_enable_peripheral_channel(const Gclk_t* self, enum ClockPeripheral eClockPeripheral);
+void gclk_enable_peripheral_channel(uint8_t uId, enum ClockPeripheral eClockPeripheral);

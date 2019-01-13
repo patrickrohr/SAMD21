@@ -9,17 +9,16 @@ int main()
     // Turn on the digital interface clock
     PM->APBAMASK.reg |= PM_APBAMASK_GCLK;
 
-    GCLK->CTRL.reg = GCLK_CTRL_SWRST;
-    while ((GCLK->CTRL.reg & GCLK_CTRL_SWRST) && (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY));
+    // Set Up DFLL
+    gclk_init();
 
-    Gclk_t objGclk;
-    gclk_init(&objGclk, 1, eOSC32K);
-    gclk_enable_generator(&objGclk);
-    gclk_enable_peripheral_channel(&objGclk, eGCLK_DFLL48M_REF);
+    gclk_configure(1, eOSC32K);
+    gclk_enable_generator(1);
+    gclk_enable_peripheral_channel(1, eGCLK_DFLL48M_REF);
 
-    Gclk_t objGclkDFLL;
-    gclk_init(&objGclkDFLL, 0, eDFLL48M);
-    gclk_enable_generator(&objGclkDFLL);
+    // TODO: should configure and enable really be two steps
+    gclk_configure(0, eDFLL48M);
+    gclk_enable_generator(0);
 
     unsigned uPinLed = 17;
     PORT->Group[0].DIRSET.reg = (1 << uPinLed);
