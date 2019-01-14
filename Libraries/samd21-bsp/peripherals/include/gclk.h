@@ -100,7 +100,7 @@ void gclk_init();
  * @date       January 8, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_enable_input(uint8_t uId, enum ClockSource eClockSource);
+void gclk_set_input(uint8_t uId, enum ClockSource eClockSource);
 
 /*!************************************************************
  * @brief      Enables Generic Clock Multiplexer

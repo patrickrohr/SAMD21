@@ -125,7 +125,7 @@ void _gclk_clock_stop(enum ClockSource eClockSource)
     }
 }
 
-void gclk_enable_input(uint8_t uId, enum ClockSource eClockSource)
+void gclk_set_input(uint8_t uId, enum ClockSource eClockSource)
 {
     assert(uId < ClockCount);
     assert(eClockSource < GCLK_SOURCE_NUM);
