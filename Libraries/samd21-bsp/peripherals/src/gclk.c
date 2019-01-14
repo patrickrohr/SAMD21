@@ -10,14 +10,6 @@
 #include "error.h"
 #include <samd21.h>
 
-/*!************************************************************
- * Clock System Overview:
- *
- * --------------     -------------------     -----------------------
- * | CLK Source | >>> | Generic CLK Gen | >>> | Gen CLK Multiplexer |
- * --------------     -------------------     -----------------------
- *   (SYSCTRL)         (GENCTRL & GENDIV)            (CLKCTRL)
-**************************************************************/
 
 enum
 {
@@ -41,33 +33,40 @@ typedef struct
     uint16_t m_uGclkSource;       // Clock source
 } Gclk_t;
 
-static Gclk_t g_arrGclk[ClockCount];
+// Static Data
+static Gclk_t g_GclkHandleArr[ClockCount];
+
+// Private Functions
+void _gclk_configure(uint8_t uId, enum ClockSource eClockSource);
+void _gclk_clock_start(enum ClockSource eClockSource);
+void _gclk_clock_stop(enum ClockSource eClockSource);
 
 
 void gclk_init()
 {
+    // TODO: this can be moved into PM once that exists.
+    PM->APBAMASK.reg |= PM_APBAMASK_GCLK;
+
     // software reset to make sure we start from a clean state
     GCLK->CTRL.reg = GCLK_CTRL_SWRST;
     while ((GCLK->CTRL.reg & GCLK_CTRL_SWRST) && (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY));
+
+    // Initialize clocks
+    clock_init();
 }
 
 // TODO: Maybe uId should be an enum?
-void gclk_configure(uint8_t uId, enum ClockSource eGclkSource)
+void _gclk_configure(uint8_t uId, enum ClockSource eClockSource)
 {
-    assert(uId < ClockCount);
+    g_GclkHandleArr[uId].m_uGclkSource       = eClockSource;
+    g_GclkHandleArr[uId].m_uGclkGenDiv       = 1;
+    g_GclkHandleArr[uId].m_uGclkGenCtrlFlags = 0;
 
-    g_arrGclk[uId].m_uGclkSource       = eGclkSource;
-    g_arrGclk[uId].m_uGclkGenDiv       = 0;
-    g_arrGclk[uId].m_uGclkGenCtrlFlags = 0;
-
-    // Init
-    g_arrGclk[uId].m_uGclkGenDiv = 1; // TODO: What should the global default be? compile flag??
-
-    switch (eGclkSource)
+    switch (eClockSource)
     {
     case eOSC32K:
     case eDFLL48M:
-        g_arrGclk[uId].m_uGclkGenCtrlFlags |= GCLK_GENCTRL_RUNSTDBY;
+        g_GclkHandleArr[uId].m_uGclkGenCtrlFlags |= GCLK_GENCTRL_RUNSTDBY;
         break;
 
     default:
@@ -76,40 +75,97 @@ void gclk_configure(uint8_t uId, enum ClockSource eGclkSource)
     }
 
     // The generic clock generator duty cycle is not 50/50 for odd division factors
-    if (g_arrGclk[uId].m_uGclkGenDiv % 2)
+    if (g_GclkHandleArr[uId].m_uGclkGenDiv % 2)
     {
-        g_arrGclk[uId].m_uGclkGenCtrlFlags |= GCLK_GENCTRL_IDC;
+        g_GclkHandleArr[uId].m_uGclkGenCtrlFlags |= GCLK_GENCTRL_IDC;
     }
 }
 
-void gclk_enable_generator(uint8_t uId)
+void _gclk_clock_start(enum ClockSource eClockSource)
+{
+    switch (eClockSource)
+    {
+    case eOSC32K:
+        clock_osc32k_start();
+        break;
+
+    case eXOSC32K:
+        clock_xosc32k_start();
+        break;
+
+    case eDFLL48M:
+        clock_dfll48m_start();
+        break;
+
+    default:
+        assert(0);
+        break;
+    }
+}
+
+void _gclk_clock_stop(enum ClockSource eClockSource)
+{
+    switch (eClockSource)
+    {
+    case eOSC32K:
+        clock_osc32k_stop();
+        break;
+
+    case eXOSC32K:
+        clock_xosc32k_stop();
+        break;
+
+    case eDFLL48M:
+        clock_dfll48m_stop();
+        break;
+
+    default:
+        assert(0);
+        break;
+    }
+}
+
+void gclk_enable_input(uint8_t uId, enum ClockSource eClockSource)
 {
     assert(uId < ClockCount);
+    assert(eClockSource < GCLK_SOURCE_NUM);
 
-    // Initialize Clock Source
-    clock_init(g_arrGclk[uId].m_uGclkSource);
+    _gclk_clock_start(eClockSource);
+    _gclk_configure(uId, eClockSource);
 
-
-    GCLK->GENDIV.reg = GCLK_GENDIV_ID(uId) |
-                       GCLK_GENDIV_DIV(g_arrGclk[uId].m_uGclkGenDiv);
-
+    // Setup Generic Clock Generator Division
+    GCLK_GENDIV_Type objGeneratorDivision =
+    {
+        .bit.ID  = uId,
+        .bit.DIV = g_GclkHandleArr[uId].m_uGclkGenDiv
+    };
+    GCLK->GENDIV = objGeneratorDivision;
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 
-    GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(uId) |
-                        GCLK_GENCTRL_SRC(g_arrGclk[uId].m_uGclkSource) |
-                        g_arrGclk[uId].m_uGclkGenCtrlFlags |
-                        GCLK_GENCTRL_GENEN;
-
+    // Setup Generic Clock Generator Control
+    GCLK_GENCTRL_Type objGeneratorControl =
+    {
+        .bit.ID    = uId,
+        .bit.SRC   = g_GclkHandleArr[uId].m_uGclkSource,
+        .bit.GENEN = 1
+    };
+    objGeneratorControl.reg |= g_GclkHandleArr[uId].m_uGclkGenCtrlFlags;
+    GCLK->GENCTRL            = objGeneratorControl;
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 }
 
-void gclk_enable_peripheral_channel(uint8_t uId, enum ClockPeripheral eClockPeripheral)
+void gclk_add_output(uint8_t uId, enum ClockOutput eClockOutput)
 {
     assert(uId < ClockCount);
-    assert(eClockPeripheral < _eINVALID);
+    assert(eClockOutput < _eClockOutputMax);
 
-    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(eClockPeripheral) |
-                        GCLK_CLKCTRL_GEN(uId) |
-                        GCLK_CLKCTRL_CLKEN;
+    // Set the Generic Clock Output
+    GCLK_CLKCTRL_Type objClockControl =
+    {
+        .bit.ID    = eClockOutput,
+        .bit.GEN   = uId,
+        .bit.CLKEN = 1
+    };
+    GCLK->CLKCTRL = objClockControl;
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 }

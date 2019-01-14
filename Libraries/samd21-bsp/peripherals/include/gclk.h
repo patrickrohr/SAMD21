@@ -19,13 +19,32 @@
 **************************************************************/
 
 /*!************************************************************
+ * @brief      Clock Sources available on the SAMD21
+ * @date       January 9, 2019
+ * @author     Patrick Rohr
+**************************************************************/
+enum ClockSource
+{
+    eDFLL48M   = GCLK_SOURCE_DFLL48M,   // DFLL48M output
+    eFDPLL     = GCLK_SOURCE_FDPLL,     // FDPLL output
+    eGCLKGEN1  = GCLK_SOURCE_GCLKGEN1,  // Generic clock generator 1 output
+    eGCLKIN    = GCLK_SOURCE_GCLKIN,    // Generator input pad
+    eNUM       = GCLK_SOURCE_NUM,       // Number of Generic Clock Sources
+    eOSCULP32K = GCLK_SOURCE_OSCULP32K, // OSCULP32K oscillator output
+    eOSC8M     = GCLK_SOURCE_OSC8M,     // OSC8M oscillator output
+    eOSC32K    = GCLK_SOURCE_OSC32K,    // OSC32K oscillator outpur
+    eXOSC      = GCLK_SOURCE_XOSC,      // XOSC oscillator output
+    eXOSC32K   = GCLK_SOURCE_XOSC32K    // XOSC32K oscillator output
+};
+
+/*!************************************************************
  * @brief      Enum used to configure which peripheral the clock
  *             should be routed to.
  * @date       January 10, 2019
  * @author     Patrick Rohr
  * @todo       These enums are awkwardly named, rename them.
 **************************************************************/
-enum ClockPeripheral
+enum ClockOutput
 {
     eGCLK_DFLL48M_REF,
     eGCLK_DPLL,
@@ -65,7 +84,7 @@ enum ClockPeripheral
     eGCLK_I2S_0,
     eGCLK_I2S_1,
 
-    _eINVALID
+    _eClockOutputMax
 };
 
 /*!************************************************************
@@ -76,27 +95,18 @@ enum ClockPeripheral
 void gclk_init();
 
 /*!************************************************************
- * @brief      Configure Generic Clock Controller
- * @param[in]  uId          The Generic Clock Controller ID. 0 is CPU Clock.
- * @param[in]  eGclkSource  The \enum ClockSource
- * @date       January 8, 2019
- * @author     Patrick Rohr
-**************************************************************/
-void gclk_configure(uint8_t uId, enum ClockSource eGclkSource);
-
-/*!************************************************************
  * @brief      Enable Generic Clock Generator
- * @param[in]  uId  The Generetar ID
+ * @param[in]  uId  The Generator ID. ID 0 specifies the CPU clock.
  * @date       January 8, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_enable_generator(uint8_t uId);
+void gclk_enable_input(uint8_t uId, enum ClockSource eClockSource);
 
 /*!************************************************************
  * @brief      Enables Generic Clock Multiplexer
  * @param[in]  uId               The u identifier
- * @param[in]  eClockPeripheral  The e clock peripheral
+ * @param[in]  eClockOutput  The e clock peripheral
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_enable_peripheral_channel(uint8_t uId, enum ClockPeripheral eClockPeripheral);
+void gclk_add_output(uint8_t uId, enum ClockOutput eClockOutput);

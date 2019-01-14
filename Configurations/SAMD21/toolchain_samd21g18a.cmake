@@ -1,4 +1,6 @@
-#CMake options to cross-compile for Atmel SAMD21G18A from Linux on PC
+# Major TODO: Clean all of this up, set up configurations
+
+# CMake options to cross-compile for Atmel SAMD21G18A from Linux on PC
 set(TOOLCHAIN "Target")
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
@@ -10,3 +12,4 @@ set(CMAKE_BUILD_TYPE Debug)
 add_compile_options(-mtune=cortex-m0plus)
 add_compile_options(-mthumb)
 add_compile_options(-march=armv6-m)
+add_compile_options($<$<CONFIG:Debug>:-ggdb>)

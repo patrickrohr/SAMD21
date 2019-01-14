@@ -7,7 +7,7 @@
 
 #pragma once
 
-// TODO: Find a way for user to overwrite this
+// TODO: Find a better way to configure this: kconfig / menuconfig?
 
 
 /*!************************************************************
@@ -18,19 +18,6 @@
  * OSC32K
 **************************************************************/
 #define CONFIG_OSC32K_ENABLED       1
-// This bit locks the OSC32K register for future writes to fix the OSC32K configuration.
-// 1 is locked, 0 is unlocked
-#define CONFIG_OSC32K_WRITELOCK     0
-// These bits select start-up time for the oscillator according to Table 16-10 in the Datasheet.
-// TODO: no idea what's best to use here
-#define CONFIG_OSC32K_STARTUP       0x0
-// The On Demand operation mode allows an oscillator to be enabled or disabled
-// depending on peripheral clock requests. 1 enables on demand.
-#define CONFIG_OSC32K_ONDEMAND      1
-// This bit controls how the OSC32K behaves during standby sleep mode.
-// 0 is disabled in sleep mode. 1 is ondemand (if enabled) or on.
-#define CONFIG_OSC32K_RUNSTANDBY    1
-
 
 /*!************************************************************
  * DFLL48M

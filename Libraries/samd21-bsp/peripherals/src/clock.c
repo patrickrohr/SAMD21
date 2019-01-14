@@ -7,92 +7,143 @@
 
 #include "config.h"
 #include "clock.h"
-#include "error.h"
+#include "gclk.h"
 #include <samd21.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-static bool _clock_is_enabled(enum ClockSource eSource);
+static bool _clock_is_running(enum ClockSource eSource);
+static unsigned _clock_get_frequency();
 
 
-static bool _clock_is_enabled(enum ClockSource eSource)
+static bool _clock_is_running(enum ClockSource eSource)
 {
     switch (eSource)
     {
     case eOSC32K:
-        return 1 == SYSCTRL->OSC32K.bit.ENABLE;
+        return SYSCTRL->PCLKSR.bit.OSC32KRDY;
 
     case eDFLL48M:
-        return 1 == SYSCTRL->DFLLCTRL.bit.ENABLE;
+        return SYSCTRL->DFLLCTRL.bit.ENABLE;
+
+    case eXOSC32K:
+        return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
     default:
         return false;
     }
 }
 
-void clock_init(enum ClockSource eSource)
+// TODO: function to get frequency
+unsigned _clock_get_frequency();
+
+
+void clock_init()
 {
-    // If the clock is already enabled, there is nothing to do
-    if (_clock_is_enabled(eSource))
+    // TODO: TMaybe move into pm.c, once there is one
+    PM->APBAMASK.reg |= PM_APBAMASK_SYSCTRL;
+}
+
+void clock_osc32k_start()
+{
+    if (_clock_is_running(eOSC32K))
     {
         return;
     }
 
-    switch (eSource)
+    uint32_t uCalib = (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >> FUSES_OSC32K_CAL_Pos;
+
+    // TODO: compile time configure these values
+    SYSCTRL_OSC32K_Type objRegisterTmp =
     {
-#if CONFIG_OSC32K_ENABLED
-    case eOSC32K:
+        .bit.ENABLE   = 1,
+        .bit.EN32K    = 1,
+        .bit.CALIB    = uCalib,
+        .bit.STARTUP  = 0x7,
+        .bit.WRTLOCK  = 0,
+        .bit.ONDEMAND = 0,
+        .bit.RUNSTDBY = 0,
+    };
+
+    SYSCTRL->OSC32K = objRegisterTmp;
+    while (!(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_OSC32KRDY));
+}
+
+void clock_osc32k_stop()
+{
+    // Just reset it completely
+    SYSCTRL->OSC32K.reg = 0;
+}
+
+void clock_dfll48m_start()
+{
+    if (_clock_is_running(eDFLL48M))
     {
-        // TODO: Exercise for tomorrow: use internal 32k oscillator as a source for DFLL48M
-        uint32_t uCalib = (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >> FUSES_OSC32K_CAL_Pos;
-
-        // TODO: This still likes to fail sometimes, play with startup value?
-        SYSCTRL->OSC32K.reg = SYSCTRL_OSC32K_CALIB(uCalib) |
-                              SYSCTRL_OSC32K_STARTUP(0x6) |
-                              (1 & CONFIG_OSC32K_WRITELOCK) << SYSCTRL_OSC32K_WRTLOCK_Pos |
-                              (1 & CONFIG_OSC32K_ONDEMAND) << SYSCTRL_OSC32K_ONDEMAND_Pos |
-                              (1 & CONFIG_OSC32K_RUNSTANDBY) << SYSCTRL_OSC32K_RUNSTDBY_Pos |
-                              SYSCTRL_OSC32K_EN32K |
-                              SYSCTRL_OSC32K_ENABLE;
-
-        while (!SYSCTRL->PCLKSR.bit.OSC32KRDY);
-        break;
+        return;
     }
-#endif
-#if CONFIG_DFLL48M_ENABLED
-    case eDFLL48M:
+
+    // Flash wait states to support 48MHz
+    NVMCTRL->CTRLB.bit.RWS = 1;
+
+    // Errata
+    SYSCTRL->DFLLCTRL.reg = 0;
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+
+    // Set DFLL Multiplier
+    SYSCTRL_DFLLMUL_Type objDfllMulTmp =
     {
-        // See Errata 9905 - write to DFLLCTRL before using it
-        SYSCTRL->DFLLCTRL.reg = 0;
-        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+        .bit.MUL   = 1464, // TODO: Calculate
+        .bit.CSTEP = 32,   // max / 2
+        .bit.FSTEP = 511   // max / 2
+    };
+    SYSCTRL->DFLLMUL = objDfllMulTmp;
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 
-        uint32_t uCoarse = (*((uint32_t*)FUSES_DFLL48M_COARSE_CAL_ADDR) & FUSES_DFLL48M_COARSE_CAL_Msk) >> FUSES_DFLL48M_COARSE_CAL_Pos;
-        uint32_t uFine   = (*((uint32_t*)FUSES_DFLL48M_FINE_CAL_ADDR) & FUSES_DFLL48M_FINE_CAL_Msk) >> FUSES_DFLL48M_FINE_CAL_Pos;
+    // Set DFLL Control
+    SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp =
+    {
+        .bit.MODE     = 1,
+        .bit.WAITLOCK = 1,
+        .bit.QLDIS    = 1
+    };
+    SYSCTRL->DFLLCTRL = objDfllCtrlTmp;
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 
-        // TODO: INVESTIGATION: Somehow setting this causes hard fault when enabling clock...
-        // SYSCTRL->DFLLVAL.reg = SYSCTRL_DFLLVAL_COARSE(uCoarse) | SYSCTRL_DFLLVAL_FINE(uFine);
+    // Enable DFLL
+    SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_ENABLE;
 
-        // Open loop configuration
-        // Setting CSTEP and FSTEP to max values
-        SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_MUL(1465); // Calculate from reference clock 1465
+    // Wait for locks and DFLL Ready
+    while (!SYSCTRL->PCLKSR.bit.DFLLLCKC
+           && !SYSCTRL->PCLKSR.bit.DFLLLCKF
+           && !SYSCTRL->PCLKSR.bit.DFLLRDY);
+}
 
+void clock_dfll48m_stop()
+{
+    // May not be necessary, and may even be wrong. Possibly this should be inside glck
+    // and be dependent on the clock output frequency and cpu bus divider
+    // TODO: consider checking if this is set to 1 first.
+    NVMCTRL->CTRLB.bit.RWS = 0;
 
-        SYSCTRL->DFLLCTRL.reg = SYSCTRL_DFLLCTRL_ENABLE; // TODO: Configure this correctly.
-        //
-        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    SYSCTRL->DFLLCTRL.reg = 0;
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+}
 
-        // Closed loop configuration
-        // SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP(10) |
-        //                        SYSCTRL_DFLLMUL_FSTEP(500);
+void clock_xosc32k_start()
+{
+    SYSCTRL_XOSC32K_Type objXosc32kTmp =
+    {
+        .bit.STARTUP = 0x6,
+        .bit.XTALEN  = 1,
+        .bit.EN32K   = 1,
+        .bit.ENABLE  = 1
+    };
 
-        // // Close the loop
-        SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_MODE;
-        while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
-        break;
-    }
-#endif
-    default:
-        assert(0);
-        break;
-    }
+    SYSCTRL->XOSC32K = objXosc32kTmp;
+    while (!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
+}
+
+void clock_xosc32k_stop()
+{
+    SYSCTRL->XOSC32K.reg = 0;
 }

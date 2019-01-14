@@ -9,6 +9,7 @@ target_sources(samd21_peripherals PRIVATE
 
 target_include_directories(samd21_peripherals PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/include
+    ${CMAKE_CURRENT_LIST_DIR}/src
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
