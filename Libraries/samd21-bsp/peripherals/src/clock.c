@@ -87,7 +87,7 @@ void clock_dfll48m_start()
     NVMCTRL->CTRLB.bit.RWS = 1;
 
     // Errata
-    SYSCTRL->DFLLCTRL.reg = 0;
+    SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0;
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 
     // Set DFLL Multiplier
