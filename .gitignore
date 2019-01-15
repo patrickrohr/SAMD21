@@ -3,7 +3,7 @@ Workspace
 REMOVE_*
 
 # Kconfig
-.config*
+.config.old
 
 # Sublime
 *.sublime-project

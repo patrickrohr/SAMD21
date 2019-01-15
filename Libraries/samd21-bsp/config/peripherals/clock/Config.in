@@ -1,0 +1,45 @@
+menuconfig CONFIG_OSC32K_ENABLED
+    bool "Enable Internal 32kHz Oscillator"
+
+if CONFIG_OSC32K_ENABLED
+
+config CONFIG_OSC32K_STARTUP
+    range 0 7
+    int "Startup Delay Value (0-7)"
+    default 5
+
+config CONFIG_OSC32K_WRTLOCK
+    range 0 1
+    int "Enable Writelock"
+    default 0
+
+config CONFIG_OSC32K_ONDEMAND
+    range 0 1
+    int "Enable OnDemand"
+    default 0
+
+config CONFIG_OSC32K_RUNSTDBY
+    range 0 1
+    int "Enable Run in Standby Mode"
+    help "Actual state of the clock in standby mode depends on OnDemand setting"
+    default 0
+
+
+menuconfig CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+    bool "Use a fixed calibration value rather than reading NVM"
+    default 1
+
+if CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+
+config CONFIG_OSC32K_CALIB
+    range 0 63
+    int "Set OSC32K Fixed Calibration Value"
+    default 0
+
+endif
+
+
+endif
+
+menuconfig CONFIG_DFLL48M_ENABLED
+    bool "Enable DFLL48M Oscillator"

@@ -5,8 +5,8 @@
  *                                                            *
  *************************************************************/
 
-#include "config.h"
 #include "clock.h"
+#include "config.h"
 #include "gclk.h"
 #include <samd21.h>
 #include <stdbool.h>
@@ -60,10 +60,10 @@ void clock_osc32k_start()
         .bit.ENABLE   = 1,
         .bit.EN32K    = 1,
         .bit.CALIB    = uCalib,
-        .bit.STARTUP  = 0x7,
-        .bit.WRTLOCK  = 0,
-        .bit.ONDEMAND = 0,
-        .bit.RUNSTDBY = 0,
+        .bit.STARTUP  = CONFIG_CONFIG_OSC32K_STARTUP,
+        .bit.WRTLOCK  = CONFIG_CONFIG_OSC32K_WRTLOCK,
+        .bit.ONDEMAND = CONFIG_CONFIG_OSC32K_ONDEMAND,
+        .bit.RUNSTDBY = CONFIG_CONFIG_OSC32K_RUNSTDBY,
     };
 
     SYSCTRL->OSC32K = objRegisterTmp;
