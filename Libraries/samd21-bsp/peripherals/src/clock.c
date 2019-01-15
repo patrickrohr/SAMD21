@@ -27,7 +27,8 @@ static bool _clock_is_running(enum ClockSource eSource)
         return SYSCTRL->DFLLCTRL.bit.ENABLE;
 
     case eXOSC32K:
-        return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
+        // May not be necessary to check both. But this is a little finicky, so can't hurt.
+        return SYSCTRL->XOSC32K.bit.ENABLE && SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
     default:
         return false;
@@ -131,19 +132,25 @@ void clock_dfll48m_stop()
 
 void clock_xosc32k_start()
 {
+    if (_clock_is_running(eXOSC32K))
+    {
+        return;
+    }
+
     SYSCTRL_XOSC32K_Type objXosc32kTmp =
     {
-        .bit.STARTUP = 0x6,
-        .bit.XTALEN  = 1,
-        .bit.EN32K   = 1,
-        .bit.ENABLE  = 1
+        .bit.STARTUP  = 0x6,
+        .bit.XTALEN   = 1,
+        .bit.EN32K    = 1,
+        .bit.RUNSTDBY = 1
     };
-
     SYSCTRL->XOSC32K = objXosc32kTmp;
+    // Separate write to Enable bit as per Datasheet
+    SYSCTRL->XOSC32K.bit.ENABLE = 1;
     while (!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
 }
 
 void clock_xosc32k_stop()
 {
-    SYSCTRL->XOSC32K.reg = 0;
+    SYSCTRL->XOSC32K.bit.ENABLE = 0;
 }
