@@ -1,3 +1,10 @@
+#/**************************************************************
+# *                                                            *
+# *               Copyright (c) 2019 - Patrick Rohr            *
+# *                      All Rights Reserved                   *
+# *                                                            *
+# *************************************************************/
+
 menu "Clocks"
     source "$srctree/peripherals/clock/Config.in"
 endmenu

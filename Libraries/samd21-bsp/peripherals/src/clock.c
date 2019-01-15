@@ -47,12 +47,17 @@ void clock_init()
 
 void clock_osc32k_start()
 {
+#ifdef CONFIG_OSC32K_ENABLED
     if (_clock_is_running(eOSC32K))
     {
         return;
     }
 
+# ifdef CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+    uint32_t uCalib = CONFIG_OSC32K_CALIB;
+# else
     uint32_t uCalib = (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >> FUSES_OSC32K_CAL_Pos;
+# endif
 
     // TODO: compile time configure these values
     SYSCTRL_OSC32K_Type objRegisterTmp =
@@ -60,14 +65,17 @@ void clock_osc32k_start()
         .bit.ENABLE   = 1,
         .bit.EN32K    = 1,
         .bit.CALIB    = uCalib,
-        .bit.STARTUP  = CONFIG_CONFIG_OSC32K_STARTUP,
-        .bit.WRTLOCK  = CONFIG_CONFIG_OSC32K_WRTLOCK,
-        .bit.ONDEMAND = CONFIG_CONFIG_OSC32K_ONDEMAND,
-        .bit.RUNSTDBY = CONFIG_CONFIG_OSC32K_RUNSTDBY,
+        .bit.STARTUP  = CONFIG_OSC32K_STARTUP,
+        .bit.WRTLOCK  = CONFIG_OSC32K_WRTLOCK,
+        .bit.ONDEMAND = CONFIG_OSC32K_ONDEMAND,
+        .bit.RUNSTDBY = CONFIG_OSC32K_RUNSTDBY,
     };
 
     SYSCTRL->OSC32K = objRegisterTmp;
     while (!(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_OSC32KRDY));
+#else
+    assert(0);
+#endif
 }
 
 void clock_osc32k_stop()
@@ -78,6 +86,7 @@ void clock_osc32k_stop()
 
 void clock_dfll48m_start()
 {
+#ifdef CONFIG_DFLL48M_ENABLED
     if (_clock_is_running(eDFLL48M))
     {
         return;
@@ -90,12 +99,16 @@ void clock_dfll48m_start()
     SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0;
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 
+    // TODO: If we are running open loop, set DFLLVAL
+
     // Set DFLL Multiplier
     SYSCTRL_DFLLMUL_Type objDfllMulTmp =
     {
         .bit.MUL   = 1464, // TODO: Calculate
-        .bit.CSTEP = 32,   // max / 2
-        .bit.FSTEP = 511   // max / 2
+# ifdef CONFIG_DFLL48M_CLOSED_LOOP
+        .bit.CSTEP = CONFIG_DFLL48M_MUL_CSTEP,
+        .bit.FSTEP = CONFIG_DFLL48M_MUL_FSTEP
+# endif
     };
     SYSCTRL->DFLLMUL = objDfllMulTmp;
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
@@ -103,9 +116,18 @@ void clock_dfll48m_start()
     // Set DFLL Control
     SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp =
     {
-        .bit.MODE     = 1,
-        .bit.WAITLOCK = 1,
-        .bit.QLDIS    = 1
+        // Open / Closed Loop
+        .bit.RUNSTDBY = CONFIG_DFLL48M_CTRL_RUNSTDBY,
+        .bit.ONDEMAND = CONFIG_DFLL48M_CTRL_ONDEMAND,
+# ifdef CONFIG_DFLL48M_CLOSED_LOOP
+        .bit.MODE     = CONFIG_DFLL48M_CTRL_MODE,
+        .bit.WAITLOCK = CONFIG_DFLL48M_CTRL_WAITLOCK,
+        .bit.QLDIS    = CONFIG_DFLL48M_CTRL_QLDIS,
+        .bit.CCDIS    = CONFIG_DFLL48M_CTRL_CCDIS,
+        .bit.BPLCKC   = CONFIG_DFLL48M_CTRL_BPLCKC,
+        .bit.LLAW     = CONFIG_DFLL48M_CTRL_LLAW,
+        .bit.STABLE   = CONFIG_DFLL48M_CTRL_STABLE,
+# endif
     };
     SYSCTRL->DFLLCTRL = objDfllCtrlTmp;
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
@@ -114,9 +136,14 @@ void clock_dfll48m_start()
     SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_ENABLE;
 
     // Wait for locks and DFLL Ready
+# ifdef CONFIG_DFLL48M_CLOSED_LOOP
     while (!SYSCTRL->PCLKSR.bit.DFLLLCKC
-           && !SYSCTRL->PCLKSR.bit.DFLLLCKF
-           && !SYSCTRL->PCLKSR.bit.DFLLRDY);
+           && !SYSCTRL->PCLKSR.bit.DFLLLCKF);
+# endif
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+#else
+    assert(0);
+#endif
 }
 
 void clock_dfll48m_stop()

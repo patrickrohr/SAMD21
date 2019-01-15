@@ -1,45 +1,133 @@
-menuconfig CONFIG_OSC32K_ENABLED
+#/**************************************************************
+# *                                                            *
+# *               Copyright (c) 2019 - Patrick Rohr            *
+# *                      All Rights Reserved                   *
+# *                                                            *
+# *************************************************************/
+
+################################################################
+# OSC32K
+################################################################
+menuconfig OSC32K_ENABLED
     bool "Enable Internal 32kHz Oscillator"
 
-if CONFIG_OSC32K_ENABLED
+if OSC32K_ENABLED
 
-config CONFIG_OSC32K_STARTUP
+config OSC32K_STARTUP
     range 0 7
     int "Startup Delay Value (0-7)"
     default 5
 
-config CONFIG_OSC32K_WRTLOCK
+config OSC32K_WRTLOCK
     range 0 1
     int "Enable Writelock"
     default 0
 
-config CONFIG_OSC32K_ONDEMAND
+config OSC32K_ONDEMAND
     range 0 1
     int "Enable OnDemand"
     default 0
 
-config CONFIG_OSC32K_RUNSTDBY
+config OSC32K_RUNSTDBY
     range 0 1
     int "Enable Run in Standby Mode"
     help "Actual state of the clock in standby mode depends on OnDemand setting"
     default 0
 
 
-menuconfig CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+menuconfig OSC32K_CALIB_USE_FIXED_VAL
     bool "Use a fixed calibration value rather than reading NVM"
     default 1
 
-if CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+if OSC32K_CALIB_USE_FIXED_VAL
 
-config CONFIG_OSC32K_CALIB
-    range 0 63
-    int "Set OSC32K Fixed Calibration Value"
+config OSC32K_CALIB
+    range 0x0 0x3F
+    hex "Set OSC32K Fixed Calibration Value"
+    default 0x0
+
+endif
+
+
+endif
+
+################################################################
+# DFLL48M
+################################################################
+menuconfig DFLL48M_ENABLED
+    bool "Enable 48MHz DFLL"
+
+if DFLL48M_ENABLED
+
+config DFLL48M_CTRL_RUNSTDBY
+    range 0 1
+    int "Run in Standby"
     default 0
 
+config DFLL48M_CTRL_ONDEMAND
+    range 0 1
+    int "Run on On Demand"
+    default 0
+
+# config DFLL48M_CTRL_USBCRM
+#     range 0 1
+#     int "USB Clock Recovery Mode"
+#     default 0
+
+menuconfig DFLL48M_CLOSED_LOOP
+    bool "Enable Closed Loop Mode for DFLL48M"
+    default y
+
+# Closed Loop Configuration
+if DFLL48M_CLOSED_LOOP
+
+config DFLL48M_CTRL_WAITLOCK
+    range 0 1
+    int "Wait for DFLL to be locked before outputting"
+    default 1
+
+config DFLL48M_CTRL_BPLCKC
+    range 0 1
+    int "Bypass Coarse Lock"
+    default 0
+
+config DFLL48M_CTRL_CCDIS
+    range 0 1
+    int "Turn on Chill Cycle Disable"
+    default 0
+
+config DFLL48M_CTRL_QLDIS
+    range 0 1
+    int "Quick Lock Disable"
+    default 1
+
+config DFLL48M_CTRL_LLAW
+    range 0 1
+    int "Lose Lock After Wake"
+    default 0
+
+config DFLL48M_CTRL_STABLE
+    range 0 1
+    int "Stable DFLL Frequency - Fixed value for Fine Calibration after Fine Lock"
+    default 0
+
+config DFLL48M_MUL_CSTEP
+    range 0 63
+    int "Maximum Coarse Adjustment Step"
+    default 31
+
+config DFLL48M_MUL_FSTEP
+    range 0 1023
+    int "Maximum Fine Adjustment Step"
+    default 511
 endif
 
+config DFLL48M_CTRL_MODE
+    range 0 1
+    int
+    default 1 if DFLL48M_CLOSED_LOOP
+    default 0
+
+# Open Loop Configuration: TODO
 
 endif
-
-menuconfig CONFIG_DFLL48M_ENABLED
-    bool "Enable DFLL48M Oscillator"
