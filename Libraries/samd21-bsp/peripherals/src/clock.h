@@ -55,3 +55,17 @@ void clock_xosc32k_start();
  * @author     Patrick Rohr
 **************************************************************/
 void clock_xosc32k_stop();
+
+/*!************************************************************
+ * @brief      Start OSC8M
+ * @date       January 15, 2019
+ * @author     Patrick Rohr
+**************************************************************/
+void clock_osc8m_start();
+
+/*!************************************************************
+ * @brief      Stops OSC8M
+ * @date       January 15, 2019
+ * @author     Patrick Rohr
+**************************************************************/
+void clock_osc8m_stop();

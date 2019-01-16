@@ -14,3 +14,5 @@ target_include_directories(samd21_peripherals PUBLIC
 )
 
 target_link_libraries(samd21_peripherals PRIVATE cmsis_samd21)
+
+target_compile_features(samd21_peripherals PRIVATE c_static_assert)

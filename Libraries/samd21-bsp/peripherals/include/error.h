@@ -9,9 +9,12 @@
 
 // TODO: Implement assert
 // The dream is for this function to provide some kind of debug information in some blocked off memory region
-#define assert(value)    do { \
-        while (!(value));     \
+#define assert(value)                    do { \
+        while (!(value));                     \
 } while (0)
+
+// Static assertion macro
+#define static_assert(assertion, msg) _Static_assert(assertion, msg)  
 
 #define E_ERROR              1
 #define E_BAD_PARAM          2

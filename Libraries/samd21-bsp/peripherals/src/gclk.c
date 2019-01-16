@@ -8,6 +8,7 @@
 #include "config.h"
 #include "gclk.h"
 #include "error.h"
+#include <stdbool.h>
 #include <samd21.h>
 
 /*!************************************************************
@@ -32,6 +33,8 @@ enum
 
     ClockCount
 };
+// TODO: There *may* be a use case for just 1 clock
+static_assert(ClockCount >= 2, "We need at least 2 clocks to operate.");
 
 /*!************************************************************
  * Generic Clock Controller Handle
@@ -40,16 +43,16 @@ typedef struct
 {
     uint32_t m_uGclkGenCtrlFlags; // Generator Control Flags
     uint16_t m_uGclkGenDiv;       // Division Factor
-    uint16_t m_uGclkSource;       // Clock source
+    uint16_t m_uClockSource;      // Clock source
 } Gclk_t;
 
 // Static Data
-static Gclk_t g_GclkHandleArr[ClockCount];
+static Gclk_t g_GclkHandleArr[ClockCount] = { { 0 } };
 
 // Private Functions
-void _gclk_configure(uint8_t uId, enum ClockSource eClockSource);
-void _gclk_clock_start(enum ClockSource eClockSource);
-void _gclk_clock_stop(enum ClockSource eClockSource);
+static void _gclk_handle_init();
+static void _gclk_configure(uint8_t uId, enum ClockSource eClockSource);
+static void _gclk_clock_start(enum ClockSource eClockSource);
 
 
 void gclk_init()
@@ -68,7 +71,7 @@ void gclk_init()
 // TODO: Maybe uId should be an enum?
 void _gclk_configure(uint8_t uId, enum ClockSource eClockSource)
 {
-    g_GclkHandleArr[uId].m_uGclkSource       = eClockSource;
+    g_GclkHandleArr[uId].m_uClockSource      = eClockSource;
     g_GclkHandleArr[uId].m_uGclkGenDiv       = 1;
     g_GclkHandleArr[uId].m_uGclkGenCtrlFlags = 0;
 
@@ -107,13 +110,17 @@ void _gclk_clock_start(enum ClockSource eClockSource)
         clock_dfll48m_start();
         break;
 
+    case eOSC8M:
+        clock_osc8m_start();
+        break;
+
     default:
         assert(0);
         break;
     }
 }
 
-void _gclk_clock_stop(enum ClockSource eClockSource)
+void gclk_clock_stop(enum ClockSource eClockSource)
 {
     switch (eClockSource)
     {
@@ -127,6 +134,10 @@ void _gclk_clock_stop(enum ClockSource eClockSource)
 
     case eDFLL48M:
         clock_dfll48m_stop();
+        break;
+
+    case eOSC8M:
+        clock_osc8m_stop();
         break;
 
     default:
@@ -156,7 +167,7 @@ void gclk_set_input(uint8_t uId, enum ClockSource eClockSource)
     GCLK_GENCTRL_Type objGeneratorControl =
     {
         .bit.ID    = uId,
-        .bit.SRC   = g_GclkHandleArr[uId].m_uGclkSource,
+        .bit.SRC   = g_GclkHandleArr[uId].m_uClockSource,
         .bit.GENEN = 1
     };
     objGeneratorControl.reg |= g_GclkHandleArr[uId].m_uGclkGenCtrlFlags;

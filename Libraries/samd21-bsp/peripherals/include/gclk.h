@@ -110,3 +110,13 @@ void gclk_set_input(uint8_t uId, enum ClockSource eClockSource);
  * @author     Patrick Rohr
 **************************************************************/
 void gclk_add_output(uint8_t uId, enum ClockOutput eClockOutput);
+
+
+/*!************************************************************
+ * @brief      Stops a ClockSource
+ * @warning    Do not stop a ClockSource that is currently in use.
+ * @param[in]  eClockSource  The e clock source
+ * @date       January 15, 2019
+ * @author     Patrick Rohr
+**************************************************************/
+void gclk_clock_stop(enum ClockSource eClockSource);
