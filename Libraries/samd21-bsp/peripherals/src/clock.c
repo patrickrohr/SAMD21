@@ -7,6 +7,7 @@
 
 #include "clock.h"
 #include "config.h"
+#include "error.h"
 #include "gclk.h"
 #include <samd21.h>
 #include <stdbool.h>
@@ -29,6 +30,9 @@ static bool _clock_is_running(enum ClockSource eSource)
     case eXOSC32K:
         // May not be necessary to check both. But this is a little finicky, so can't hurt.
         return SYSCTRL->XOSC32K.bit.ENABLE && SYSCTRL->PCLKSR.bit.XOSC32KRDY;
+
+    case eOSC8M:
+        return SYSCTRL->PCLKSR.bit.OSC8MRDY;
 
     default:
         return false;
@@ -159,6 +163,7 @@ void clock_dfll48m_stop()
 
 void clock_xosc32k_start()
 {
+#ifdef CONFIG_XOSC32K_ENABLED
     if (_clock_is_running(eXOSC32K))
     {
         return;
@@ -166,18 +171,52 @@ void clock_xosc32k_start()
 
     SYSCTRL_XOSC32K_Type objXosc32kTmp =
     {
-        .bit.STARTUP  = 0x6,
-        .bit.XTALEN   = 1,
+        .bit.STARTUP  = CONFIG_XOSC32K_STARTUP,
+        .bit.XTALEN   = CONFIG_XOSC32K_XTALEN,
         .bit.EN32K    = 1,
-        .bit.RUNSTDBY = 1
+        .bit.RUNSTDBY = CONFIG_XOSC32K_RUNSTDBY,
+        .bit.ONDEMAND = CONFIG_XOSC32K_ONDEMAND,
+        .bit.WRTLOCK  = CONFIG_XOSC32K_WRTLOCK
     };
     SYSCTRL->XOSC32K = objXosc32kTmp;
     // Separate write to Enable bit as per Datasheet
     SYSCTRL->XOSC32K.bit.ENABLE = 1;
     while (!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
+#else
+    assert(0);
+#endif
 }
 
 void clock_xosc32k_stop()
 {
     SYSCTRL->XOSC32K.bit.ENABLE = 0;
+}
+
+void clock_osc8m_start()
+{
+#ifdef CONFIG_OSC8M_ENABLED
+    if (_clock_is_running(eOSC8M))
+    {
+        return;
+    }
+
+    // Leave Factory Values for FRANGE and CALIB
+    SYSCTRL_OSC8M_Type objOsc8mTmp = SYSCTRL->OSC8M;
+    objOsc8mTmp = (SYSCTRL_OSC8M_Type)
+    {
+        .bit.ENABLE   = 1,
+        .bit.PRESC    = CONFIG_OSC8M_PRESC, // prescaler of 1
+        .bit.ONDEMAND = CONFIG_OSC8M_ONDEMAND,
+        .bit.RUNSTDBY = CONFIG_OSC8M_RUNSTDBY
+    };
+    SYSCTRL->OSC8M = objOsc8mTmp;
+    while (!SYSCTRL->PCLKSR.bit.OSC8MRDY);
+#else
+    assert(0);
+#endif
+}
+
+void clock_osc8m_stop()
+{
+    SYSCTRL->OSC8M.bit.ENABLE = 0;
 }

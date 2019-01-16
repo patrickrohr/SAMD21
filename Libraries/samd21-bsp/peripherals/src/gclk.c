@@ -10,7 +10,11 @@
 #include "error.h"
 #include <samd21.h>
 
-
+/*!************************************************************
+ * HACK to find number of GCLKs as there is no point having more
+ * GCLKs than enabled Clock Sources.
+ * TODO: Is there a less "hacky" way to do this?
+**************************************************************/
 enum
 {
 #if CONFIG_OSC32K_ENABLED
@@ -18,6 +22,12 @@ enum
 #endif
 #if CONFIG_DFLL48M_ENABLED
     _dfll48m,
+#endif
+#if CONFIG_XOSC32K_ENABLED
+    _xosc32K,
+#endif
+#if CONFIG_OSC8M_ENABLED
+    _osc8m,
 #endif
 
     ClockCount
