@@ -10,3 +10,4 @@ endif()
 
 add_compile_options(-O0)
 add_compile_options(-D__ATSAMD21G18A__)
+add_compile_options(-Wall)

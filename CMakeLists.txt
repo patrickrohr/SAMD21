@@ -6,6 +6,13 @@ project(samd21 C)
 
 include(Configurations/ProjectDefinitions.cmake)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
+set(Kconfiglib_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/Libraries/samd21-bsp/config")
+set(Kconfiglib_CONFIG_FILENAME "Config.in")
+set(Kconfiglib_HEADER_OUTPUT "${CMAKE_BINARY_DIR}")
+find_package(Kconfiglib REQUIRED)
+
 # Libraries
 add_subdirectory(Libraries/BufferPool)
 add_subdirectory(Libraries/cmsis-core)

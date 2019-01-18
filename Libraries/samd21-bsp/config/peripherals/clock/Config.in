@@ -128,6 +128,59 @@ config DFLL48M_CTRL_MODE
     default 1 if DFLL48M_CLOSED_LOOP
     default 0
 
+endif
+
 # Open Loop Configuration: TODO
 
+################################################################
+# XOSC32K (External 32kHz Oscillator)
+################################################################
+menuconfig XOSC32K_ENABLED
+    bool "Enable External 32kHz Oscillator"
+
+if XOSC32K_ENABLED
+    config XOSC32K_RUNSTDBY
+        range 0 1
+        int "Run in StandBy Mode"
+        default 1
+    
+    config XOSC32K_ONDEMAND
+        range 0 1
+        int "Enable On Demand Mode"
+        default 0
+
+    config XOSC32K_STARTUP
+        range 0 7
+        int "Startup Delay Value - See Datasheet for value table"
+        default 6
+
+    config XOSC32K_XTALEN
+        range 0 1
+        int "Enable Crystal"
+        default 1
+
+    config XOSC32K_WRTLOCK
+        range 0 1
+        int "Writelock"
+        default 0
+endif
+
+menuconfig OSC8M_ENABLED
+    bool "Enable 8MHz Internal Oscillator"
+
+if OSC8M_ENABLED
+    config OSC8M_RUNSTDBY
+        range 0 1
+        int "Run in StandBy Mode"
+        default 0
+    
+    config OSC8M_ONDEMAND
+        range 0 1
+        int "Enable On Demand Mode"
+        default 0
+    
+    config OSC8M_PRESC
+        range 0 3
+        int "Set Prescaler Value according to table in datasheet"
+        default 0
 endif

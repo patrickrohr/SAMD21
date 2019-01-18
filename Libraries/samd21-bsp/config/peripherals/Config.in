@@ -6,5 +6,5 @@
 # *************************************************************/
 
 menu "Clocks"
-    source "$srctree/peripherals/clock/Config.in"
+    rsource "clock/Config.in"
 endmenu

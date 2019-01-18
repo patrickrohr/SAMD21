@@ -6,5 +6,5 @@
 # *************************************************************/
 
 menu "Peripherals"
-    source "$srctree/peripherals/Config.in"
+    rsource "peripherals/Config.in"
 endmenu
