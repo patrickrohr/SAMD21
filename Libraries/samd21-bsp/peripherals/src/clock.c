@@ -6,18 +6,13 @@
  *************************************************************/
 
 #include "clock.h"
+#include "clock_private.h"
 #include "config.h"
 #include "error.h"
-#include "gclk.h"
 #include <samd21.h>
-#include <stdbool.h>
 #include <stdint.h>
 
-static bool _clock_is_running(enum ClockSource eSource);
-static unsigned _clock_get_frequency();
-
-
-static bool _clock_is_running(enum ClockSource eSource)
+bool clock_is_running(enum ClockSource eSource)
 {
     switch (eSource)
     {
@@ -25,11 +20,11 @@ static bool _clock_is_running(enum ClockSource eSource)
         return SYSCTRL->PCLKSR.bit.OSC32KRDY;
 
     case eDFLL48M:
+        // DFLL is turned on synchronously, so this check is adequate
         return SYSCTRL->DFLLCTRL.bit.ENABLE;
 
     case eXOSC32K:
-        // May not be necessary to check both. But this is a little finicky, so can't hurt.
-        return SYSCTRL->XOSC32K.bit.ENABLE && SYSCTRL->PCLKSR.bit.XOSC32KRDY;
+        return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
     case eOSC8M:
         return SYSCTRL->PCLKSR.bit.OSC8MRDY;
@@ -39,20 +34,16 @@ static bool _clock_is_running(enum ClockSource eSource)
     }
 }
 
-// TODO: function to get frequency
-unsigned _clock_get_frequency();
-
-
-void clock_init()
+void clock_init(void)
 {
     // TODO: TMaybe move into pm.c, once there is one
     PM->APBAMASK.reg |= PM_APBAMASK_SYSCTRL;
 }
 
-void clock_osc32k_start()
+void clock_osc32k_start(void)
 {
 #ifdef CONFIG_OSC32K_ENABLED
-    if (_clock_is_running(eOSC32K))
+    if (clock_is_running(eOSC32K))
     {
         return;
     }
@@ -76,22 +67,24 @@ void clock_osc32k_start()
     };
 
     SYSCTRL->OSC32K = objRegisterTmp;
-    while (!(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_OSC32KRDY));
+
+    // Do not block anymore
+    // while (!(SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_OSC32KRDY));
 #else
     assert(0);
 #endif
 }
 
-void clock_osc32k_stop()
+void clock_osc32k_stop(void)
 {
     // Just reset it completely
     SYSCTRL->OSC32K.reg = 0;
 }
 
-void clock_dfll48m_start()
+void clock_dfll48m_start(void)
 {
 #ifdef CONFIG_DFLL48M_ENABLED
-    if (_clock_is_running(eDFLL48M))
+    if (clock_is_running(eDFLL48M))
     {
         return;
     }
@@ -141,6 +134,7 @@ void clock_dfll48m_start()
 
     // Wait for locks and DFLL Ready
 # ifdef CONFIG_DFLL48M_CLOSED_LOOP
+    // TODO: Locks may depend on settings
     while (!SYSCTRL->PCLKSR.bit.DFLLLCKC
            && !SYSCTRL->PCLKSR.bit.DFLLLCKF);
 # endif
@@ -150,7 +144,7 @@ void clock_dfll48m_start()
 #endif
 }
 
-void clock_dfll48m_stop()
+void clock_dfll48m_stop(void)
 {
     // May not be necessary, and may even be wrong. Possibly this should be inside glck
     // and be dependent on the clock output frequency and cpu bus divider
@@ -161,10 +155,10 @@ void clock_dfll48m_stop()
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
 }
 
-void clock_xosc32k_start()
+void clock_xosc32k_start(void)
 {
 #ifdef CONFIG_XOSC32K_ENABLED
-    if (_clock_is_running(eXOSC32K))
+    if (clock_is_running(eXOSC32K))
     {
         return;
     }
@@ -181,21 +175,23 @@ void clock_xosc32k_start()
     SYSCTRL->XOSC32K = objXosc32kTmp;
     // Separate write to Enable bit as per Datasheet
     SYSCTRL->XOSC32K.bit.ENABLE = 1;
-    while (!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
+
+    // Non-blocking
+    // while (!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
 #else
     assert(0);
 #endif
 }
 
-void clock_xosc32k_stop()
+void clock_xosc32k_stop(void)
 {
     SYSCTRL->XOSC32K.bit.ENABLE = 0;
 }
 
-void clock_osc8m_start()
+void clock_osc8m_start(void)
 {
 #ifdef CONFIG_OSC8M_ENABLED
-    if (_clock_is_running(eOSC8M))
+    if (clock_is_running(eOSC8M))
     {
         return;
     }
@@ -210,13 +206,15 @@ void clock_osc8m_start()
         .bit.RUNSTDBY = CONFIG_OSC8M_RUNSTDBY
     };
     SYSCTRL->OSC8M = objOsc8mTmp;
-    while (!SYSCTRL->PCLKSR.bit.OSC8MRDY);
+
+    // Non-blocking
+    // while (!SYSCTRL->PCLKSR.bit.OSC8MRDY);
 #else
     assert(0);
 #endif
 }
 
-void clock_osc8m_stop()
+void clock_osc8m_stop(void)
 {
     SYSCTRL->OSC8M.bit.ENABLE = 0;
 }
