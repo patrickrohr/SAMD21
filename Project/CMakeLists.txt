@@ -14,7 +14,7 @@ target_link_libraries(app PRIVATE cmsis_samd21 samd21_peripherals)
 
 # TODO: Clean up
 add_custom_command(
-        TARGET app
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O binary -S ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_CURRENT_LIST_DIR}/../app.bin
-        )
+    TARGET app
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary -S ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_BINARY_DIR}/app.bin
+)
