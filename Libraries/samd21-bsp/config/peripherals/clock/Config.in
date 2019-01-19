@@ -31,7 +31,6 @@ config OSC32K_ONDEMAND
 config OSC32K_RUNSTDBY
     range 0 1
     int "Enable Run in Standby Mode"
-    help "Actual state of the clock in standby mode depends on OnDemand setting"
     default 0
 
 
