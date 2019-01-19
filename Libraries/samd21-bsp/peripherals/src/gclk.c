@@ -65,10 +65,13 @@ void gclk_set_input(uint8_t uGenericClockId, enum ClockSource eClockSource)
     assert(uGenericClockId < GCLK_ID_NUM);
     assert(eClockSource < GCLK_SOURCE_NUM);
 
-    g_objHandleArray[uGenericClockId].uGenericClockId = uGenericClockId;
+    Gclk_t* self = &g_objHandleArray[uGenericClockId];
+    self->uGenericClockId = uGenericClockId;
+    self->objInputControl.bit.SRC = eClockSource;
 
     // Go ahead and start the clock since this can take a while
     _gclk_clock_start(eClockSource);
+
 }
 
 void gclk_set_division(uint8_t uGenericClockId, uint32_t uDivisionFactor)
@@ -204,8 +207,7 @@ void _gclk_clock_start(enum ClockSource eClockSource)
 
 void _gclk_clock_stop(enum ClockSource eClockSource)
 {
-    --g_arrClockSourceRefCount[eClockSource];
-    if (g_arrClockSourceRefCount[eClockSource] != 0)
+    if (--g_arrClockSourceRefCount[eClockSource] != 0)
     {
         // This is a situation we want to catch, hopefully this never happens
         // Looks like there is a superfluous gclk_clock_stop

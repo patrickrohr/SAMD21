@@ -63,7 +63,7 @@ void clock_osc32k_start(void)
         .bit.STARTUP  = CONFIG_OSC32K_STARTUP,
         .bit.WRTLOCK  = CONFIG_OSC32K_WRTLOCK,
         .bit.ONDEMAND = CONFIG_OSC32K_ONDEMAND,
-        .bit.RUNSTDBY = CONFIG_OSC32K_RUNSTDBY,
+        .bit.RUNSTDBY = CONFIG_OSC32K_RUNSTDBY
     };
 
     SYSCTRL->OSC32K = objRegisterTmp;
