@@ -12,6 +12,7 @@
 #include <samd21.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <limits.h> // TODO: Remove
 
 
 /*!************************************************************
@@ -50,8 +51,8 @@ void gclk_init(void)
     PM->APBAMASK.reg |= PM_APBAMASK_GCLK;
 
     // software reset to make sure we start from a clean state
-    GCLK->CTRL.reg = GCLK_CTRL_SWRST;
-    while ((GCLK->CTRL.reg & GCLK_CTRL_SWRST) && (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY));
+    // GCLK->CTRL.reg = GCLK_CTRL_SWRST;
+    // while ((GCLK->CTRL.reg & GCLK_CTRL_SWRST) && (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY));
 
     // Initialize static data members
     _gclk_data_init();
@@ -66,12 +67,11 @@ void gclk_set_input(uint8_t uGenericClockId, enum ClockSource eClockSource)
     assert(eClockSource < GCLK_SOURCE_NUM);
 
     Gclk_t* self = &g_objHandleArray[uGenericClockId];
-    self->uGenericClockId = uGenericClockId;
+    self->uGenericClockId         = uGenericClockId;
     self->objInputControl.bit.SRC = eClockSource;
 
     // Go ahead and start the clock since this can take a while
     _gclk_clock_start(eClockSource);
-
 }
 
 void gclk_set_division(uint8_t uGenericClockId, uint32_t uDivisionFactor)
@@ -106,7 +106,7 @@ void gclk_enable(uint8_t uGenericClockId)
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 
     // Read GenCtrl
-    GCLK->GENCTRL.bit.ID = self->uGenericClockId;
+    *((uint8_t*)&(GCLK->GENCTRL)) = self->uGenericClockId;
     GCLK_GENCTRL_Type objGeneratorControl = GCLK->GENCTRL;
 
     bool             bGeneratorWasEnabled = objGeneratorControl.bit.GENEN;
@@ -125,13 +125,15 @@ void gclk_enable(uint8_t uGenericClockId)
     }
 }
 
-void gclk_add_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
+void gclk_set_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
 {
     assert(uGenericClockId < GCLK_ID_NUM);
     assert(eClockOutput < _eClockOutputMax);
 
+    gclk_disable_output(uGenericClockId, eClockOutput);
+
     // Set the Generic Clock Output
-    GCLK_CLKCTRL_Type objClockControl =
+    GCLK_CLKCTRL_Type objClockControl = (GCLK_CLKCTRL_Type)
     {
         .bit.ID    = eClockOutput,
         .bit.GEN   = uGenericClockId,
@@ -141,8 +143,7 @@ void gclk_add_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 }
 
-// TODO: commonize function with add_output since this is copy paste...
-void gclk_remove_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
+void gclk_disable_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
 {
     assert(uGenericClockId < GCLK_ID_NUM);
     assert(eClockOutput < _eClockOutputMax);
@@ -151,15 +152,25 @@ void gclk_remove_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
     GCLK_CLKCTRL_Type objClockControl =
     {
         .bit.ID    = eClockOutput,
-        .bit.GEN   = uGenericClockId,
         .bit.CLKEN = 0
     };
     GCLK->CLKCTRL = objClockControl;
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
+
+    do
+    {
+        *((uint8_t*)&GCLK->CLKCTRL) = eClockOutput;
+    } while (0 != GCLK->CLKCTRL.bit.CLKEN);
 }
 
 static void _gclk_data_init(void)
 {
+    // TODO: Remove
+    for (unsigned i = 0; i < _eClockOutputMax; ++i)
+    {
+        g_arrClockSourceRefCount[i] = 0;
+    }
+
     for (unsigned i = 0; i < GCLK_ID_NUM; ++i)
     {
         Gclk_t* self = &g_objHandleArray[i];
@@ -168,8 +179,8 @@ static void _gclk_data_init(void)
         self->uGenericClockId = i;
 
         // Read GenCtrl
-        GCLK->GENCTRL.bit.ID  = i;
-        self->objInputControl = GCLK->GENCTRL;
+        *((uint8_t*)&GCLK->GENCTRL) = i;
+        self->objInputControl       = GCLK->GENCTRL;
 
         if (self->objInputControl.bit.GENEN)
         {

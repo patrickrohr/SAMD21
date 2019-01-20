@@ -20,9 +20,16 @@ bool clock_is_running(enum ClockSource eSource)
         return SYSCTRL->PCLKSR.bit.OSC32KRDY;
 
     case eDFLL48M:
-        // DFLL is turned on synchronously, so this check is adequate
-        return SYSCTRL->DFLLCTRL.bit.ENABLE;
+    {
+#ifdef CONFIG_DFLL48M_CLOSED_LOOP
+        // TODO: Locks may depend on settings
+        bool bResult = SYSCTRL->PCLKSR.bit.DFLLLCKC && SYSCTRL->PCLKSR.bit.DFLLLCKF;
+#endif
+        bResult = bResult && SYSCTRL->PCLKSR.bit.DFLLRDY;
+        bResult = bResult && SYSCTRL->DFLLCTRL.bit.ENABLE;
 
+        return bResult;
+    }
     case eXOSC32K:
         return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
@@ -216,5 +223,6 @@ void clock_osc8m_start(void)
 
 void clock_osc8m_stop(void)
 {
-    SYSCTRL->OSC8M.bit.ENABLE = 0;
+    SYSCTRL->OSC8M.reg &= ~SYSCTRL_OSC8M_ENABLE;
+    while (SYSCTRL->PCLKSR.bit.OSC8MRDY);
 }

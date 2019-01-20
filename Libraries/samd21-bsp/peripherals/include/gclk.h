@@ -95,19 +95,20 @@ void gclk_set_division(uint8_t uGenericClockId, uint32_t uDivisionFactor);
 void gclk_enable(uint8_t uGenericClockId);
 
 /*!************************************************************
- * @brief      Adds an output to the Generic Clock
+ * @brief      Sets the output to the Generic Clock.
+ * @details    Call this after the gclk has been enabled.
  * @param[in]  uGenericClockId               The u identifier
  * @param[in]  eClockOutput  The e clock peripheral
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_add_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput);
+void gclk_set_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput);
 
 /*!************************************************************
- * @brief      Removes an output from the Generic Clock
+ * @brief      Disables an output in the Generic Clock
  * @param[in]  uGenericClockId  The u generic clock identifier
  * @param[in]  eClockOutput     The e clock output
  * @date       January 17, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void gclk_remove_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput);
+void gclk_disable_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput);

@@ -7,7 +7,7 @@ int main()
     gclk_init();
     gclk_set_input(1, eXOSC32K);
     gclk_enable(1);
-    gclk_add_output(1, eGCLK_DFLL48M_REF);
+    gclk_set_output(1, eGCLK_DFLL48M_REF);
     gclk_set_input(0, eDFLL48M);
     gclk_enable(0);
 
