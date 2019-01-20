@@ -1,8 +1,22 @@
-# SAMD21
+# SAMD21 Board Support Package
+## Overview
+Work in progress board support package for ATSAMD21. This project also includes a 'barebones' build system based on the GNU toolchain. Right now, this project includes:
 
-Work in progress board support package for ATSAMD21. This project also includes a 'barebones' build system based on the GNU toolchain.
+  - Clock Peripheral Interface
+  - Generic Clock Controller Peripheral Interface
 
-You can build the project by `make`ing one of the following Configuration targets:
+Checkout `Libraries/samd21-bsp`. Yes, I know, I need to rearrange some of the project.
+
+
+## Build
+Right now, configure the project by `make`ing the following Configuration target:
+
+`make TargetDebug` - Builds target debug configuration
+
+Then navigate to the newly created `Workspace/[SELECTED_CONFIGURATION]` and build using `make`.
+The BSP can be configured using `make menuconfig` using Kconfiglb and pulled in automatically via kconfiglib-cmake.
+
+The following Configuration targets are coming soon:
 
 `make all` - Builds all configurations
 
@@ -12,4 +26,6 @@ You can build the project by `make`ing one of the following Configuration target
 
 `make HostCI` - Builds host configuration (Yeah, that's a dream. But maybe useful to just build libs for a unit test environment?)
 
-Then navigate to the newly created `Workspace/[SELECTED_CONFIGURATION]` and build using `make`.
+## Design
+### Peripheral Interface Considerations
+The peripheral interface was designed to provide a simple hardware abstraction for use in the drivers (coming soon). All peripheral interfaces are kept OS independent, and are supporting (or will support) callback interfaces via function pointers.
