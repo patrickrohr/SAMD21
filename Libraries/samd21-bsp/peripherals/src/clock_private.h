@@ -11,18 +11,32 @@
 #include <stdbool.h>
 
 /*!************************************************************
- * @brief      Initialize, must be called before using any clock source.
+ * @brief      Initialize, must be called before using any Clock Source.
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
 void clock_init(void);
 
-
+/*!************************************************************
+ * @brief      Determines if Clock Source is running
+ * @param[in]  eSource  The e source
+ * @return     True if it is running
+ * @date       January 19, 2019
+ * @author     Patrick Rohr
+**************************************************************/
 bool clock_is_running(enum ClockSource eSource);
 
 /*!************************************************************
+ * @brief      Returns the clock frequency of the selected Clock Source.
+ * @param[in]  eSource  The e source
+ * @return     clock frequency in Hertz
+ * @date       January 19, 2019
+ * @author     Patrick Rohr
+**************************************************************/
+unsigned clock_get_frequency(enum ClockSource eSource);
+
+/*!************************************************************
  * @brief      Start OSC32K
- * @param[in]  cbOnReady  The callback on ready
  * @date       January 17, 2019
  * @author     Patrick Rohr
 **************************************************************/
@@ -37,11 +51,11 @@ void clock_osc32k_stop(void);
 
 /*!************************************************************
  * @brief      Start DFLL48M
- * @param[in]  cbOnReady  The callback on ready
+ * @param      uSourceFrequency The frequency of the DFLL reference clock.
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
-void clock_dfll48m_start(void);
+void clock_dfll48m_start(unsigned uSourceFrequency);
 
 /*!************************************************************
  * @brief      Stop DFLL48M
@@ -52,7 +66,6 @@ void clock_dfll48m_stop(void);
 
 /*!************************************************************
  * @brief      Start XOSC32K
- * @param[in]  cbOnReady  The callback on ready
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
@@ -67,7 +80,6 @@ void clock_xosc32k_stop(void);
 
 /*!************************************************************
  * @brief      Start OSC8M
- * @param[in]  cbOnReady  The callback on ready
  * @date       January 15, 2019
  * @author     Patrick Rohr
 **************************************************************/

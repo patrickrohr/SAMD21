@@ -9,6 +9,7 @@
 #include "clock_private.h"
 #include "config.h"
 #include "error.h"
+#include <math.h>
 #include <samd21.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -41,6 +42,7 @@ static Gclk_t g_objHandleArray[GCLK_ID_NUM];
 static void _gclk_clock_start(enum ClockSource eClockSource);
 static void _gclk_clock_stop(enum ClockSource eClockSource); // check ref count
 static void _gclk_data_init(void);
+static unsigned _gclk_get_dfll_input_frequency();
 
 // static void _gclk_is_enabled(void);
 
@@ -162,6 +164,32 @@ void gclk_disable_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
     } while (0 != GCLK->CLKCTRL.bit.CLKEN);
 }
 
+// User must check for 0 return
+static unsigned _gclk_get_dfll_input_frequency()
+{
+    // Only GCLK[1] can be configured as source
+    static const unsigned uDfllSourceGenerator = 1;
+    Gclk_t* self = &g_objHandleArray[uDfllSourceGenerator];
+
+
+    // GENDIV.DIV if DIVSEL is 0
+    unsigned uDivider = self->uDivisionFactor;
+
+    if (1 == self->objInputControl.bit.DIVSEL)
+    {
+        // 2^(GENDIV.DIV+1)
+        uDivider = pow(2, self->uDivisionFactor + 1);
+    }
+
+    unsigned uFreqHz = clock_get_frequency(self->objInputControl.bit.SRC);
+
+    if (0 == uDivider)
+    {
+        uDivider = 1;
+    }
+    return uFreqHz / uDivider;
+}
+
 static void _gclk_data_init(void)
 {
     // TODO: Remove
@@ -202,8 +230,11 @@ void _gclk_clock_start(enum ClockSource eClockSource)
         break;
 
     case eDFLL48M:
-        clock_dfll48m_start();
+    {
+        unsigned uFreq = _gclk_get_dfll_input_frequency();
+        clock_dfll48m_start(uFreq);
         break;
+    }
 
     case eOSC8M:
         clock_osc8m_start();

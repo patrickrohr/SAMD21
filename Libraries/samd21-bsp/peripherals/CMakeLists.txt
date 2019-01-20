@@ -24,7 +24,7 @@ target_include_directories(samd21_peripherals PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-target_link_libraries(samd21_peripherals PRIVATE cmsis_samd21)
+target_link_libraries(samd21_peripherals PRIVATE cmsis_samd21 m)
 
 target_compile_features(samd21_peripherals PRIVATE c_static_assert)
 

@@ -30,6 +30,7 @@ bool clock_is_running(enum ClockSource eSource)
 
         return bResult;
     }
+
     case eXOSC32K:
         return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
@@ -38,6 +39,51 @@ bool clock_is_running(enum ClockSource eSource)
 
     default:
         return false;
+    }
+}
+
+unsigned clock_get_frequency(enum ClockSource eSource)
+{
+    switch (eSource)
+    {
+    case eOSC32K:
+    case eXOSC32K:
+        return 32768;
+
+    case eOSC8M:
+    {
+#ifdef CONFIG_OSC8M_ENABLED
+        // Using Upper Values
+        // 0 - 6MHz
+        // 1 - 8MHz
+        // 2 - 11MHz
+        // 3 - 15MHz
+        unsigned uPrescaler = CONFIG_OSC8M_PRESC;
+        switch (uPrescaler)
+        {
+        case 0:
+            return 6000000;
+
+        case 1:
+            return 8000000;
+
+        case 2:
+            return 11000000;
+
+        case 3:
+            return 15000000;
+
+        default:
+            return 0;
+        }
+#endif
+        return 0;
+    }
+
+    // Unsupported
+    case eDFLL48M:
+    default:
+        return 0;
     }
 }
 
@@ -88,7 +134,7 @@ void clock_osc32k_stop(void)
     SYSCTRL->OSC32K.reg = 0;
 }
 
-void clock_dfll48m_start(void)
+void clock_dfll48m_start(unsigned uSourceFrequency)
 {
 #ifdef CONFIG_DFLL48M_ENABLED
     if (clock_is_running(eDFLL48M))
@@ -105,10 +151,16 @@ void clock_dfll48m_start(void)
 
     // TODO: If we are running open loop, set DFLLVAL
 
+    if (0 == uSourceFrequency)
+    {
+        assert(0); // BUG!
+    }
+    static const unsigned uTargetFrequency = 48000000;
+    unsigned uMultiplier = uTargetFrequency / uSourceFrequency;
     // Set DFLL Multiplier
     SYSCTRL_DFLLMUL_Type objDfllMulTmp =
     {
-        .bit.MUL   = 1464, // TODO: Calculate
+        .bit.MUL   = uMultiplier, // TODO: Calculate
 # ifdef CONFIG_DFLL48M_CLOSED_LOOP
         .bit.CSTEP = CONFIG_DFLL48M_MUL_CSTEP,
         .bit.FSTEP = CONFIG_DFLL48M_MUL_FSTEP
