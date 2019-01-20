@@ -12,7 +12,6 @@
 #include <samd21.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <limits.h> // TODO: Remove
 
 
 /*!************************************************************
