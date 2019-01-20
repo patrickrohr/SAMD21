@@ -15,10 +15,13 @@ target_sources(samd21_peripherals PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/src/gclk.c
 )
 
-target_include_directories(samd21_peripherals PUBLIC
+target_include_directories(samd21_peripherals PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_LIST_DIR}/src
+)
+
+target_include_directories(samd21_peripherals PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 target_link_libraries(samd21_peripherals PRIVATE cmsis_samd21)
