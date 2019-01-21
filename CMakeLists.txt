@@ -10,7 +10,6 @@ include(Configurations/ProjectDefinitions.cmake)
 add_subdirectory(Libraries/BufferPool)
 add_subdirectory(Libraries/cmsis-core)
 add_subdirectory(Libraries/cmsis-core-samcortexm0p-samd21)
-add_subdirectory(Libraries/samd21-bsp)
 
 # Project
-add_subdirectory(Project)
+add_subdirectory(samd21-bsp)

@@ -5,8 +5,6 @@ Work in progress board support package for ATSAMD21. This project also includes 
   - Clock Peripheral Interface
   - Generic Clock Controller Peripheral Interface
 
-Checkout `Libraries/samd21-bsp`. Yes, I know, I need to rearrange some of the project.
-
 
 ## Build
 Right now, configure the project by `make`ing the following Configuration target:
