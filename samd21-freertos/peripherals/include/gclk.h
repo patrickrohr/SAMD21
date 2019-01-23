@@ -64,6 +64,7 @@ enum ClockOutput
 
 /*!************************************************************
  * @brief      Initialize Generic Clock Controller
+ * @warning    Not thread safe.
  * @date       January 13, 2019
  * @author     Patrick Rohr
 **************************************************************/
@@ -71,6 +72,7 @@ void gclk_init(void);
 
 /*!************************************************************
  * @brief      Enable Generic Clock Generator
+ * @warning    Not thread safe.
  * @param[in]  uGenericClockId  The Generator ID. ID 0 specifies the CPU clock.
  * @date       January 8, 2019
  * @author     Patrick Rohr
@@ -79,6 +81,7 @@ void gclk_set_input(uint8_t uGenericClockId, enum ClockSource eClockSource);
 
 /*!************************************************************
  * @brief      Sets the Division Factor
+ * @warning    Not thread safe.
  * @param[in]  uGenericClockId  The u generic clock identifier
  * @param[in]  uDivisionFactor  The u division factor
  * @date       January 17, 2019
@@ -88,6 +91,7 @@ void gclk_set_division(uint8_t uGenericClockId, uint32_t uDivisionFactor);
 
 /*!************************************************************
  * @brief      Enables the Clock Generator. Call this before adding outputs.
+ * @warning    Not thread safe.
  * @param[in]  uGenericClockId  The u generic clock identifier
  * @date       January 17, 2019
  * @author     Patrick Rohr
@@ -97,6 +101,7 @@ void gclk_enable(uint8_t uGenericClockId);
 /*!************************************************************
  * @brief      Sets the output to the Generic Clock.
  * @details    Call this after the gclk has been enabled.
+ *             Thread safe.
  * @param[in]  uGenericClockId               The u identifier
  * @param[in]  eClockOutput  The e clock peripheral
  * @date       January 13, 2019
@@ -106,6 +111,7 @@ void gclk_set_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput);
 
 /*!************************************************************
  * @brief      Disables an output in the Generic Clock
+ * @details    Thread safe.
  * @param[in]  uGenericClockId  The u generic clock identifier
  * @param[in]  eClockOutput     The e clock output
  * @date       January 17, 2019

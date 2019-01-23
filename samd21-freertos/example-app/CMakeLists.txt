@@ -1,16 +1,21 @@
 # Copyright Patrick Rohr, 2018
 
-cmake_minimum_required(VERSION 3.9.1)
+cmake_minimum_required(VERSION 3.11)
 
 project(app)
 
-set(SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
-    )
+add_executable(app)
 
-add_executable(app ${SOURCES})
+target_sources(app
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+)
 
-target_link_libraries(app PRIVATE cmsis_samd21 samd21_peripherals)
+target_link_libraries(app
+    PRIVATE
+        cmsis_samd21 # TODO: Remove
+        samd21_peripherals
+)
 
 # TODO: Clean up
 add_custom_command(

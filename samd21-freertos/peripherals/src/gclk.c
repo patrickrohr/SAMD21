@@ -52,6 +52,7 @@ void gclk_init(void)
     PM->APBAMASK.reg |= PM_APBAMASK_GCLK;
 
     // software reset to make sure we start from a clean state
+    // TODO: Re-enable?
     // GCLK->CTRL.reg = GCLK_CTRL_SWRST;
     // while ((GCLK->CTRL.reg & GCLK_CTRL_SWRST) && (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY));
 
@@ -158,10 +159,12 @@ void gclk_disable_output(uint8_t uGenericClockId, enum ClockOutput eClockOutput)
     GCLK->CLKCTRL = objClockControl;
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);
 
+    __disable_irq();
     do
     {
         *((uint8_t*)&GCLK->CLKCTRL) = eClockOutput;
     } while (0 != GCLK->CLKCTRL.bit.CLKEN);
+    __enable_irq();
 }
 
 // User must check for 0 return
