@@ -1,5 +1,6 @@
 #include <samd21.h>
 #include <gclk.h>
+#include <port.h>
 
 int main()
 {
@@ -12,8 +13,14 @@ int main()
     gclk_enable(0);
 
     unsigned uPinLed = 17;
-    PORT->Group[0].DIRSET.reg = (1 << uPinLed);
-    PORT->Group[0].OUTSET.reg = (1 << uPinLed);
+
+    Port_t objPort;
+    port_init(&objPort, ePortA);
+    port_configure_pin(&objPort, uPinLed, ePortTotemPoleDisabledIn);
+    port_set_pin_output(&objPort, uPinLed);
+
+    // PORT->Group[0].DIRSET.reg = (1 << uPinLed);
+    // PORT->Group[0].OUTSET.reg = (1 << uPinLed);
 
     while (1)
     {
