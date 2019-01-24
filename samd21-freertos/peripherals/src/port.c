@@ -12,8 +12,12 @@
 
 void port_init(Port_t* self, enum PortGroup ePortGroup)
 {
-    // TODO: PM Unmasking
     self->uPortGroup = ePortGroup;
+
+    if (ePortB == ePortGroup)
+    {
+        PM->APBBMASK.reg |= PM_APBBMASK_PORT;
+    }
 }
 
 void port_configure_pin(Port_t* self, unsigned uPinNumber, enum PortPinConfiguration ePinConfig)
