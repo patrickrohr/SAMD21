@@ -74,7 +74,5 @@ void port_toggle_pin_output(Port_t* self, unsigned uPinNumber)
 
 int port_read_pin_input(Port_t* self, unsigned uPinNumber)
 {
-    // TODO
-    assert(0);
-    return 0;
+    return PORT->Group[self->uPortGroup].IN.reg & (1 << uPinNumber);
 }
