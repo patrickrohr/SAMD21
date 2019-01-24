@@ -8,7 +8,6 @@
 #pragma once
 
 #include "clock.h"
-#include <samd21.h>
 #include <stdint.h>
 
 
