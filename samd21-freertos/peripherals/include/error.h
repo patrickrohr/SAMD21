@@ -14,7 +14,7 @@
 } while (0)
 
 // Static assertion macro
-#define static_assert(assertion, msg) _Static_assert(assertion, msg)  
+#define static_assert(assertion, msg)    _Static_assert(assertion, msg)
 
 #define E_ERROR              1
 #define E_BAD_PARAM          2

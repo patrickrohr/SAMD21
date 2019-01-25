@@ -24,10 +24,10 @@ void usart_init(Usart_t* self, unsigned uSercomId, enum UsartClock eClock, enum 
     // TODO: Add the following default configuration to Config.in
     SERCOM_USART_CTRLA_Type objUsartCtrlA =
     {
-        .bit.CMODE  = eCommMode, // 0 async
-        .bit.RXPO   = eRxPad,
-        .bit.TXPO   = eTxPad,
-        .bit.DORD   = 0, // 0 = MSB first
+        .bit.CMODE = eCommMode,  // 0 async
+        .bit.RXPO  = eRxPad,
+        .bit.TXPO  = eTxPad,
+        .bit.DORD  = 0,  // 0 = MSB first
     };
 
     SERCOM_USART_CTRLB_Type objUsartCtrlB =
