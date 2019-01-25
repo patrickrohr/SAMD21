@@ -51,18 +51,18 @@ void sercom_init(Sercom_t* self, unsigned uSercomId, enum SercomMode eMode)
 
     switch (eMode)
     {
-    case eUsartExternalClk:
-    case eUsartInternalClk:
+    case eSercomUsartExternalClk:
+    case eSercomUsartInternalClk:
         self->pSercom->USART.CTRLA.bit.SWRST = 1;
         while (self->pSercom->USART.SYNCBUSY.bit.SWRST);
 
         self->pSercom->USART.CTRLA.bit.MODE = eMode;
         break;
 
-    case eSpiSlave:
-    case eSpiMaster:
-    case eI2cSlave:
-    case eI2cMaster:
+    case eSercomSpiSlave:
+    case eSercomSpiMaster:
+    case eSercomI2cSlave:
+    case eSercomI2cMaster:
         // TODO: Implement
         assert(0);
         break;

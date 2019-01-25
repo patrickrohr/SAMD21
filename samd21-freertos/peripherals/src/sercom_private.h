@@ -11,12 +11,12 @@
 
 enum SercomMode
 {
-    eUsartExternalClk,
-    eUsartInternalClk,
-    eSpiSlave,
-    eSpiMaster,
-    eI2cSlave,
-    eI2cMaster,
+    eSercomUsartExternalClk,
+    eSercomUsartInternalClk,
+    eSercomSpiSlave,
+    eSercomSpiMaster,
+    eSercomI2cSlave,
+    eSercomI2cMaster,
 };
 
 void sercom_init(Sercom_t* self, unsigned uSercomId, enum SercomMode eMode);

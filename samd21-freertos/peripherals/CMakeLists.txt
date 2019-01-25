@@ -17,7 +17,7 @@ target_sources(samd21_peripherals
         ${CMAKE_CURRENT_SOURCE_DIR}/src/gclk.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/sercom.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/uart.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
 )
 
 target_include_directories(samd21_peripherals
