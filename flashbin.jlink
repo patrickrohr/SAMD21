@@ -1,4 +1,0 @@
-r
-loadbin /home/patrick/Projects/samd21-firmware/app.bin 0x2000
-r
-q
