@@ -8,6 +8,7 @@ set(CMAKE_C_COMPILER /usr/bin/arm-none-eabi-gcc)
 set(CMAKE_ASM_COMPILER /usr/bin/arm-none-eabi-as)
 set(CMAKE_OBJCOPY /usr/bin/arm-none-eabi-objcopy)
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 add_compile_options(-mtune=cortex-m0plus)
 add_compile_options(-mthumb)
