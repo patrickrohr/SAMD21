@@ -18,7 +18,15 @@ target_sources(samd21_peripherals
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/sercom.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_source_generic.cpp
 )
+
+target_compile_features(samd21_peripherals
+    PUBLIC
+        cxx_constexpr
+    )
 
 target_include_directories(samd21_peripherals
     PRIVATE
@@ -35,6 +43,11 @@ target_link_libraries(samd21_peripherals
     PRIVATE
         cmsis_samd21
         m
+)
+
+target_link_libraries(samd21_peripherals
+    PUBLIC
+        common_utils
 )
 
 target_compile_features(samd21_peripherals PRIVATE c_static_assert)

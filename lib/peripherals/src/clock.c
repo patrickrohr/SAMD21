@@ -16,29 +16,30 @@ bool clock_is_running(enum ClockSource eSource)
 {
     switch (eSource)
     {
-    case eOSC32K:
-        return SYSCTRL->PCLKSR.bit.OSC32KRDY;
+        case eOSC32K:
+            return SYSCTRL->PCLKSR.bit.OSC32KRDY;
 
-    case eDFLL48M:
-    {
+        case eDFLL48M:
+        {
 #ifdef CONFIG_DFLL48M_CLOSED_LOOP
-        // TODO: Locks may depend on settings
-        bool bResult = SYSCTRL->PCLKSR.bit.DFLLLCKC && SYSCTRL->PCLKSR.bit.DFLLLCKF;
+            // TODO: Locks may depend on settings
+            bool bResult =
+              SYSCTRL->PCLKSR.bit.DFLLLCKC && SYSCTRL->PCLKSR.bit.DFLLLCKF;
 #endif
-        bResult = bResult && SYSCTRL->PCLKSR.bit.DFLLRDY;
-        bResult = bResult && SYSCTRL->DFLLCTRL.bit.ENABLE;
+            bResult = bResult && SYSCTRL->PCLKSR.bit.DFLLRDY;
+            bResult = bResult && SYSCTRL->DFLLCTRL.bit.ENABLE;
 
-        return bResult;
-    }
+            return bResult;
+        }
 
-    case eXOSC32K:
-        return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
+        case eXOSC32K:
+            return SYSCTRL->PCLKSR.bit.XOSC32KRDY;
 
-    case eOSC8M:
-        return SYSCTRL->PCLKSR.bit.OSC8MRDY;
+        case eOSC8M:
+            return SYSCTRL->PCLKSR.bit.OSC8MRDY;
 
-    default:
-        return false;
+        default:
+            return false;
     }
 }
 
@@ -46,44 +47,44 @@ unsigned clock_get_frequency(enum ClockSource eSource)
 {
     switch (eSource)
     {
-    case eOSC32K:
-    case eXOSC32K:
-        return 32768;
+        case eOSC32K:
+        case eXOSC32K:
+            return 32768;
 
-    case eOSC8M:
-    {
-#ifdef CONFIG_OSC8M_ENABLED
-        // Using Upper Values
-        // 0 - 6MHz
-        // 1 - 8MHz
-        // 2 - 11MHz
-        // 3 - 15MHz
-        unsigned uPrescaler = CONFIG_OSC8M_PRESC;
-        switch (uPrescaler)
+        case eOSC8M:
         {
-        case 0:
-            return 6000000;
+#ifdef CONFIG_OSC8M_ENABLED
+            // Using Upper Values
+            // 0 - 6MHz
+            // 1 - 8MHz
+            // 2 - 11MHz
+            // 3 - 15MHz
+            unsigned uPrescaler = CONFIG_OSC8M_PRESC;
+            switch (uPrescaler)
+            {
+                case 0:
+                    return 6000000;
 
-        case 1:
-            return 8000000;
+                case 1:
+                    return 8000000;
 
-        case 2:
-            return 11000000;
+                case 2:
+                    return 11000000;
 
-        case 3:
-            return 15000000;
+                case 3:
+                    return 15000000;
 
-        default:
+                default:
+                    return 0;
+            }
+#endif
             return 0;
         }
-#endif
-        return 0;
-    }
 
-    // Unsupported
-    case eDFLL48M:
-    default:
-        return 0;
+        // Unsupported
+        case eDFLL48M:
+        default:
+            return 0;
     }
 }
 
@@ -101,23 +102,24 @@ void clock_osc32k_start(void)
         return;
     }
 
-# ifdef CONFIG_OSC32K_CALIB_USE_FIXED_VAL
+#ifdef CONFIG_OSC32K_CALIB_USE_FIXED_VAL
     uint32_t uCalib = CONFIG_OSC32K_CALIB;
-# else
-    uint32_t uCalib = (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >> FUSES_OSC32K_CAL_Pos;
-# endif
+#else
+    uint32_t uCalib =
+      (*((uint32_t*)FUSES_OSC32K_CAL_ADDR) & FUSES_OSC32K_CAL_Msk) >>
+      FUSES_OSC32K_CAL_Pos;
+#endif
 
     // TODO: compile time configure these values
-    SYSCTRL_OSC32K_Type objRegisterTmp =
-    {
-        .bit.ENABLE   = 1,
-        .bit.EN32K    = 1,
-        .bit.CALIB    = uCalib,
-        .bit.STARTUP  = CONFIG_OSC32K_STARTUP,
-        .bit.WRTLOCK  = CONFIG_OSC32K_WRTLOCK,
-        .bit.ONDEMAND = CONFIG_OSC32K_ONDEMAND,
-        .bit.RUNSTDBY = CONFIG_OSC32K_RUNSTDBY
-    };
+    SYSCTRL_OSC32K_Type objRegisterTmp = { .bit.ENABLE  = 1,
+                                           .bit.EN32K   = 1,
+                                           .bit.CALIB   = uCalib,
+                                           .bit.STARTUP = CONFIG_OSC32K_STARTUP,
+                                           .bit.WRTLOCK = CONFIG_OSC32K_WRTLOCK,
+                                           .bit.ONDEMAND =
+                                             CONFIG_OSC32K_ONDEMAND,
+                                           .bit.RUNSTDBY =
+                                             CONFIG_OSC32K_RUNSTDBY };
 
     SYSCTRL->OSC32K = objRegisterTmp;
 
@@ -147,7 +149,8 @@ void clock_dfll48m_start(unsigned uSourceFrequency)
 
     // Errata
     SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0;
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY)
+        ;
 
     // TODO: If we are running open loop, set DFLLVAL
 
@@ -158,24 +161,23 @@ void clock_dfll48m_start(unsigned uSourceFrequency)
     static const unsigned uTargetFrequency = 48000000;
     unsigned uMultiplier = uTargetFrequency / uSourceFrequency;
     // Set DFLL Multiplier
-    SYSCTRL_DFLLMUL_Type objDfllMulTmp =
-    {
-        .bit.MUL   = uMultiplier, // TODO: Calculate
-# ifdef CONFIG_DFLL48M_CLOSED_LOOP
+    SYSCTRL_DFLLMUL_Type objDfllMulTmp = {
+        .bit.MUL = uMultiplier, // TODO: Calculate
+#ifdef CONFIG_DFLL48M_CLOSED_LOOP
         .bit.CSTEP = CONFIG_DFLL48M_MUL_CSTEP,
         .bit.FSTEP = CONFIG_DFLL48M_MUL_FSTEP
-# endif
+#endif
     };
     SYSCTRL->DFLLMUL = objDfllMulTmp;
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY)
+        ;
 
     // Set DFLL Control
-    SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp =
-    {
+    SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp = {
         // Open / Closed Loop
         .bit.RUNSTDBY = CONFIG_DFLL48M_CTRL_RUNSTDBY,
         .bit.ONDEMAND = CONFIG_DFLL48M_CTRL_ONDEMAND,
-# ifdef CONFIG_DFLL48M_CLOSED_LOOP
+#ifdef CONFIG_DFLL48M_CLOSED_LOOP
         .bit.MODE     = CONFIG_DFLL48M_CTRL_MODE,
         .bit.WAITLOCK = CONFIG_DFLL48M_CTRL_WAITLOCK,
         .bit.QLDIS    = CONFIG_DFLL48M_CTRL_QLDIS,
@@ -183,21 +185,23 @@ void clock_dfll48m_start(unsigned uSourceFrequency)
         .bit.BPLCKC   = CONFIG_DFLL48M_CTRL_BPLCKC,
         .bit.LLAW     = CONFIG_DFLL48M_CTRL_LLAW,
         .bit.STABLE   = CONFIG_DFLL48M_CTRL_STABLE,
-# endif
+#endif
     };
     SYSCTRL->DFLLCTRL = objDfllCtrlTmp;
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY)
+        ;
 
     // Enable DFLL
     SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_ENABLE;
 
     // Wait for locks and DFLL Ready
-# ifdef CONFIG_DFLL48M_CLOSED_LOOP
+#ifdef CONFIG_DFLL48M_CLOSED_LOOP
     // TODO: Locks may depend on settings
-    while (!SYSCTRL->PCLKSR.bit.DFLLLCKC
-           && !SYSCTRL->PCLKSR.bit.DFLLLCKF);
-# endif
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    while (!SYSCTRL->PCLKSR.bit.DFLLLCKC && !SYSCTRL->PCLKSR.bit.DFLLLCKF)
+        ;
+#endif
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY)
+        ;
 #else
     assert(0);
 #endif
@@ -205,13 +209,15 @@ void clock_dfll48m_start(unsigned uSourceFrequency)
 
 void clock_dfll48m_stop(void)
 {
-    // May not be necessary, and may even be wrong. Possibly this should be inside glck
-    // and be dependent on the clock output frequency and cpu bus divider
+    // May not be necessary, and may even be wrong. Possibly this should be
+    // inside glck and be dependent on the clock output frequency and cpu bus
+    // divider
     // TODO: consider checking if this is set to 1 first.
     NVMCTRL->CTRLB.bit.RWS = 0;
 
     SYSCTRL->DFLLCTRL.reg = 0;
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY);
+    while (!SYSCTRL->PCLKSR.bit.DFLLRDY)
+        ;
 }
 
 void clock_xosc32k_start(void)
@@ -222,8 +228,7 @@ void clock_xosc32k_start(void)
         return;
     }
 
-    SYSCTRL_XOSC32K_Type objXosc32kTmp =
-    {
+    SYSCTRL_XOSC32K_Type objXosc32kTmp = {
         .bit.STARTUP  = CONFIG_XOSC32K_STARTUP,
         .bit.XTALEN   = CONFIG_XOSC32K_XTALEN,
         .bit.EN32K    = 1,
@@ -257,13 +262,11 @@ void clock_osc8m_start(void)
 
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_OSC8M_Type objOsc8mTmp = SYSCTRL->OSC8M;
-    objOsc8mTmp = (SYSCTRL_OSC8M_Type)
-    {
-        .bit.ENABLE   = 1,
-        .bit.PRESC    = CONFIG_OSC8M_PRESC, // prescaler of 1
-        .bit.ONDEMAND = CONFIG_OSC8M_ONDEMAND,
-        .bit.RUNSTDBY = CONFIG_OSC8M_RUNSTDBY
-    };
+    objOsc8mTmp =
+      (SYSCTRL_OSC8M_Type){ .bit.ENABLE = 1,
+                            .bit.PRESC  = CONFIG_OSC8M_PRESC, // prescaler of 1
+                            .bit.ONDEMAND = CONFIG_OSC8M_ONDEMAND,
+                            .bit.RUNSTDBY = CONFIG_OSC8M_RUNSTDBY };
     SYSCTRL->OSC8M = objOsc8mTmp;
 
     // Non-blocking
@@ -276,5 +279,6 @@ void clock_osc8m_start(void)
 void clock_osc8m_stop(void)
 {
     SYSCTRL->OSC8M.reg &= ~SYSCTRL_OSC8M_ENABLE;
-    while (SYSCTRL->PCLKSR.bit.OSC8MRDY);
+    while (SYSCTRL->PCLKSR.bit.OSC8MRDY)
+        ;
 }
