@@ -1,4 +1,9 @@
-// Copyright 2019, Patrick Rohr
+/**************************************************************
+ *                                                            *
+ *               Copyright (c) 2019 - Patrick Rohr            *
+ *                      All Rights Reserved                   *
+ *                                                            *
+ *************************************************************/
 
 #include <gtest/gtest.h>
 
@@ -13,7 +18,9 @@ struct FakeRegister
     uint32_t b : 8;
     uint32_t c : 16;
 
-    FakeRegister() : a(), b(), c() {}
+    FakeRegister() : a(), b(), c()
+    {
+    }
 
     bool operator==(const FakeRegister& rhs) const
     {
@@ -25,9 +32,14 @@ struct FakeWideRegister
 {
     std::array<char, 16> data;
 
-    FakeWideRegister() : data() {}
+    FakeWideRegister() : data()
+    {
+    }
 
-    bool operator==(const FakeWideRegister& rhs) const { return data == rhs.data; }
+    bool operator==(const FakeWideRegister& rhs) const
+    {
+        return data == rhs.data;
+    }
 };
 
 TEST(RegisterTypeTest, Constructor)
@@ -95,7 +107,8 @@ TEST(RegisterTypeTest, WideRegister)
 
     objRegisterSim = registerVal;
     // HACK: Casting away volatile qualifier using const_cast
-    EXPECT_EQ(*const_cast<FakeWideRegister*>(objRegisterSim.Get()), registerVal);
+    EXPECT_EQ(
+        *const_cast<FakeWideRegister*>(objRegisterSim.Get()), registerVal);
 
     FakeWideRegister result = registerVal;
     EXPECT_EQ(result, fakeRegister);
@@ -104,4 +117,3 @@ TEST(RegisterTypeTest, WideRegister)
     result = objRegisterSim;
     EXPECT_EQ(result, registerVal);
 }
-

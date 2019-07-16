@@ -40,7 +40,9 @@ class register_t
     static constexpr unsigned size = sizeof(T);
 
 public:
-    register_t(volatile T* addr) : m_pAddress(addr) {}
+    register_t(volatile T* addr) : m_pAddress(addr)
+    {
+    }
 
     register_t& operator=(const T& rhs)
     {
@@ -62,8 +64,14 @@ public:
         return *reinterpret_cast<T*>(&obj);
     }
 
-    volatile T* Get() { return m_pAddress; }
-    const volatile T* Get() const { return m_pAddress; }
+    volatile T* Get()
+    {
+        return m_pAddress;
+    }
+    const volatile T* Get() const
+    {
+        return m_pAddress;
+    }
 
 private:
     volatile T* m_pAddress;
@@ -73,7 +81,10 @@ template<typename T>
 class register_t<T, Environment::eSimulation>
 {
 public:
-    register_t(volatile T* addr) : m_objRegisterSim() { (void)addr; }
+    register_t(volatile T* addr) : m_objRegisterSim()
+    {
+        (void)addr;
+    }
 
     register_t& operator=(const T& rhs)
     {
@@ -81,10 +92,19 @@ public:
         return *this;
     }
 
-    operator T() const { return m_objRegisterSim; }
+    operator T() const
+    {
+        return m_objRegisterSim;
+    }
 
-    volatile T* Get() { return &m_objRegisterSim; }
-    const volatile T* Get() const { return &m_objRegisterSim; }
+    volatile T* Get()
+    {
+        return &m_objRegisterSim;
+    }
+    const volatile T* Get() const
+    {
+        return &m_objRegisterSim;
+    }
 
 private:
     T m_objRegisterSim;

@@ -1,3 +1,9 @@
+/**************************************************************
+ *                                                            *
+ *               Copyright (c) 2019 - Patrick Rohr            *
+ *                      All Rights Reserved                   *
+ *                                                            *
+ *************************************************************/
 
 #pragma once
 
@@ -22,7 +28,10 @@ struct assert
 template<>
 struct assert<Configuration::eRelease>
 {
-    constexpr assert(bool statement) { (void)statement; }
+    constexpr assert(bool statement)
+    {
+        (void)statement;
+    }
 };
 
 } // namespace SAMD
