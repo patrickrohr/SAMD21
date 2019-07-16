@@ -19,6 +19,7 @@ class OSC8M final : public ClockSourceGeneric
 {
 public:
     OSC8M();
+    ~OSC8M() override = default;
 
 private:
     error_t StartImpl() override;
