@@ -21,6 +21,7 @@ target_sources(samd21_peripherals
 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_source_generic.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
 )
 
 target_compile_features(samd21_peripherals
