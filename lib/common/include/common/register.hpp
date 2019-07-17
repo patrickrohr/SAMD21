@@ -9,6 +9,7 @@
 
 #include "common/environment.hpp"
 #include "common/fixed_width_int.hpp"
+#include "common/irq.hpp"
 
 namespace SAMD
 {
@@ -29,7 +30,11 @@ struct RegisterCopy<char>
     void
     operator()(volatile char* dest, const volatile char* source, unsigned size)
     {
-        for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
+        // Disable interrupts while reading wide register
+        {
+            InterruptSafeGuard objGuard;
+            for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
+        }
     }
 };
 
