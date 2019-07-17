@@ -49,7 +49,7 @@ public:
         return m_bIsStarted;
     }
 
-protected:
+private:
     // purely virtuals
     virtual error_t StartImpl()                  = 0;
     virtual error_t StopImpl()                   = 0;
