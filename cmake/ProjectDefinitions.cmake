@@ -16,7 +16,7 @@ add_compile_options(-O0)
 add_compile_options(-Wall)
 
 # Functions
-function(add_unit_test_directory dir)
+function(add_test_directory dir)
     if(BUILD_TESTING)
         add_subdirectory(${dir})
     endif()

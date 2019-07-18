@@ -33,4 +33,4 @@ target_compile_features(common_utils
 )
 
 configure_file(cmakeconfig.h.in cmakeconfig.h)
-add_unit_test_directory(test)
+add_test_directory(test)
