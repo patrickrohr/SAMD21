@@ -19,8 +19,9 @@ target_sources(samd21_peripherals
         ${CMAKE_CURRENT_SOURCE_DIR}/src/sercom.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_source_generic.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/dfll48m.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
 )
 
@@ -57,3 +58,5 @@ target_compile_features(samd21_peripherals PRIVATE c_static_assert)
 if(Kconfiglib_FOUND)
     add_dependencies(samd21_peripherals genconfig)
 endif()
+
+add_test_directory(test)

@@ -49,11 +49,12 @@ public:
         return m_bIsStarted;
     }
 
+    virtual frequency_t GetFrequency() const     = 0;
+
 private:
     // purely virtuals
     virtual error_t StartImpl()                  = 0;
     virtual error_t StopImpl()                   = 0;
-    virtual frequency_t GetFrequency() const     = 0;
     virtual bool PollReady() const               = 0;
     virtual ClockType GetClockSourceType() const = 0;
 
