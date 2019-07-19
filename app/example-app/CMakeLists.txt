@@ -14,7 +14,7 @@ target_sources(app
 target_link_libraries(app
     PRIVATE
         cmsis_samd21 # TODO: Remove
-        samd21_peripherals
+        samd21_hal
 )
 
 # TODO: Clean up

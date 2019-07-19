@@ -7,11 +7,11 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-project(samd21_peripherals)
+project(samd21_hal)
 
-add_library(samd21_peripherals STATIC)
+add_library(samd21_hal STATIC)
 
-target_sources(samd21_peripherals
+target_sources(samd21_hal
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/gclk.c
@@ -25,38 +25,38 @@ target_sources(samd21_peripherals
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
 )
 
-target_compile_features(samd21_peripherals
+target_compile_features(samd21_hal
     PUBLIC
         cxx_constexpr
     )
 
-target_include_directories(samd21_peripherals
+target_include_directories(samd21_hal
     PRIVATE
         ${Kconfiglib_HEADER_OUTPUT}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_include_directories(samd21_peripherals
+target_include_directories(samd21_hal
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(samd21_peripherals
+target_link_libraries(samd21_hal
     PRIVATE
         cmsis_samd21
         m
 )
 
-target_link_libraries(samd21_peripherals
+target_link_libraries(samd21_hal
     PUBLIC
         common_utils
 )
 
-target_compile_features(samd21_peripherals PRIVATE c_static_assert)
+target_compile_features(samd21_hal PRIVATE c_static_assert)
 
 # Generate configuration before before building
 if(Kconfiglib_FOUND)
-    add_dependencies(samd21_peripherals genconfig)
+    add_dependencies(samd21_hal genconfig)
 endif()
 
-add_test_directory(test)
+add_test_directory(tests)
