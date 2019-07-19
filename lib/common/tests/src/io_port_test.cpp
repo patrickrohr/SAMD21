@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <common/io_port.hpp>
+#include <cstdint>
 
 using namespace SAMD;
 
