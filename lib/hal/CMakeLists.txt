@@ -50,6 +50,7 @@ target_link_libraries(samd21_hal
 target_link_libraries(samd21_hal
     PUBLIC
         common_utils
+        samd21_hal_utils
 )
 
 target_compile_features(samd21_hal PRIVATE c_static_assert)

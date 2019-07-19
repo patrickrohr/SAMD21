@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "common/register.hpp"
+#include "hal_utils/register.hpp"
 
 namespace SAMD
 {

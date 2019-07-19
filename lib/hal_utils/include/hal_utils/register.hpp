@@ -9,7 +9,7 @@
 
 #include "common/environment.hpp"
 #include "common/fixed_width_int.hpp"
-#include "common/irq.hpp"
+#include "hal_utils/irq.hpp"
 
 namespace SAMD
 {

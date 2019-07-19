@@ -13,7 +13,7 @@ target_sources(common_utils_test
 
 target_link_libraries(common_utils_test
     PUBLIC
-        common_utils
+        samd21_hal_utils
         gtest
 )
 

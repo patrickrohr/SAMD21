@@ -6,7 +6,6 @@
  *************************************************************/
 
 #include "clock/dfll48m.hpp"
-#include "common/error.hpp"
 #include "config.h"
 
 namespace SAMD

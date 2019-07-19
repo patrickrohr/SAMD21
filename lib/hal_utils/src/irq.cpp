@@ -5,10 +5,10 @@
  *                                                            *
  *************************************************************/
 
-#include "common/irq.hpp"
+#include "hal_utils/irq.hpp"
 #include "common/error.hpp"
 
-#include <samd21.h>
+extern void __disable_irq();
 
 namespace SAMD
 {
@@ -21,7 +21,7 @@ InterruptSafeGuardImpl<ENV>::InterruptSafeGuardImpl()
 {
     if (m_depthCount++ == 0)
     {
-        __disable_irq();
+        // __disable_irq();
     }
 }
 
@@ -30,7 +30,7 @@ InterruptSafeGuardImpl<ENV>::~InterruptSafeGuardImpl()
 {
     if (--m_depthCount == 0)
     {
-        __enable_irq();
+        // __enable_irq();
     }
 }
 
@@ -46,6 +46,9 @@ InterruptSafeGuardImpl<Environment::eSimulation>::~InterruptSafeGuardImpl()
     assert<eRuntimeConfiguration>(--m_depthCount >= 0);
 }
 
-template class InterruptSafeGuardImpl<Environment::eTarget>;
+#if BUILD_SIMULATION
 template class InterruptSafeGuardImpl<Environment::eSimulation>;
+#else
+template class InterruptSafeGuardImpl<Environment::eTarget>;
+#endif
 } // namespace SAMD

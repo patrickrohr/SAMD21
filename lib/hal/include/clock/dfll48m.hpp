@@ -8,7 +8,7 @@
 #pragma once
 
 #include "clock/clock_source_generic.hpp"
-#include <common/io_port.hpp>
+#include <hal_utils/io_port.hpp>
 
 namespace SAMD
 {

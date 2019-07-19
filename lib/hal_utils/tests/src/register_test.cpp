@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
-#include <common/io_port.hpp>
+#include <hal_utils/register.hpp>
 
 using namespace SAMD;
 
