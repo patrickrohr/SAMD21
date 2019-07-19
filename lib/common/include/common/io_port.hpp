@@ -27,10 +27,10 @@ protected:
 };
 
 template<typename T>
-class IoPortRead : public IoPortBase<const T>
+class IoPortRead : public virtual IoPortBase<T>
 {
 public:
-    IoPortRead(const volatile T* addr) : IoPortBase<const T>(addr)
+    IoPortRead(volatile T* addr) : IoPortBase<T>(addr)
     {
     }
 
@@ -48,7 +48,7 @@ public:
 };
 
 template<typename T>
-class IoPortWrite : public IoPortBase<T>
+class IoPortWrite : public virtual IoPortBase<T>
 {
 public:
     IoPortWrite(volatile T* addr) : IoPortBase<T>(addr)
@@ -74,34 +74,16 @@ public:
 };
 
 template<typename T>
-class IoPortRW : public IoPortBase<T>
+class IoPortRW : public IoPortRead<T>, public IoPortWrite<T>
 {
 public:
-    IoPortRW(volatile T* addr) : IoPortBase<T>(addr)
+    IoPortRW(volatile T* addr) : IoPortBase<T>(addr), IoPortRead<T>(addr), IoPortWrite<T>(addr)
     {
     }
 
     ~IoPortRW() override = default;
 
-    T Read() const
-    {
-        return this->m_objRegister;
-    }
-
-    void Write(const T& obj)
-    {
-        this->m_objRegister = obj;
-    }
-
-    volatile const T* operator->() const
-    {
-        return this->m_objRegister.Get();
-    }
-
-    volatile T* operator->()
-    {
-        return this->m_objRegister.Get();
-    }
+    using IoPortWrite<T>::operator->;
 };
 
 // TODO: support registers that need to be written to before you can read them
