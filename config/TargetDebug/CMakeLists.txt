@@ -10,7 +10,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Should options be moved to gloablly included file?
 option(BUILD_TESTING "Build Unit Tests" OFF)
-option(BUILD_SIMULATION "Build in Simulator Mode" ON)
+option(BUILD_SIMULATION "Build in Simulator Mode" OFF)
+option(BUILD_SIMULATION "Build in for Target" ON)
 
 # For future reference CMake 3.13 is adding target_link_options
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_SOURCE_DIR}/../../board/SAMD21/samd21g18a_flash.ld")

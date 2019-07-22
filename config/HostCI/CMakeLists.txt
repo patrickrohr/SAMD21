@@ -10,6 +10,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 option(BUILD_TESTING "Build Unit Tests" ON)
 option(BUILD_SIMULATION "Build in Simulator Mode" ON)
+option(BUILD_TARGET "Build in for Target" OFF)
 
 # Libraries
 add_subdirectory(lib/BufferPool)
