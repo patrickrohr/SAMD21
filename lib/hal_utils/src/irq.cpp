@@ -49,7 +49,11 @@ InterruptSafeGuardImpl<Environment::eSimulation>::InterruptSafeGuardImpl()
 template<>
 InterruptSafeGuardImpl<Environment::eSimulation>::~InterruptSafeGuardImpl()
 {
-    assert<eRuntimeConfiguration>(--g_depthCount >= 0);
+    samd_assert(
+        --g_depthCount >= 0,
+        "InterruptSafeGuard depth counter must always be >= 0. Current value: "
+        "%u",
+        g_depthCount);
 }
 
 template class InterruptSafeGuardImpl<Environment::eTarget>;

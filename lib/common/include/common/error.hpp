@@ -9,29 +9,30 @@
 
 #include "common/environment.hpp"
 
+#if BUILD_SIMULATION
+#include "cstdout"
+
+#define samd_assert(statement, message, ...)  \
+    do                                        \
+    {                                         \
+        if (!(statement))                     \
+            printf((message), ##__VA_ARGS__); \
+    } while (0)
+
+#else
+
+#define samd_assert(statement, message, ...) \
+    do                                       \
+    {                                        \
+        while (!(statement)) {}              \
+                                             \
+    } while (0)
+
+#endif
+
 namespace SAMD
 {
 
 using error_t = int;
-
-template<Configuration CONFIG = eRuntimeConfiguration>
-struct assert
-{
-    // add error code
-    constexpr assert(bool statement)
-    {
-        // infinite while loop when assertion is false.
-        while (!statement) {}
-    }
-};
-
-template<>
-struct assert<Configuration::eRelease>
-{
-    constexpr assert(bool statement)
-    {
-        (void)statement;
-    }
-};
 
 } // namespace SAMD

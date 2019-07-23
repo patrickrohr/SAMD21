@@ -39,7 +39,10 @@ void DFLL48M::SetMode(Mode eMode)
 void DFLL48M::SetTargetFrequency(frequency_t targetFrequency)
 {
     // TODO: Come up with a sane number
-    assert<>(targetFrequency > 1000);
+    samd_assert(
+        targetFrequency > 1000,
+        "Requested target frequency too low: %u",
+        targetFrequency);
     m_uTargetFrequency = targetFrequency;
 }
 
@@ -90,7 +93,8 @@ error_t DFLL48M::StartImpl()
     // Wait for locks in closed loop
     if (m_eMode == Mode::eClosedLoop)
     {
-        // TODO: think about how we could possibly time out here and return an error
+        // TODO: think about how we could possibly time out here and return an
+        // error
         // clang-format off
         while (!m_ioSysctrlPclksr->bit.DFLLLCKC &&
                !m_ioSysctrlPclksr->bit.DFLLLCKF);
