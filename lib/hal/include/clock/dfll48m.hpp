@@ -23,7 +23,7 @@ public:
     };
 
 public:
-    DFLL48M(const ClockSourceGeneric& sourceClock);
+    DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock);
     ~DFLL48M() override = default;
 
     void SetTargetFrequency(frequency_t targetFrequency);

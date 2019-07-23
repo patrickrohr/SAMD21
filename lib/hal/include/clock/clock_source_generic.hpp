@@ -8,6 +8,7 @@
 #pragma once
 
 #include <common/error.hpp>
+#include <common/id_traits.hpp>
 #include <samd21.h>
 
 namespace SAMD
@@ -34,17 +35,41 @@ enum class ClockType
 // TODO: change this to something else probably
 using frequency_t = unsigned;
 
+
+using gclk_id_t = id_traits<uint8_t>;
+
 class ClockSourceGeneric
 {
 public:
-    ClockSourceGeneric();
+    /**
+     * @brief      ClockSource itself is RAII. The Gclk however needs to be
+     *             started explicitly to allow for additional runtime
+     * configuration.
+     * @param[in]  id  The gclk identifier
+     */
+    ClockSourceGeneric(gclk_id_t id);
+
     virtual ~ClockSourceGeneric();
 
+    /**
+     * @brief      Start, starts sets up the GCLK, once the ClockSource is
+     * running.
+     *
+     * @return     Returns error when ???
+     */
     error_t Start();
     error_t Stop();
     error_t WaitReady() const;
 
-    bool IsRunning() const
+    /**
+     * @brief      Callback function to be called out of clock ready interrupt
+     * context.
+     * @param      callback  The callback
+     *
+     * @tparam     T         { description }
+     */
+    template<typename T>
+    void RegisterClockSourceReadyHandler(T&& callback);
     {
         return m_bIsStarted;
     }
@@ -59,6 +84,7 @@ private:
     virtual ClockType GetClockSourceType() const = 0;
 
 private:
+    gclk_id_t m_uGclkId;
     bool m_bIsStarted;
 
 public:

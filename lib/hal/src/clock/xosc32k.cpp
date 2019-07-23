@@ -14,7 +14,8 @@ namespace SAMD
 // This definition should probably be in a private header file.
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
-XOSC32K::XOSC32K() :
+XOSC32K::XOSC32K(gclk_id_t id) :
+    ClockSourceGeneric(id),
     m_ioSysctrlXosc32k(&g_ioSysctrl->XOSC32K),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {

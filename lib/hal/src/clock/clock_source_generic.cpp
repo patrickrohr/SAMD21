@@ -5,8 +5,10 @@
 namespace SAMD
 {
 
-ClockSourceGeneric::ClockSourceGeneric() : m_bIsStarted(false)
+ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id), m_bIsStarted(false)
 {
+    static constexpr gclk_id_t g_uGclkIdMax(9);
+    samd_assert(m_uGclkId < g_uGclkIdMax, "GCLK ID out of range: %u", uGclkId);
 }
 
 ClockSourceGeneric::~ClockSourceGeneric()

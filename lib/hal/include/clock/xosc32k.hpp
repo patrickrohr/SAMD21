@@ -18,7 +18,7 @@ namespace SAMD
 class XOSC32K : public ClockSourceGeneric
 {
 public:
-    XOSC32K();
+    XOSC32K(gclk_id_t id);
     ~XOSC32K() override = default;
 
 private:

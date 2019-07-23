@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "config.h"
+
 #include "clock/clock_source_generic.hpp"
 #include <hal_utils/io_port.hpp>
 
@@ -15,15 +17,23 @@
 namespace SAMD
 {
 
+struct Osc8mConfiguration : StaticConfiguration
+{
+    static constexpr unsigned Prescaler  = CONFIG_OSC8M_PRESC;
+    static constexpr unsigned OnDemand   = CONFIG_OSC8M_ONDEMAND;
+    static constexpr unsigned RunStandby = CONFIG_OSC8M_RUNSTDBY;
+};
+
+template<StaticConfiguration CONFIG = Osc8mConfiguration>
 class OSC8M final : public ClockSourceGeneric
 {
 public:
-    OSC8M();
+    OSC8M(gclk_id_t id);
     ~OSC8M() override = default;
 
 private:
-    error_t StartImpl() override;
-    error_t StopImpl() override;
+    error_t StartImpl();
+    error_t StopImpl();
     frequency_t GetFrequency() const override;
     bool PollReady() const override;
     ClockType GetClockSourceType() const override;

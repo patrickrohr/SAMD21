@@ -9,6 +9,8 @@ namespace SAMD
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
 OSC8M::OSC8M() :
+OSC8M::OSC8M(gclk_id_t id) :
+    ClockSourceGeneric(id),
     m_ioSysctrlOsc8m(&g_ioSysctrl->OSC8M),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {

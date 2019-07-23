@@ -13,7 +13,8 @@ namespace SAMD
 
 static constexpr frequency_t g_uTargetFrequency = 48000000;
 
-DFLL48M::DFLL48M(const ClockSourceGeneric& sourceClock) :
+DFLL48M::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
+    ClockSourceGeneric(id),
     m_ioSysctrlDfllMultiplier(&SYSCTRL->DFLLMUL),
     m_ioSysctrlDfllControl(&SYSCTRL->DFLLCTRL),
     m_ioSysctrlPclksr(&SYSCTRL->PCLKSR),
