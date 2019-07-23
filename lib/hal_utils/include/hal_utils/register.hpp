@@ -15,28 +15,23 @@ namespace SAMD
 {
 
 template<typename T>
-struct RegisterCopy
+inline void
+RegisterCopy(volatile T* dest, const volatile T* source, unsigned size)
 {
-    void operator()(volatile T* dest, const volatile T* source, unsigned size)
-    {
-        (void)size;
-        *dest = *source;
-    }
-};
+    (void)size;
+    *dest = *source;
+}
 
 template<>
-struct RegisterCopy<char>
+inline void RegisterCopy<char>(
+    volatile char* dest,
+    const volatile char* source,
+    unsigned size)
 {
-    void
-    operator()(volatile char* dest, const volatile char* source, unsigned size)
-    {
-        // Disable interrupts while reading wide register
-        {
-            InterruptSafeGuard objGuard;
-            for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
-        }
-    }
-};
+    // Disable interrupts while reading wide register
+    InterruptSafeGuard objGuard;
+    for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
+}
 
 template<typename T, Environment ENV = eRuntimeEnvironment>
 class register_t
@@ -51,7 +46,7 @@ public:
 
     register_t& operator=(const T& rhs)
     {
-        RegisterCopy<underlying_type>()(
+        RegisterCopy<underlying_type>(
             reinterpret_cast<volatile underlying_type*>(m_pAddress),
             reinterpret_cast<const underlying_type*>(&rhs),
             size);
@@ -61,7 +56,7 @@ public:
     operator T() const
     {
         underlying_type obj;
-        RegisterCopy<underlying_type>()(
+        RegisterCopy<underlying_type>(
             &obj,
             reinterpret_cast<const volatile underlying_type*>(m_pAddress),
             size);
