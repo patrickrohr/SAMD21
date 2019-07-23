@@ -29,6 +29,21 @@ public:
         return m_id == rhs.m_id;
     }
 
+    constexpr bool operator!=(id_traits rhs) const
+    {
+        return !operator==(rhs);
+    }
+
+    constexpr bool operator<(id_traits rhs) const
+    {
+        return m_id < rhs.m_id;
+    }
+
+    constexpr bool operator>(id_traits rhs) const
+    {
+        return m_id > rhs.m_id;
+    }
+
     type Get() const
     {
         return m_id;
