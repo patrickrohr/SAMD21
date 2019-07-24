@@ -17,19 +17,19 @@
 namespace SAMD
 {
 
-struct Osc8mConfiguration : StaticConfiguration
+struct Osc8mConfiguration
 {
     static constexpr unsigned Prescaler  = CONFIG_OSC8M_PRESC;
     static constexpr unsigned OnDemand   = CONFIG_OSC8M_ONDEMAND;
     static constexpr unsigned RunStandby = CONFIG_OSC8M_RUNSTDBY;
 };
 
-template<StaticConfiguration CONFIG = Osc8mConfiguration>
-class OSC8M final : public ClockSourceGeneric
+template<typename CONFIG = Osc8mConfiguration>
+class OSC8M final : public ClockSourceGeneric, private CONFIG
 {
 public:
     OSC8M(gclk_id_t id);
-    ~OSC8M() override = default;
+    ~OSC8M() override;
 
 private:
     error_t StartImpl();

@@ -13,8 +13,10 @@ namespace SAMD
 
 static constexpr frequency_t g_uTargetFrequency = 48000000;
 
-DFLL48M::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
+template<typename CONFIG>
+DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     ClockSourceGeneric(id),
+    CONFIG(),
     m_ioSysctrlDfllMultiplier(&SYSCTRL->DFLLMUL),
     m_ioSysctrlDfllControl(&SYSCTRL->DFLLCTRL),
     m_ioSysctrlPclksr(&SYSCTRL->PCLKSR),
@@ -31,12 +33,14 @@ DFLL48M::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY) {}
 }
 
-void DFLL48M::SetMode(Mode eMode)
+template<typename CONFIG>
+void DFLL48M<CONFIG>::SetMode(Mode eMode)
 {
     m_eMode = eMode;
 }
 
-void DFLL48M::SetTargetFrequency(frequency_t targetFrequency)
+template<typename CONFIG>
+void DFLL48M<CONFIG>::SetTargetFrequency(frequency_t targetFrequency)
 {
     // TODO: Come up with a sane number
     samd_assert(
@@ -46,7 +50,8 @@ void DFLL48M::SetTargetFrequency(frequency_t targetFrequency)
     m_uTargetFrequency = targetFrequency;
 }
 
-error_t DFLL48M::StartImpl()
+template<typename CONFIG>
+error_t DFLL48M<CONFIG>::StartImpl()
 {
     // Calculate the multiplier
     // Frequency is guaranteed to never be 0.
@@ -58,8 +63,8 @@ error_t DFLL48M::StartImpl()
     // In Closed loop, we need to set the Coarse and Fine Adjustment steps
     if (m_eMode == Mode::eClosedLoop)
     {
-        dfllMultiplier.bit.CSTEP = CONFIG_DFLL48M_MUL_CSTEP;
-        dfllMultiplier.bit.FSTEP = CONFIG_DFLL48M_MUL_FSTEP;
+        dfllMultiplier.bit.CSTEP = CONFIG::MultiplierCoarseStep;
+        dfllMultiplier.bit.FSTEP = CONFIG::MultiplierFineStep;
     }
 
     m_ioSysctrlDfllMultiplier.Write(dfllMultiplier);
@@ -69,18 +74,18 @@ error_t DFLL48M::StartImpl()
     SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
 
     // Open / Closed Loop
-    objDfllCtrlTmp.bit.RUNSTDBY = CONFIG_DFLL48M_CTRL_RUNSTDBY;
-    objDfllCtrlTmp.bit.ONDEMAND = CONFIG_DFLL48M_CTRL_ONDEMAND;
+    objDfllCtrlTmp.bit.RUNSTDBY = CONFIG::RunStandby;
+    objDfllCtrlTmp.bit.ONDEMAND = CONFIG::OnDemand;
 
     if (m_eMode == Mode::eClosedLoop)
     {
-        objDfllCtrlTmp.bit.MODE     = CONFIG_DFLL48M_CTRL_MODE;
-        objDfllCtrlTmp.bit.WAITLOCK = CONFIG_DFLL48M_CTRL_WAITLOCK;
-        objDfllCtrlTmp.bit.QLDIS    = CONFIG_DFLL48M_CTRL_QLDIS;
-        objDfllCtrlTmp.bit.CCDIS    = CONFIG_DFLL48M_CTRL_CCDIS;
-        objDfllCtrlTmp.bit.BPLCKC   = CONFIG_DFLL48M_CTRL_BPLCKC;
-        objDfllCtrlTmp.bit.LLAW     = CONFIG_DFLL48M_CTRL_LLAW;
-        objDfllCtrlTmp.bit.STABLE   = CONFIG_DFLL48M_CTRL_STABLE;
+        objDfllCtrlTmp.bit.MODE     = CONFIG::CtrlMode;
+        objDfllCtrlTmp.bit.WAITLOCK = CONFIG::CtrlWaitlock;
+        objDfllCtrlTmp.bit.QLDIS    = CONFIG::CtrlQlDisable;
+        objDfllCtrlTmp.bit.CCDIS    = CONFIG::CtrlCcDisable;
+        objDfllCtrlTmp.bit.BPLCKC   = CONFIG::CtrlBplckc;
+        objDfllCtrlTmp.bit.LLAW     = CONFIG::CtrlLlaw;
+        objDfllCtrlTmp.bit.STABLE   = CONFIG::CtrlStable;
     }
 
     m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
@@ -107,7 +112,8 @@ error_t DFLL48M::StartImpl()
     return 0;
 }
 
-error_t DFLL48M::StopImpl()
+template<typename CONFIG>
+error_t DFLL48M<CONFIG>::StopImpl()
 {
     // Disable
     SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
@@ -117,17 +123,20 @@ error_t DFLL48M::StopImpl()
     return 0;
 }
 
-frequency_t DFLL48M::GetFrequency() const
+template<typename CONFIG>
+frequency_t DFLL48M<CONFIG>::GetFrequency() const
 {
     return m_uTargetFrequency;
 }
 
-bool DFLL48M::PollReady() const
+template<typename CONFIG>
+bool DFLL48M<CONFIG>::PollReady() const
 {
     return m_ioSysctrlPclksr->bit.DFLLRDY;
 }
 
-ClockType DFLL48M::GetClockSourceType() const
+template<typename CONFIG>
+ClockType DFLL48M<CONFIG>::GetClockSourceType() const
 {
     return ClockType::eDFLL48M;
 }

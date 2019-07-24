@@ -14,24 +14,27 @@ namespace SAMD
 // This definition should probably be in a private header file.
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
-XOSC32K::XOSC32K(gclk_id_t id) :
+template<typename CONFIG>
+XOSC32K<CONFIG>::XOSC32K(gclk_id_t id) :
     ClockSourceGeneric(id),
+    CONFIG(),
     m_ioSysctrlXosc32k(&g_ioSysctrl->XOSC32K),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {
 }
 
-error_t XOSC32K::StartImpl()
+template<typename CONFIG>
+error_t XOSC32K<CONFIG>::StartImpl()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_XOSC32K_Type objXosc32kTmp = m_ioSysctrlXosc32k.Read();
 
-    objXosc32kTmp.bit.STARTUP  = CONFIG_XOSC32K_STARTUP;
-    objXosc32kTmp.bit.XTALEN   = CONFIG_XOSC32K_XTALEN;
+    objXosc32kTmp.bit.STARTUP  = CONFIG::Startup;
+    objXosc32kTmp.bit.XTALEN   = CONFIG::ExternalEnabled;
     objXosc32kTmp.bit.EN32K    = 1;
-    objXosc32kTmp.bit.RUNSTDBY = CONFIG_XOSC32K_RUNSTDBY;
-    objXosc32kTmp.bit.ONDEMAND = CONFIG_XOSC32K_ONDEMAND;
-    objXosc32kTmp.bit.WRTLOCK  = CONFIG_XOSC32K_WRTLOCK;
+    objXosc32kTmp.bit.RUNSTDBY = CONFIG::RunStandby;
+    objXosc32kTmp.bit.ONDEMAND = CONFIG::OnDemand;
+    objXosc32kTmp.bit.WRTLOCK  = CONFIG::WriteLock;
 
     m_ioSysctrlXosc32k.Write(objXosc32kTmp);
 
@@ -42,7 +45,8 @@ error_t XOSC32K::StartImpl()
     return 0;
 }
 
-error_t XOSC32K::StopImpl()
+template<typename CONFIG>
+error_t XOSC32K<CONFIG>::StopImpl()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_XOSC32K_Type objXosc32kTmp = m_ioSysctrlXosc32k.Read();
@@ -52,17 +56,20 @@ error_t XOSC32K::StopImpl()
     return 0;
 }
 
-frequency_t XOSC32K::GetFrequency() const
+template<typename CONFIG>
+frequency_t XOSC32K<CONFIG>::GetFrequency() const
 {
     return 32768;
 }
 
-bool XOSC32K::PollReady() const
+template<typename CONFIG>
+bool XOSC32K<CONFIG>::PollReady() const
 {
     return m_ioSysctrlPclksr->bit.XOSC32KRDY;
 }
 
-ClockType XOSC32K::GetClockSourceType() const
+template<typename CONFIG>
+ClockType XOSC32K<CONFIG>::GetClockSourceType() const
 {
     return ClockType::eXOSC32K;
 }

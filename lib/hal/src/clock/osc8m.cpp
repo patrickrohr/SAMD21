@@ -8,31 +8,38 @@ namespace SAMD
 
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
-OSC8M::OSC8M() :
-OSC8M::OSC8M(gclk_id_t id) :
+template<typename CONFIG>
+OSC8M<CONFIG>::OSC8M(gclk_id_t id) :
     ClockSourceGeneric(id),
+    CONFIG(),
     m_ioSysctrlOsc8m(&g_ioSysctrl->OSC8M),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {
 }
 
-error_t OSC8M::StartImpl()
+template<typename CONFIG>
+OSC8M<CONFIG>::~OSC8M() {
+}
+
+template<typename CONFIG>
+error_t OSC8M<CONFIG>::StartImpl()
 {
     // Leave Factory Values for FRANGE and CALIB
 
     SYSCTRL_OSC8M_Type reg = m_ioSysctrlOsc8m.Read();
 
     reg.bit.ENABLE   = 1;
-    reg.bit.PRESC    = CONFIG_OSC8M_PRESC; // prescaler of 1
-    reg.bit.ONDEMAND = CONFIG_OSC8M_ONDEMAND;
-    reg.bit.RUNSTDBY = CONFIG_OSC8M_RUNSTDBY;
+    reg.bit.PRESC    = CONFIG::Prescaler; // prescaler of 1
+    reg.bit.ONDEMAND = CONFIG::OnDemand;
+    reg.bit.RUNSTDBY = CONFIG::RunStandby;
 
     m_ioSysctrlOsc8m.Write(reg);
 
     return 0;
 }
 
-error_t OSC8M::StopImpl()
+template<typename CONFIG>
+error_t OSC8M<CONFIG>::StopImpl()
 {
     SYSCTRL_OSC8M_Type reg = m_ioSysctrlOsc8m.Read();
 
@@ -43,7 +50,8 @@ error_t OSC8M::StopImpl()
     return 0;
 }
 
-frequency_t OSC8M::GetFrequency() const
+template<typename CONFIG>
+frequency_t OSC8M<CONFIG>::GetFrequency() const
 {
     // TODO: get the value from the actual clock register.
     // Using Upper Values
@@ -72,12 +80,14 @@ frequency_t OSC8M::GetFrequency() const
     }
 }
 
-bool OSC8M::PollReady() const
+template<typename CONFIG>
+bool OSC8M<CONFIG>::PollReady() const
 {
     return m_ioSysctrlPclksr->bit.OSC8MRDY;
 }
 
-ClockType OSC8M::GetClockSourceType() const
+template<typename CONFIG>
+ClockType OSC8M<CONFIG>::GetClockSourceType() const
 {
     return ClockType::eOSC8M;
 }
