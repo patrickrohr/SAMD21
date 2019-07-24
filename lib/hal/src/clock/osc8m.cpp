@@ -15,14 +15,16 @@ OSC8M<CONFIG>::OSC8M(gclk_id_t id) :
     m_ioSysctrlOsc8m(&g_ioSysctrl->OSC8M),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {
+    Start();
 }
 
 template<typename CONFIG>
 OSC8M<CONFIG>::~OSC8M() {
+    Stop();
 }
 
 template<typename CONFIG>
-error_t OSC8M<CONFIG>::StartImpl()
+error_t OSC8M<CONFIG>::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
 
@@ -39,7 +41,7 @@ error_t OSC8M<CONFIG>::StartImpl()
 }
 
 template<typename CONFIG>
-error_t OSC8M<CONFIG>::StopImpl()
+error_t OSC8M<CONFIG>::Stop()
 {
     SYSCTRL_OSC8M_Type reg = m_ioSysctrlOsc8m.Read();
 

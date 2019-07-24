@@ -11,8 +11,6 @@
 namespace SAMD
 {
 
-static constexpr frequency_t g_uTargetFrequency = 48000000;
-
 template<typename CONFIG>
 DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     ClockSourceGeneric(id),
@@ -20,9 +18,7 @@ DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     m_ioSysctrlDfllMultiplier(&SYSCTRL->DFLLMUL),
     m_ioSysctrlDfllControl(&SYSCTRL->DFLLCTRL),
     m_ioSysctrlPclksr(&SYSCTRL->PCLKSR),
-    m_objSourceClock(sourceClock),
-    m_uTargetFrequency(g_uTargetFrequency),
-    m_eMode(Mode::eOpenLoop)
+    m_objSourceClock(sourceClock)
 {
     // HACK: Do this properly.
     // Flash wait states to support 48MHz
@@ -31,37 +27,28 @@ DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     // Errata 9905
     SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0;
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY) {}
+
+    Start();
 }
 
 template<typename CONFIG>
-void DFLL48M<CONFIG>::SetMode(Mode eMode)
+DFLL48M<CONFIG>::~DFLL48M()
 {
-    m_eMode = eMode;
+    Stop();
 }
 
 template<typename CONFIG>
-void DFLL48M<CONFIG>::SetTargetFrequency(frequency_t targetFrequency)
-{
-    // TODO: Come up with a sane number
-    samd_assert(
-        targetFrequency > 1000,
-        "Requested target frequency too low: %u",
-        targetFrequency);
-    m_uTargetFrequency = targetFrequency;
-}
-
-template<typename CONFIG>
-error_t DFLL48M<CONFIG>::StartImpl()
+error_t DFLL48M<CONFIG>::Start()
 {
     // Calculate the multiplier
     // Frequency is guaranteed to never be 0.
-    unsigned uMultiplier = m_uTargetFrequency / m_objSourceClock.GetFrequency();
+    unsigned uMultiplier = CONFIG::TargetFrequency / m_objSourceClock.GetFrequency();
 
     SYSCTRL_DFLLMUL_Type dfllMultiplier;
     dfllMultiplier.bit.MUL = uMultiplier;
 
     // In Closed loop, we need to set the Coarse and Fine Adjustment steps
-    if (m_eMode == Mode::eClosedLoop)
+    if (CONFIG::Mode == DfllMode::eClosedLoop)
     {
         dfllMultiplier.bit.CSTEP = CONFIG::MultiplierCoarseStep;
         dfllMultiplier.bit.FSTEP = CONFIG::MultiplierFineStep;
@@ -77,7 +64,7 @@ error_t DFLL48M<CONFIG>::StartImpl()
     objDfllCtrlTmp.bit.RUNSTDBY = CONFIG::RunStandby;
     objDfllCtrlTmp.bit.ONDEMAND = CONFIG::OnDemand;
 
-    if (m_eMode == Mode::eClosedLoop)
+    if (CONFIG::Mode == DfllMode::eClosedLoop)
     {
         objDfllCtrlTmp.bit.MODE     = CONFIG::CtrlMode;
         objDfllCtrlTmp.bit.WAITLOCK = CONFIG::CtrlWaitlock;
@@ -96,7 +83,7 @@ error_t DFLL48M<CONFIG>::StartImpl()
     m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
 
     // Wait for locks in closed loop
-    if (m_eMode == Mode::eClosedLoop)
+    if (CONFIG::Mode == DfllMode::eClosedLoop)
     {
         // TODO: think about how we could possibly time out here and return an
         // error
@@ -113,7 +100,7 @@ error_t DFLL48M<CONFIG>::StartImpl()
 }
 
 template<typename CONFIG>
-error_t DFLL48M<CONFIG>::StopImpl()
+error_t DFLL48M<CONFIG>::Stop()
 {
     // Disable
     SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
@@ -126,7 +113,7 @@ error_t DFLL48M<CONFIG>::StopImpl()
 template<typename CONFIG>
 frequency_t DFLL48M<CONFIG>::GetFrequency() const
 {
-    return m_uTargetFrequency;
+    return CONFIG::TargetFrequency;
 }
 
 template<typename CONFIG>

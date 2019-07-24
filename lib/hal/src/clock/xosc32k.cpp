@@ -21,10 +21,17 @@ XOSC32K<CONFIG>::XOSC32K(gclk_id_t id) :
     m_ioSysctrlXosc32k(&g_ioSysctrl->XOSC32K),
     m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
 {
+    Start();
 }
 
 template<typename CONFIG>
-error_t XOSC32K<CONFIG>::StartImpl()
+XOSC32K<CONFIG>::~XOSC32K()
+{
+    Stop();
+}
+
+template<typename CONFIG>
+error_t XOSC32K<CONFIG>::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_XOSC32K_Type objXosc32kTmp = m_ioSysctrlXosc32k.Read();
@@ -46,7 +53,7 @@ error_t XOSC32K<CONFIG>::StartImpl()
 }
 
 template<typename CONFIG>
-error_t XOSC32K<CONFIG>::StopImpl()
+error_t XOSC32K<CONFIG>::Stop()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_XOSC32K_Type objXosc32kTmp = m_ioSysctrlXosc32k.Read();

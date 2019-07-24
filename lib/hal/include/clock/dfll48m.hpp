@@ -15,20 +15,28 @@
 namespace SAMD
 {
 
+enum class DfllMode
+{
+    eOpenLoop,
+    eClosedLoop
+};
+
 struct Dfll48mConfiguration
 {
     // TODO: Clean up DataTypes
     static constexpr unsigned MultiplierCoarseStep = CONFIG_DFLL48M_MUL_CSTEP;
-    static constexpr unsigned MultiplierFineStep  = CONFIG_DFLL48M_MUL_FSTEP;
-    static constexpr unsigned RunStandby    = CONFIG_DFLL48M_CTRL_RUNSTDBY;
-    static constexpr unsigned OnDemand      = CONFIG_DFLL48M_CTRL_ONDEMAND;
-    static constexpr unsigned CtrlMode      = CONFIG_DFLL48M_CTRL_MODE;
-    static constexpr unsigned CtrlWaitlock  = CONFIG_DFLL48M_CTRL_WAITLOCK;
-    static constexpr unsigned CtrlQlDisable = CONFIG_DFLL48M_CTRL_QLDIS;
-    static constexpr unsigned CtrlCcDisable = CONFIG_DFLL48M_CTRL_CCDIS;
-    static constexpr unsigned CtrlBplckc    = CONFIG_DFLL48M_CTRL_BPLCKC;
-    static constexpr unsigned CtrlLlaw      = CONFIG_DFLL48M_CTRL_LLAW;
-    static constexpr unsigned CtrlStable    = CONFIG_DFLL48M_CTRL_STABLE;
+    static constexpr unsigned MultiplierFineStep   = CONFIG_DFLL48M_MUL_FSTEP;
+    static constexpr unsigned RunStandby         = CONFIG_DFLL48M_CTRL_RUNSTDBY;
+    static constexpr unsigned OnDemand           = CONFIG_DFLL48M_CTRL_ONDEMAND;
+    static constexpr unsigned CtrlMode           = CONFIG_DFLL48M_CTRL_MODE;
+    static constexpr unsigned CtrlWaitlock       = CONFIG_DFLL48M_CTRL_WAITLOCK;
+    static constexpr unsigned CtrlQlDisable      = CONFIG_DFLL48M_CTRL_QLDIS;
+    static constexpr unsigned CtrlCcDisable      = CONFIG_DFLL48M_CTRL_CCDIS;
+    static constexpr unsigned CtrlBplckc         = CONFIG_DFLL48M_CTRL_BPLCKC;
+    static constexpr unsigned CtrlLlaw           = CONFIG_DFLL48M_CTRL_LLAW;
+    static constexpr unsigned CtrlStable         = CONFIG_DFLL48M_CTRL_STABLE;
+    static constexpr frequency_t TargetFrequency = 48000000;
+    static constexpr DfllMode Mode               = DfllMode::eClosedLoop;
 };
 
 template<typename CONFIG = Dfll48mConfiguration>
@@ -37,22 +45,13 @@ class DFLL48M
     , private CONFIG
 {
 public:
-    enum class Mode
-    {
-        eOpenLoop,
-        eClosedLoop
-    };
-
 public:
     DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock);
-    ~DFLL48M() override = default;
-
-    void SetTargetFrequency(frequency_t targetFrequency);
-    void SetMode(Mode eMode);
+    ~DFLL48M() override;
 
 private:
-    error_t StartImpl() override;
-    error_t StopImpl() override;
+    error_t Start();
+    error_t Stop();
     frequency_t GetFrequency() const override;
     bool PollReady() const override;
     ClockType GetClockSourceType() const override;
@@ -62,7 +61,5 @@ private:
     IoPortRW<SYSCTRL_DFLLCTRL_Type> m_ioSysctrlDfllControl;
     IoPortRead<SYSCTRL_PCLKSR_Type> m_ioSysctrlPclksr;
     const ClockSourceGeneric& m_objSourceClock;
-    frequency_t m_uTargetFrequency;
-    Mode m_eMode;
 };
 } // namespace SAMD

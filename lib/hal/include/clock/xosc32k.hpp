@@ -31,11 +31,11 @@ class XOSC32K : public ClockSourceGeneric, private CONFIG
 {
 public:
     XOSC32K(gclk_id_t id);
-    ~XOSC32K() override = default;
+    ~XOSC32K() override;
 
 private:
-    error_t StartImpl() override;
-    error_t StopImpl() override;
+    error_t Start();
+    error_t Stop();
     frequency_t GetFrequency() const override;
     bool PollReady() const override;
     ClockType GetClockSourceType() const override;

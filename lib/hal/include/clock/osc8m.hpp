@@ -32,8 +32,8 @@ public:
     ~OSC8M() override;
 
 private:
-    error_t StartImpl();
-    error_t StopImpl();
+    error_t Start();
+    error_t Stop();
     frequency_t GetFrequency() const override;
     bool PollReady() const override;
     ClockType GetClockSourceType() const override;
