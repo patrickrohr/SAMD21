@@ -35,7 +35,6 @@ enum class ClockType
 // TODO: change this to something else probably
 using frequency_t = unsigned;
 
-
 using gclk_id_t = id_traits<uint8_t>;
 
 class ClockSourceGeneric
@@ -44,41 +43,35 @@ public:
     /**
      * @brief      ClockSource itself is RAII. The Gclk however needs to be
      *             started explicitly to allow for additional runtime
-     * configuration.
+     *             configuration.
+     *             TODO: Or does it?
      * @param[in]  id  The gclk identifier
      */
     ClockSourceGeneric(gclk_id_t id);
 
     virtual ~ClockSourceGeneric();
 
-    /**
-     * @brief      Start, starts sets up the GCLK, once the ClockSource is
-     * running.
-     *
-     * @return     Returns error when ???
-     */
-    error_t Start();
-    error_t Stop();
-    error_t WaitReady() const;
+    // GCLK Interface
+    error_t Enable(/*output */);
 
-    /**
-     * @brief      Callback function to be called out of clock ready interrupt
-     * context.
-     * @param      callback  The callback
-     *
-     * @tparam     T         { description }
-     */
-    template<typename T>
-    void RegisterClockSourceReadyHandler(T&& callback);
-    {
-        return m_bIsStarted;
-    }
+    error_t Disable();
 
-    virtual frequency_t GetFrequency() const     = 0;
+    void SetDivision(uint32_t uDivisionFactor);
+
+    bool IsEnabled() const;
+
+    // Clock Source
+    error_t WaitOnClockIsRunning() const;
+
+    // Future?
+    // void OnClockReady();
+protected:
+    error_t WaitOnClockReady();
+    virtual frequency_t GetFrequency() const = 0;
 
 private:
     // purely virtuals
-    virtual bool PollReady() const               = 0;
+    virtual bool PollIsRunning() const           = 0;
     virtual ClockType GetClockSourceType() const = 0;
 
 private:

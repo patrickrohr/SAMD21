@@ -5,7 +5,7 @@
 namespace SAMD
 {
 
-ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id), m_bIsStarted(false)
+ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
 {
     static constexpr gclk_id_t g_uGclkIdMax(9);
     samd_assert(m_uGclkId < g_uGclkIdMax, "GCLK ID out of range: %u", uGclkId);
@@ -13,37 +13,38 @@ ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id), m_bIsStart
 
 ClockSourceGeneric::~ClockSourceGeneric()
 {
-    if (m_bIsStarted)
+    if (IsEnabled())
     {
-        Stop();
+        Disable();
     }
 }
 
-error_t ClockSourceGeneric::Start()
+error_t ClockSourceGeneric::Enable()
 {
-    error_t error = StartImpl();
-    if (!error)
-    {
-        m_bIsStarted = true;
-    }
 
-    return error;
+    return 0;
 }
 
-error_t ClockSourceGeneric::Stop()
+error_t ClockSourceGeneric::Disable()
 {
-    error_t error = StopImpl();
-    if (!error)
-    {
-        m_bIsStarted = false;
-    }
 
-    return error;
+    return 0;
 }
 
-error_t ClockSourceGeneric::WaitReady() const
+void ClockSourceGeneric::SetDivision(uint32_t uDivisionFactor)
 {
-    while (!PollReady()) {}
+    (void) uDivisionFactor;
+}
+
+bool ClockSourceGeneric::IsEnabled() const
+{
+    // check hardware
+    return false;
+}
+
+error_t ClockSourceGeneric::WaitOnClockIsRunning() const
+{
+    while (!PollIsRunning()) {}
     return 0;
 }
 

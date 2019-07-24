@@ -70,7 +70,7 @@ frequency_t XOSC32K<CONFIG>::GetFrequency() const
 }
 
 template<typename CONFIG>
-bool XOSC32K<CONFIG>::PollReady() const
+bool XOSC32K<CONFIG>::PollIsRunning() const
 {
     return m_ioSysctrlPclksr->bit.XOSC32KRDY;
 }

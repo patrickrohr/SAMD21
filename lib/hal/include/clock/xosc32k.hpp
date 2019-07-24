@@ -37,7 +37,7 @@ private:
     error_t Start();
     error_t Stop();
     frequency_t GetFrequency() const override;
-    bool PollReady() const override;
+    bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;
 
 private:

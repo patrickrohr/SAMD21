@@ -37,6 +37,7 @@ DFLL48M<CONFIG>::~DFLL48M()
     Stop();
 }
 
+// This can probably be optimized quite a bit, since we have to sync registers 3 times
 template<typename CONFIG>
 error_t DFLL48M<CONFIG>::Start()
 {
@@ -55,7 +56,7 @@ error_t DFLL48M<CONFIG>::Start()
     }
 
     m_ioSysctrlDfllMultiplier.Write(dfllMultiplier);
-    WaitReady();
+    RegisterSync();
 
     // Set up DFLL Control
     SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
@@ -76,7 +77,7 @@ error_t DFLL48M<CONFIG>::Start()
     }
 
     m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
-    WaitReady();
+    RegisterSync();
 
     // Enable
     objDfllCtrlTmp.bit.ENABLE = 1;
@@ -94,7 +95,7 @@ error_t DFLL48M<CONFIG>::Start()
     }
 
     // Finally, wait for clock to become ready
-    WaitReady();
+    RegisterSync();
 
     return 0;
 }
@@ -117,15 +118,22 @@ frequency_t DFLL48M<CONFIG>::GetFrequency() const
 }
 
 template<typename CONFIG>
-bool DFLL48M<CONFIG>::PollReady() const
+bool DFLL48M<CONFIG>::PollIsRunning() const
 {
-    return m_ioSysctrlPclksr->bit.DFLLRDY;
+    return m_ioSysctrlPclksr->bit.DFLLRDY && m_ioSysctrlDfllControl->bit.ENABLE;
 }
 
 template<typename CONFIG>
 ClockType DFLL48M<CONFIG>::GetClockSourceType() const
 {
     return ClockType::eDFLL48M;
+}
+
+template<typename CONFIG>
+error_t DFLL48M<CONFIG>::RegisterSync()
+{
+    while(!m_ioSysctrlPclksr->bit.DFLLRDY) {}
+    return 0;
 }
 
 } // namespace SAMD

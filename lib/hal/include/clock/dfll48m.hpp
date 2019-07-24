@@ -52,8 +52,9 @@ public:
 private:
     error_t Start();
     error_t Stop();
+    error_t RegisterSync();
     frequency_t GetFrequency() const override;
-    bool PollReady() const override;
+    bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;
 
 private:

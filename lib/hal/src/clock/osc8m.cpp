@@ -83,7 +83,7 @@ frequency_t OSC8M<CONFIG>::GetFrequency() const
 }
 
 template<typename CONFIG>
-bool OSC8M<CONFIG>::PollReady() const
+bool OSC8M<CONFIG>::PollIsRunning() const
 {
     return m_ioSysctrlPclksr->bit.OSC8MRDY;
 }
