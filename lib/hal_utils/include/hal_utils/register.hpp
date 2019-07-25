@@ -33,6 +33,60 @@ inline void RegisterCopy<char>(
     for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
 }
 
+template<typename T, bool IsHardwareAddr = false>
+struct RegisterGuard
+{
+    using underlying_type = typename fixed_width_int<sizeof(T)>::type;
+    static constexpr unsigned size = sizeof(T);
+
+    RegisterGuard() = default;
+
+    RegisterGuard(const volatile RegisterGuard<T, true>& rhs)
+    {
+        operator=(rhs);
+    }
+
+    RegisterGuard& operator=(const volatile RegisterGuard<T, true>& rhs)
+    {
+        RegisterCopy(
+            reinterpret_cast<volatile underlying_type*>(this),
+            reinterpret_cast<const volatile underlying_type*>(&rhs),
+            size);
+    }
+
+    T data;
+};
+
+
+template<typename T>
+struct RegisterGuard<T, true>
+{
+    using underlying_type = typename fixed_width_int<sizeof(T)>::type;
+    static constexpr unsigned size = sizeof(T);
+
+    RegisterGuard(const volatile RegisterGuard<T, false>& rhs)
+    {
+        RegisterGuard<T, false>::operator=(rhs);
+    }
+
+    volatile RegisterGuard& operator=(const volatile RegisterGuard<T, false>& rhs) volatile
+    {
+        RegisterCopy(
+            reinterpret_cast<volatile underlying_type*>(this),
+            reinterpret_cast<const volatile underlying_type*>(&rhs),
+            size);
+        return *this;
+    }
+
+    T data;
+};
+
+template<typename T>
+volatile RegisterGuard<T, true>* MakeRegisterGuard(volatile T* pReg)
+{
+    return reinterpret_cast<volatile RegisterGuard<T, true>*>(pReg);
+}
+
 template<typename T, Environment ENV = eRuntimeEnvironment>
 class register_t
 {
