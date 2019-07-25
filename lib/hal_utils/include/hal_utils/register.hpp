@@ -55,9 +55,23 @@ struct RegisterGuard
         return *this;
     }
 
+    // delete copy constructors
+    RegisterGuard(const RegisterGuard<T, IsHardwareAddr>& rhs) = delete;
+    RegisterGuard& operator=(const RegisterGuard<T, IsHardwareAddr>& rhs) = delete;
+
     T data;
 };
 
+/**
+ * @brief      Makes a register guard.
+ * @details    Specifying this as a function template has the benefit that we can make use of
+ *             template argument deduction.
+ * @param      pReg  The register pointer.
+ *
+ * @tparam     T     Register Type
+ *
+ * @return     Hardware Register Guard
+ */
 template<typename T>
 volatile RegisterGuard<T, true>* MakeRegisterGuard(volatile T* pReg)
 {
