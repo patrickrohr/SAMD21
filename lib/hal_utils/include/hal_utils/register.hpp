@@ -41,35 +41,12 @@ struct RegisterGuard
 
     RegisterGuard() = default;
 
-    RegisterGuard(const volatile RegisterGuard<T, true>& rhs)
+    RegisterGuard(const volatile RegisterGuard<T, !IsHardwareAddr>& rhs)
     {
         operator=(rhs);
     }
 
-    RegisterGuard& operator=(const volatile RegisterGuard<T, true>& rhs)
-    {
-        RegisterCopy(
-            reinterpret_cast<volatile underlying_type*>(this),
-            reinterpret_cast<const volatile underlying_type*>(&rhs),
-            size);
-    }
-
-    T data;
-};
-
-
-template<typename T>
-struct RegisterGuard<T, true>
-{
-    using underlying_type = typename fixed_width_int<sizeof(T)>::type;
-    static constexpr unsigned size = sizeof(T);
-
-    RegisterGuard(const volatile RegisterGuard<T, false>& rhs)
-    {
-        RegisterGuard<T, false>::operator=(rhs);
-    }
-
-    volatile RegisterGuard& operator=(const volatile RegisterGuard<T, false>& rhs) volatile
+    volatile RegisterGuard& operator=(const volatile RegisterGuard<T, !IsHardwareAddr>& rhs) volatile
     {
         RegisterCopy(
             reinterpret_cast<volatile underlying_type*>(this),
