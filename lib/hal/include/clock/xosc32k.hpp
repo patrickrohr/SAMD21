@@ -19,15 +19,17 @@ namespace SAMD
 
 struct Xosc32kConfiguration
 {
-    static constexpr unsigned Startup = CONFIG_XOSC32K_STARTUP;
+    static constexpr unsigned Startup         = CONFIG_XOSC32K_STARTUP;
     static constexpr unsigned ExternalEnabled = CONFIG_XOSC32K_XTALEN;
-    static constexpr unsigned RunStandby = CONFIG_XOSC32K_RUNSTDBY;
-    static constexpr unsigned OnDemand = CONFIG_XOSC32K_ONDEMAND;
-    static constexpr unsigned WriteLock = CONFIG_XOSC32K_WRTLOCK;
+    static constexpr unsigned RunStandby      = CONFIG_XOSC32K_RUNSTDBY;
+    static constexpr unsigned OnDemand        = CONFIG_XOSC32K_ONDEMAND;
+    static constexpr unsigned WriteLock       = CONFIG_XOSC32K_WRTLOCK;
 };
 
 template<typename CONFIG = Xosc32kConfiguration>
-class XOSC32K : public ClockSourceGeneric, private CONFIG
+class XOSC32K
+    : public ClockSourceGeneric
+    , private CONFIG
 {
 public:
     XOSC32K(gclk_id_t id);
@@ -39,10 +41,6 @@ private:
     frequency_t GetFrequency() const override;
     bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;
-
-private:
-    IoPortRW<SYSCTRL_XOSC32K_Type> m_ioSysctrlXosc32k;
-    IoPortRead<SYSCTRL_PCLKSR_Type> m_ioSysctrlPclksr;
 };
 
 } // namespace SAMD
