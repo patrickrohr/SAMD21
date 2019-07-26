@@ -8,12 +8,14 @@ namespace SAMD
 
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
+static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
+static auto reg_OSC8M = MakeRegisterGuard(&SYSCTRL->OSC8M);
+static auto reg_PCLKSR = MakeRegisterGuard(&SYSCTRL->PCLKSR);
+
 template<typename CONFIG>
 OSC8M<CONFIG>::OSC8M(gclk_id_t id) :
     ClockSourceGeneric(id),
-    CONFIG(),
-    m_ioSysctrlOsc8m(&g_ioSysctrl->OSC8M),
-    m_ioSysctrlPclksr(&g_ioSysctrl->PCLKSR)
+    CONFIG()
 {
     Start();
 }
@@ -27,15 +29,14 @@ template<typename CONFIG>
 error_t OSC8M<CONFIG>::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
+    RegisterGuard<SYSCTRL_OSC8M_Type> tmp_OSC8M(*reg_OSC8M);
 
-    SYSCTRL_OSC8M_Type reg = m_ioSysctrlOsc8m.Read();
+    tmp_OSC8M.data.bit.ENABLE   = 1;
+    tmp_OSC8M.data.bit.PRESC    = CONFIG::Prescaler; // prescaler of 1
+    tmp_OSC8M.data.bit.ONDEMAND = CONFIG::OnDemand;
+    tmp_OSC8M.data.bit.RUNSTDBY = CONFIG::RunStandby;
 
-    reg.bit.ENABLE   = 1;
-    reg.bit.PRESC    = CONFIG::Prescaler; // prescaler of 1
-    reg.bit.ONDEMAND = CONFIG::OnDemand;
-    reg.bit.RUNSTDBY = CONFIG::RunStandby;
-
-    m_ioSysctrlOsc8m.Write(reg);
+    *reg_OSC8M = tmp_OSC8M;
 
     return 0;
 }
@@ -43,11 +44,9 @@ error_t OSC8M<CONFIG>::Start()
 template<typename CONFIG>
 error_t OSC8M<CONFIG>::Stop()
 {
-    SYSCTRL_OSC8M_Type reg = m_ioSysctrlOsc8m.Read();
-
-    reg.bit.ENABLE = 0;
-
-    m_ioSysctrlOsc8m.Write(reg);
+    RegisterGuard<SYSCTRL_OSC8M_Type> tmp_OSC8M(*reg_OSC8M);
+    tmp_OSC8M.data.bit.ENABLE = 0;
+    *reg_OSC8M = tmp_OSC8M;
 
     return 0;
 }
@@ -85,7 +84,7 @@ frequency_t OSC8M<CONFIG>::GetFrequency() const
 template<typename CONFIG>
 bool OSC8M<CONFIG>::PollIsRunning() const
 {
-    return m_ioSysctrlPclksr->bit.OSC8MRDY;
+    return reg_PCLKSR->data.bit.OSC8MRDY;
 }
 
 template<typename CONFIG>

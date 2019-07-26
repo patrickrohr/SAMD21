@@ -37,10 +37,6 @@ private:
     frequency_t GetFrequency() const override;
     bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;
-
-private:
-    IoPortRW<SYSCTRL_OSC8M_Type> m_ioSysctrlOsc8m;
-    IoPortRead<SYSCTRL_PCLKSR_Type> m_ioSysctrlPclksr;
 };
 
 } // namespace SAMD
