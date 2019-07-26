@@ -36,17 +36,19 @@ inline void RegisterCopy<char>(
 template<typename T, bool IsHardwareAddr = false>
 struct RegisterGuard
 {
-    using underlying_type = typename fixed_width_int<sizeof(T)>::type;
+    using underlying_type          = typename fixed_width_int<sizeof(T)>::type;
     static constexpr unsigned size = sizeof(T);
 
     RegisterGuard() = default;
 
-    RegisterGuard(const volatile RegisterGuard<T, !IsHardwareAddr>& rhs)
+    explicit RegisterGuard(
+        const volatile RegisterGuard<T, !IsHardwareAddr>& rhs)
     {
         operator=(rhs);
     }
 
-    volatile RegisterGuard& operator=(const volatile RegisterGuard<T, !IsHardwareAddr>& rhs) volatile
+    volatile RegisterGuard& operator=(
+        const volatile RegisterGuard<T, !IsHardwareAddr>& rhs) volatile
     {
         RegisterCopy(
             reinterpret_cast<volatile underlying_type*>(this),
@@ -57,25 +59,57 @@ struct RegisterGuard
 
     // delete copy constructors
     RegisterGuard(const RegisterGuard<T, IsHardwareAddr>& rhs) = delete;
-    RegisterGuard& operator=(const RegisterGuard<T, IsHardwareAddr>& rhs) = delete;
+    RegisterGuard& operator=(const RegisterGuard<T, IsHardwareAddr>& rhs) =
+        delete;
+
+    volatile RegisterGuard<T, !IsHardwareAddr>& Convert()
+    {
+        return *reinterpret_cast<volatile RegisterGuard<T, !IsHardwareAddr>>(
+            this);
+    }
 
     T data;
 };
 
 /**
+ * @brief      Helper template struct to work around missing partial function
+ * template specialization support for MakeRegisterGuard.
+ *
+ * @tparam     T     Register Type
+ */
+template<typename T, Environment ENV = eRuntimeEnvironment>
+struct RegisterGuardHelper
+{
+    static volatile RegisterGuard<T, true>* FromPointer(volatile T* pReg)
+    {
+        return reinterpret_cast<volatile RegisterGuard<T, true>*>(pReg);
+    }
+};
+
+template<typename T>
+struct RegisterGuardHelper<T, Environment::eSimulation>
+{
+    static volatile RegisterGuard<T, true>* FromPointer(volatile T* pReg)
+    {
+        static T data;
+        return reinterpret_cast<volatile RegisterGuard<T, true>*>(&data);
+    }
+};
+
+/**
  * @brief      Makes a register guard.
- * @details    Specifying this as a function template has the benefit that we can make use of
- *             template argument deduction.
+ * @details    Specifying this as a function template has the benefit that we
+ * can make use of template argument deduction.
  * @param      pReg  The register pointer.
  *
  * @tparam     T     Register Type
  *
  * @return     Hardware Register Guard
  */
-template<typename T>
+template<typename T, Environment ENV = eRuntimeEnvironment>
 volatile RegisterGuard<T, true>* MakeRegisterGuard(volatile T* pReg)
 {
-    return reinterpret_cast<volatile RegisterGuard<T, true>*>(pReg);
+    return RegisterGuardHelper<T, ENV>::FromPointer(pReg);
 }
 
 template<typename T, Environment ENV = eRuntimeEnvironment>
