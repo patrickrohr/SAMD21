@@ -33,7 +33,7 @@ error_t XOSC32K<CONFIG>::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
     // TODO: Disable interrupts between reads and writes?
-    RegisterGuard<SYSCTRL_XOSC32K_Type> temp_XOSC32K(*reg_XOSC32K);
+    RegisterGuard<SYSCTRL_XOSC32K_Type> tmp_XOSC32K(*reg_XOSC32K);
 
     tmp_XOSC32K.data.bit.STARTUP  = CONFIG::Startup;
     tmp_XOSC32K.data.bit.XTALEN   = CONFIG::ExternalEnabled;
@@ -55,7 +55,7 @@ template<typename CONFIG>
 error_t XOSC32K<CONFIG>::Stop()
 {
     // Leave Factory Values for FRANGE and CALIB
-    RegisterGuard<SYSCTRL_XOSC32K_Type> temp_XOSC32K(*reg_XOSC32K);
+    RegisterGuard<SYSCTRL_XOSC32K_Type> tmp_XOSC32K(*reg_XOSC32K);
     tmp_XOSC32K.data.bit.ENABLE = 0;
     *reg_XOSC32K                = tmp_XOSC32K;
 
