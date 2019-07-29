@@ -9,6 +9,7 @@
 
 #include <common/error.hpp>
 #include <common/id_traits.hpp>
+#include <hal_utils/io_port.hpp>
 #include <samd21.h>
 
 namespace SAMD
@@ -53,11 +54,11 @@ public:
     virtual ~ClockSourceGeneric();
 
     // GCLK Interface
-    error_t Enable(/*output */);
+    error_t Enable(uint32_t uDivisionFactor = 0);
 
     error_t Disable();
 
-    void SetDivision(uint32_t uDivisionFactor);
+    void SetOutput();
 
     bool IsEnabled() const;
 
