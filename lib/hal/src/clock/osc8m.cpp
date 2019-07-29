@@ -9,8 +9,8 @@ namespace SAMD
 static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
 
 static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
-static auto reg_OSC8M = MakeRegisterGuard(&SYSCTRL->OSC8M);
-static auto reg_PCLKSR = MakeRegisterGuard(&SYSCTRL->PCLKSR);
+static auto reg_OSC8M = MakeRegisterGuard(&reg_SYSCTRL->data.OSC8M);
+static auto reg_PCLKSR = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);
 
 template<typename CONFIG>
 OSC8M<CONFIG>::OSC8M(gclk_id_t id) :
