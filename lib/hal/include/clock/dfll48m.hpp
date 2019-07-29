@@ -58,9 +58,6 @@ private:
     ClockType GetClockSourceType() const override;
 
 private:
-    IoPortRW<SYSCTRL_DFLLMUL_Type> m_ioSysctrlDfllMultiplier;
-    IoPortRW<SYSCTRL_DFLLCTRL_Type> m_ioSysctrlDfllControl;
-    IoPortRead<SYSCTRL_PCLKSR_Type> m_ioSysctrlPclksr;
     const ClockSourceGeneric& m_objSourceClock;
 };
 } // namespace SAMD

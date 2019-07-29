@@ -11,22 +11,25 @@
 namespace SAMD
 {
 
+static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
+static auto reg_NVMCTRL = MakeRegisterGuard(NVMCTRL);
+static auto reg_DFLLMUL = MakeRegisterGuard(&reg_SYSCTRL->data.DFLLMUL);
+static auto reg_DFLLCTRL = MakeRegisterGuard(&reg_SYSCTRL->data.DFLLCTRL);
+static auto reg_PCLKSR = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);
+
 template<typename CONFIG>
 DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
     ClockSourceGeneric(id),
     CONFIG(),
-    m_ioSysctrlDfllMultiplier(&SYSCTRL->DFLLMUL),
-    m_ioSysctrlDfllControl(&SYSCTRL->DFLLCTRL),
-    m_ioSysctrlPclksr(&SYSCTRL->PCLKSR),
     m_objSourceClock(sourceClock)
 {
     // HACK: Do this properly.
     // Flash wait states to support 48MHz
-    NVMCTRL->CTRLB.bit.RWS = 1;
+    reg_NVMCTRL->data.CTRLB.bit.RWS = 1;
 
     // Errata 9905
-    SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0;
-    while (!SYSCTRL->PCLKSR.bit.DFLLRDY) {}
+    reg_DFLLCTRL->data.bit.ONDEMAND = 0;
+    while (!reg_PCLKSR->data.bit.DFLLRDY) {}
 
     Start();
 }
@@ -45,43 +48,43 @@ error_t DFLL48M<CONFIG>::Start()
     // Frequency is guaranteed to never be 0.
     unsigned uMultiplier = CONFIG::TargetFrequency / m_objSourceClock.GetFrequency();
 
-    SYSCTRL_DFLLMUL_Type dfllMultiplier;
-    dfllMultiplier.bit.MUL = uMultiplier;
+    RegisterGuard<SYSCTRL_DFLLMUL_Type> tmp_DFLLMUL;
+    tmp_DFLLMUL.data.bit.MUL = uMultiplier;
 
     // In Closed loop, we need to set the Coarse and Fine Adjustment steps
     if (CONFIG::Mode == DfllMode::eClosedLoop)
     {
-        dfllMultiplier.bit.CSTEP = CONFIG::MultiplierCoarseStep;
-        dfllMultiplier.bit.FSTEP = CONFIG::MultiplierFineStep;
+        tmp_DFLLMUL.data.bit.CSTEP = CONFIG::MultiplierCoarseStep;
+        tmp_DFLLMUL.data.bit.FSTEP = CONFIG::MultiplierFineStep;
     }
 
-    m_ioSysctrlDfllMultiplier.Write(dfllMultiplier);
+    *reg_DFLLMUL = tmp_DFLLMUL;
     RegisterSync();
 
     // Set up DFLL Control
-    SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
+    RegisterGuard<SYSCTRL_DFLLCTRL_Type> tmp_DFLLCTRL;
 
     // Open / Closed Loop
-    objDfllCtrlTmp.bit.RUNSTDBY = CONFIG::RunStandby;
-    objDfllCtrlTmp.bit.ONDEMAND = CONFIG::OnDemand;
+    tmp_DFLLCTRL.data.bit.RUNSTDBY = CONFIG::RunStandby;
+    tmp_DFLLCTRL.data.bit.ONDEMAND = CONFIG::OnDemand;
 
     if (CONFIG::Mode == DfllMode::eClosedLoop)
     {
-        objDfllCtrlTmp.bit.MODE     = CONFIG::CtrlMode;
-        objDfllCtrlTmp.bit.WAITLOCK = CONFIG::CtrlWaitlock;
-        objDfllCtrlTmp.bit.QLDIS    = CONFIG::CtrlQlDisable;
-        objDfllCtrlTmp.bit.CCDIS    = CONFIG::CtrlCcDisable;
-        objDfllCtrlTmp.bit.BPLCKC   = CONFIG::CtrlBplckc;
-        objDfllCtrlTmp.bit.LLAW     = CONFIG::CtrlLlaw;
-        objDfllCtrlTmp.bit.STABLE   = CONFIG::CtrlStable;
+        tmp_DFLLCTRL.data.bit.MODE     = CONFIG::CtrlMode;
+        tmp_DFLLCTRL.data.bit.WAITLOCK = CONFIG::CtrlWaitlock;
+        tmp_DFLLCTRL.data.bit.QLDIS    = CONFIG::CtrlQlDisable;
+        tmp_DFLLCTRL.data.bit.CCDIS    = CONFIG::CtrlCcDisable;
+        tmp_DFLLCTRL.data.bit.BPLCKC   = CONFIG::CtrlBplckc;
+        tmp_DFLLCTRL.data.bit.LLAW     = CONFIG::CtrlLlaw;
+        tmp_DFLLCTRL.data.bit.STABLE   = CONFIG::CtrlStable;
     }
 
-    m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
+    *reg_DFLLCTRL = tmp_DFLLCTRL;
     RegisterSync();
 
-    // Enable
-    objDfllCtrlTmp.bit.ENABLE = 1;
-    m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
+    // Per data sheet, write enable bit separately
+    tmp_DFLLCTRL.data.bit.ENABLE = 1;
+    *reg_DFLLCTRL = tmp_DFLLCTRL;
 
     // Wait for locks in closed loop
     if (CONFIG::Mode == DfllMode::eClosedLoop)
@@ -89,8 +92,8 @@ error_t DFLL48M<CONFIG>::Start()
         // TODO: think about how we could possibly time out here and return an
         // error
         // clang-format off
-        while (!m_ioSysctrlPclksr->bit.DFLLLCKC &&
-               !m_ioSysctrlPclksr->bit.DFLLLCKF);
+        while (!reg_PCLKSR->data.bit.DFLLLCKC &&
+               !reg_PCLKSR->data.bit.DFLLLCKF);
         // clang-format on
     }
 
@@ -104,9 +107,9 @@ template<typename CONFIG>
 error_t DFLL48M<CONFIG>::Stop()
 {
     // Disable
-    SYSCTRL_DFLLCTRL_Type objDfllCtrlTmp;
-    objDfllCtrlTmp.bit.ENABLE = 1;
-    m_ioSysctrlDfllControl.Write(objDfllCtrlTmp);
+    RegisterGuard<SYSCTRL_DFLLCTRL_Type> tmp_DFLLCTRL;
+    tmp_DFLLCTRL.data.bit.ENABLE = 1;
+    *reg_DFLLCTRL = tmp_DFLLCTRL;
 
     return 0;
 }
@@ -114,13 +117,14 @@ error_t DFLL48M<CONFIG>::Stop()
 template<typename CONFIG>
 frequency_t DFLL48M<CONFIG>::GetFrequency() const
 {
+    // TODO: Check out gclk.c _gclk_get_dfll_input_frequency()
     return CONFIG::TargetFrequency;
 }
 
 template<typename CONFIG>
 bool DFLL48M<CONFIG>::PollIsRunning() const
 {
-    return m_ioSysctrlPclksr->bit.DFLLRDY && m_ioSysctrlDfllControl->bit.ENABLE;
+    return reg_PCLKSR->data.bit.DFLLRDY && reg_DFLLCTRL->data.bit.ENABLE;
 }
 
 template<typename CONFIG>
@@ -132,7 +136,7 @@ ClockType DFLL48M<CONFIG>::GetClockSourceType() const
 template<typename CONFIG>
 error_t DFLL48M<CONFIG>::RegisterSync()
 {
-    while(!m_ioSysctrlPclksr->bit.DFLLRDY) {}
+    while(!reg_PCLKSR->data.bit.DFLLRDY) {}
     return 0;
 }
 
