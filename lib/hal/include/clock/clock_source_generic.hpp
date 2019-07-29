@@ -35,7 +35,8 @@ enum class ClockType
 // TODO: change this to something else probably
 using frequency_t = unsigned;
 
-using gclk_id_t = id_traits<uint8_t>;
+class ClockSourceGeneric;
+using gclk_id_t = id_traits<ClockSourceGeneric, uint8_t>;
 
 class ClockSourceGeneric
 {
