@@ -77,7 +77,6 @@ private:
 
 private:
     gclk_id_t m_uGclkId;
-    bool m_bIsStarted;
 
 public:
     ClockSourceGeneric(const ClockSourceGeneric&) = delete;
