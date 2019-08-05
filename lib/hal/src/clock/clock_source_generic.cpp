@@ -57,6 +57,14 @@ error_t ClockSourceGeneric::Enable(uint32_t uDivisionFactor)
 
 error_t ClockSourceGeneric::Disable()
 {
+    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+        static_cast<uint8_t>(m_uGclkId);
+    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+
+    tmp_GENCTRL.data.bit.GENEN = 0;
+    *reg_GENCTRL               = tmp_GENCTRL;
+
+    RegisterSync();
 
     return 0;
 }
@@ -64,7 +72,11 @@ error_t ClockSourceGeneric::Disable()
 bool ClockSourceGeneric::IsEnabled() const
 {
     // check hardware
-    return false;
+    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+        static_cast<uint8_t>(m_uGclkId);
+    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+
+    return tmp_GENCTRL.data.bit.GENEN;
 }
 
 error_t ClockSourceGeneric::WaitOnClockIsRunning() const
