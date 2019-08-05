@@ -18,7 +18,10 @@ ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
 
 ClockSourceGeneric::~ClockSourceGeneric()
 {
-    if (IsEnabled())
+    bool isEnabled = IsEnabled();
+    samd_assert(isEnabled, "Clock was never enabled: %u", static_cast<unsigned>(uGclkId));
+
+    if (isEnabled)
     {
         Disable();
     }
