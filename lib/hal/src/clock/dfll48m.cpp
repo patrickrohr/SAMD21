@@ -11,11 +11,11 @@
 namespace SAMD
 {
 
-static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
-static auto reg_NVMCTRL = MakeRegisterGuard(NVMCTRL);
-static auto reg_DFLLMUL = MakeRegisterGuard(&reg_SYSCTRL->data.DFLLMUL);
+static auto reg_SYSCTRL  = MakeRegisterGuard(SYSCTRL);
+static auto reg_NVMCTRL  = MakeRegisterGuard(NVMCTRL);
+static auto reg_DFLLMUL  = MakeRegisterGuard(&reg_SYSCTRL->data.DFLLMUL);
 static auto reg_DFLLCTRL = MakeRegisterGuard(&reg_SYSCTRL->data.DFLLCTRL);
-static auto reg_PCLKSR = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);
+static auto reg_PCLKSR   = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);
 
 template<typename CONFIG>
 DFLL48M<CONFIG>::DFLL48M(gclk_id_t id, const ClockSourceGeneric& sourceClock) :
@@ -40,13 +40,15 @@ DFLL48M<CONFIG>::~DFLL48M()
     Stop();
 }
 
-// This can probably be optimized quite a bit, since we have to sync registers 3 times
+// This can probably be optimized quite a bit, since we have to sync registers 3
+// times
 template<typename CONFIG>
 error_t DFLL48M<CONFIG>::Start()
 {
     // Calculate the multiplier
     // Frequency is guaranteed to never be 0.
-    unsigned uMultiplier = CONFIG::TargetFrequency / m_objSourceClock.GetFrequency();
+    unsigned uMultiplier =
+        CONFIG::TargetFrequency / m_objSourceClock.GetOutputFrequency();
 
     RegisterGuard<SYSCTRL_DFLLMUL_Type> tmp_DFLLMUL;
     tmp_DFLLMUL.data.bit.MUL = uMultiplier;
@@ -84,7 +86,7 @@ error_t DFLL48M<CONFIG>::Start()
 
     // Per data sheet, write enable bit separately
     tmp_DFLLCTRL.data.bit.ENABLE = 1;
-    *reg_DFLLCTRL = tmp_DFLLCTRL;
+    *reg_DFLLCTRL                = tmp_DFLLCTRL;
 
     // Wait for locks in closed loop
     if (CONFIG::Mode == DfllMode::eClosedLoop)
@@ -109,7 +111,7 @@ error_t DFLL48M<CONFIG>::Stop()
     // Disable
     RegisterGuard<SYSCTRL_DFLLCTRL_Type> tmp_DFLLCTRL;
     tmp_DFLLCTRL.data.bit.ENABLE = 1;
-    *reg_DFLLCTRL = tmp_DFLLCTRL;
+    *reg_DFLLCTRL                = tmp_DFLLCTRL;
 
     return 0;
 }
@@ -136,7 +138,7 @@ ClockType DFLL48M<CONFIG>::GetClockSourceType() const
 template<typename CONFIG>
 error_t DFLL48M<CONFIG>::RegisterSync()
 {
-    while(!reg_PCLKSR->data.bit.DFLLRDY) {}
+    while (!reg_PCLKSR->data.bit.DFLLRDY) {}
     return 0;
 }
 
