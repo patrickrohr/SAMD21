@@ -65,13 +65,28 @@ public:
     // Clock Source
     error_t WaitOnClockIsRunning() const;
 
-    // Future?
-    // void OnClockReady();
+    /**
+     * @brief      Gets the divided (actual) output frequency.
+     *
+     * @return     The output frequency.
+     */
+    frequency_t GetOutputFrequency() const;
+
 protected:
     error_t WaitOnClockReady();
+
+    /**
+     * @brief      Gets the frequency of the clock source.
+     * @details    This does not equal the output frequency as this function
+     *             returns the frequency before dividing.
+     *
+     * @return     The frequency.
+     */
     virtual frequency_t GetFrequency() const = 0;
 
 private:
+    unsigned GetDivisionFactor() const;
+
     // purely virtuals
     virtual bool PollIsRunning() const           = 0;
     virtual ClockType GetClockSourceType() const = 0;
