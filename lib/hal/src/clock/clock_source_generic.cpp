@@ -7,7 +7,8 @@ namespace SAMD
 {
 
 static auto reg_GCLK    = MakeRegisterGuard(GCLK);
-static auto reg_GENCTRL = MakeRegisterGuard(&(reg_GCLK->data.GENCTRL));
+static auto reg_CLKCTRL = MakeRegisterGuard(&reg_GCLK->data.CLKCTRL);
+static auto reg_GENCTRL = MakeRegisterGuard(&reg_GCLK->data.GENCTRL);
 static auto reg_GENDIV  = MakeRegisterGuard(&reg_GCLK->data.GENDIV);
 
 ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
@@ -19,7 +20,10 @@ ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
 ClockSourceGeneric::~ClockSourceGeneric()
 {
     bool isEnabled = IsEnabled();
-    samd_assert(isEnabled, "Clock was never enabled: %u", static_cast<unsigned>(uGclkId));
+    samd_assert(
+        isEnabled,
+        "Clock was never enabled: %u",
+        static_cast<unsigned>(uGclkId));
 
     if (isEnabled)
     {
@@ -80,6 +84,34 @@ bool ClockSourceGeneric::IsEnabled() const
     RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
 
     return tmp_GENCTRL.data.bit.GENEN;
+}
+
+void ClockSourceGeneric::AddOutput(ClockOutput eOutput)
+{
+    SetOutput(eOutput, true);
+}
+
+
+void ClockSourceGeneric::RemoveOutput(ClockOutput eOutput)
+{
+    SetOutput(eOutput, false);
+}
+
+void ClockSourceGeneric::SetOutput(ClockOutput eOutput, bool enable)
+{
+    samd_assert(
+        static_cast<unsigned>(eOutput) <
+        static_cast<unsigned>(ClockOutput::eCount),
+        "Invalid ClockOutput %u", static_cast<unsigned>(eOutput));
+
+    RegisterGuard<GCLK_CLKCTRL_Type> tmp_CLKCTRL;
+
+    tmp_CLKCTRL.data.bit.ID = m_uGclkId.Get();
+    tmp_CLKCTRL.data.bit.GEN = static_cast<unsigned>(eOutput);
+    tmp_CLKCTRL.data.bit.CLKEN = static_cast<unsigned>(enable);
+
+    *reg_CLKCTRL = tmp_CLKCTRL;
+    RegisterSync();
 }
 
 error_t ClockSourceGeneric::WaitOnClockIsRunning() const
