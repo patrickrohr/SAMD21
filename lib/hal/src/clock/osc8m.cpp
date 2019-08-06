@@ -6,8 +6,6 @@
 namespace SAMD
 {
 
-static IoPortRW<Sysctrl> g_ioSysctrl(SYSCTRL);
-
 static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
 static auto reg_OSC8M = MakeRegisterGuard(&reg_SYSCTRL->data.OSC8M);
 static auto reg_PCLKSR = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);

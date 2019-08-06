@@ -10,7 +10,6 @@
 #include "config.h"
 
 #include "clock/clock_source_generic.hpp"
-#include <hal_utils/io_port.hpp>
 
 namespace SAMD
 {

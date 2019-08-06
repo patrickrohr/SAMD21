@@ -9,7 +9,7 @@
 
 #include <common/error.hpp>
 #include <common/id_traits.hpp>
-#include <hal_utils/io_port.hpp>
+#include <hal_utils/register.hpp>
 #include <samd21.h>
 
 namespace SAMD
