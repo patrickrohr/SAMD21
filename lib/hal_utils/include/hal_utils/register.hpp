@@ -33,7 +33,7 @@ inline void RegisterCopy<char>(
     for (unsigned i = 0; i < size; ++i) { dest[i] = source[i]; }
 }
 
-template<typename T, bool IsHardwareAddr = false>
+template<typename T>
 struct RegisterGuard
 {
     using underlying_type          = typename fixed_width_int<sizeof(T)>::type;
@@ -41,14 +41,13 @@ struct RegisterGuard
 
     RegisterGuard() = default;
 
-    explicit RegisterGuard(
-        const volatile RegisterGuard<T, !IsHardwareAddr>& rhs)
+    explicit RegisterGuard(const volatile RegisterGuard& rhs)
     {
         operator=(rhs);
     }
 
     volatile RegisterGuard& operator=(
-        const volatile RegisterGuard<T, !IsHardwareAddr>& rhs) volatile
+        const volatile RegisterGuard& rhs) volatile
     {
         RegisterCopy(
             reinterpret_cast<volatile underlying_type*>(this),
@@ -58,15 +57,8 @@ struct RegisterGuard
     }
 
     // delete copy constructors
-    RegisterGuard(const RegisterGuard<T, IsHardwareAddr>& rhs) = delete;
-    RegisterGuard& operator=(const RegisterGuard<T, IsHardwareAddr>& rhs) =
-        delete;
-
-    volatile RegisterGuard<T, !IsHardwareAddr>& Convert()
-    {
-        return *reinterpret_cast<volatile RegisterGuard<T, !IsHardwareAddr>>(
-            this);
-    }
+    RegisterGuard(const RegisterGuard& rhs) = delete;
+    RegisterGuard& operator=(const RegisterGuard& rhs) = delete;
 
     T data;
 };
@@ -80,19 +72,19 @@ struct RegisterGuard
 template<typename T, Environment ENV = eRuntimeEnvironment>
 struct RegisterGuardHelper
 {
-    static volatile RegisterGuard<T, true>* FromPointer(volatile T* pReg)
+    static volatile RegisterGuard<T>* FromPointer(volatile T* pReg)
     {
-        return reinterpret_cast<volatile RegisterGuard<T, true>*>(pReg);
+        return reinterpret_cast<volatile RegisterGuard<T>*>(pReg);
     }
 };
 
 template<typename T>
 struct RegisterGuardHelper<T, Environment::eSimulation>
 {
-    static volatile RegisterGuard<T, true>* FromPointer(volatile T* pReg)
+    static volatile RegisterGuard<T>* FromPointer(volatile T* pReg)
     {
         static T data;
-        return reinterpret_cast<volatile RegisterGuard<T, true>*>(&data);
+        return reinterpret_cast<volatile RegisterGuard<T>*>(&data);
     }
 };
 
@@ -107,7 +99,7 @@ struct RegisterGuardHelper<T, Environment::eSimulation>
  * @return     Hardware Register Guard
  */
 template<typename T, Environment ENV = eRuntimeEnvironment>
-volatile RegisterGuard<T, true>* MakeRegisterGuard(volatile T* pReg)
+volatile RegisterGuard<T>* MakeRegisterGuard(volatile T* pReg)
 {
     return RegisterGuardHelper<T, ENV>::FromPointer(pReg);
 }
