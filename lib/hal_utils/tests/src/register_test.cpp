@@ -22,7 +22,7 @@ struct FakeRegister
     {
     }
 
-    bool operator==(const FakeRegister& rhs) const
+    bool operator==(const volatile FakeRegister& rhs) const volatile
     {
         return a == rhs.a && b == rhs.b && c == rhs.c;
     }
@@ -30,9 +30,14 @@ struct FakeRegister
 
 struct FakeWideRegister
 {
-    std::array<char, 16> data;
+    std::array<uint8_t, 16> data;
 
     FakeWideRegister() : data()
+    {
+    }
+
+    FakeWideRegister(std::array<uint8_t, 16>&& arrData) :
+        data(std::move(arrData))
     {
     }
 
@@ -42,78 +47,68 @@ struct FakeWideRegister
     }
 };
 
-TEST(RegisterTypeTest, Constructor)
+FakeRegister CreateFakeRegister()
 {
+    FakeRegister reg;
+    reg.a = 235;
+    reg.b = 12;
+    reg.c = 9649;
 
-    volatile int fakeRegister = 15;
-
-    SAMD::register_t<int, Environment::eTarget> objRegister(&fakeRegister);
-    SAMD::register_t<int, Environment::eSimulation> objRegisterSim(
-        &fakeRegister);
-
-    EXPECT_EQ(objRegister.Get(), &fakeRegister);
-    EXPECT_NE(objRegisterSim.Get(), &fakeRegister);
+    return reg;
 }
 
-TEST(RegisterTypeTest, NormalRegister)
+FakeWideRegister CreateFakeWideRegister()
 {
-    FakeRegister fakeRegister;
+    FakeWideRegister reg(
+        { 123, 90, 23, 76, 23, 45, 1, 237, 11, 90, 72, 183, 3, 2, 2, 255 });
 
-    SAMD::register_t<decltype(fakeRegister), Environment::eTarget> objRegister(
-        &fakeRegister);
-    SAMD::register_t<decltype(fakeRegister), Environment::eSimulation>
-        objRegisterSim(&fakeRegister);
-
-    FakeRegister registerVal;
-    registerVal.a = 5;
-    registerVal.b = 123;
-    registerVal.c = 8721;
-
-    objRegister = registerVal;
-    EXPECT_EQ(fakeRegister, registerVal);
-
-    objRegisterSim = registerVal;
-    // HACK: Casting away volatile qualifier using const_cast
-    EXPECT_EQ(*const_cast<FakeRegister*>(objRegisterSim.Get()), registerVal);
-
-    FakeRegister result = objRegister;
-    EXPECT_EQ(result, fakeRegister);
-    EXPECT_EQ(result, registerVal);
-
-    result = objRegisterSim;
-    EXPECT_EQ(result, registerVal);
+    return reg;
 }
 
-TEST(RegisterTypeTest, WideRegister)
+TEST(RegisterGuardTest, TargetTest)
 {
-    FakeWideRegister fakeRegister;
+    FakeRegister fakeRegister         = CreateFakeRegister();
+    FakeWideRegister fakeRegisterWide = CreateFakeWideRegister();
 
-    SAMD::register_t<decltype(fakeRegister), Environment::eTarget> objRegister(
-        &fakeRegister);
-    SAMD::register_t<decltype(fakeRegister), Environment::eSimulation>
-        objRegisterSim(&fakeRegister);
+    auto* reg_FAKE =
+        MakeRegisterGuard<FakeRegister, Environment::eTarget>(&fakeRegister);
+    auto* reg_FAKEWIDE =
+        MakeRegisterGuard<FakeWideRegister, Environment::eTarget>(
+            &fakeRegisterWide);
 
-    FakeWideRegister registerVal;
-    registerVal.data[0]  = 35;
-    registerVal.data[1]  = 253;
-    registerVal.data[2]  = 1;
-    registerVal.data[3]  = 37;
-    registerVal.data[7]  = 1;
-    registerVal.data[11] = 17;
-    registerVal.data[13] = 178;
-
-    objRegister = registerVal;
-    EXPECT_EQ(fakeRegister, registerVal);
-
-    objRegisterSim = registerVal;
-    // HACK: Casting away volatile qualifier using const_cast
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->data), fakeRegister);
     EXPECT_EQ(
-        *const_cast<FakeWideRegister*>(objRegisterSim.Get()), registerVal);
+        const_cast<FakeWideRegister&>(reg_FAKEWIDE->data), fakeRegisterWide);
 
-    FakeWideRegister result = registerVal;
-    EXPECT_EQ(result, fakeRegister);
-    EXPECT_EQ(result, registerVal);
+    RegisterGuard<FakeRegister> tmp_FAKE(*reg_FAKE);
+    RegisterGuard<FakeWideRegister> tmp_FAKEWIDE(*reg_FAKEWIDE);
 
-    result = objRegisterSim;
-    EXPECT_EQ(result, registerVal);
+    EXPECT_EQ(tmp_FAKE.data, fakeRegister);
+    EXPECT_EQ(tmp_FAKEWIDE.data, fakeRegisterWide);
+}
+
+TEST(RegisterGuardTest, SimTest)
+{
+    FakeRegister fakeRegister         = CreateFakeRegister();
+    FakeWideRegister fakeRegisterWide = CreateFakeWideRegister();
+
+    auto* reg_FAKE = MakeRegisterGuard<FakeRegister, Environment::eSimulation>(
+        &fakeRegister);
+    auto* reg_FAKEWIDE =
+        MakeRegisterGuard<FakeWideRegister, Environment::eSimulation>(
+            &fakeRegisterWide);
+
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->data), FakeRegister());
+    EXPECT_EQ(
+        const_cast<FakeWideRegister&>(reg_FAKEWIDE->data), FakeWideRegister());
+
+    const_cast<FakeRegister&>(reg_FAKE->data) = CreateFakeRegister();
+    const_cast<FakeWideRegister&>(reg_FAKEWIDE->data) =
+        CreateFakeWideRegister();
+
+    RegisterGuard<FakeRegister> tmp_FAKE(*reg_FAKE);
+    RegisterGuard<FakeWideRegister> tmp_FAKEWIDE(*reg_FAKEWIDE);
+
+    EXPECT_EQ(tmp_FAKE.data, fakeRegister);
+    EXPECT_EQ(tmp_FAKEWIDE.data, fakeRegisterWide);
 }
