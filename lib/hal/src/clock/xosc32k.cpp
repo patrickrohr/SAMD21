@@ -13,8 +13,8 @@ namespace SAMD
 
 // Protected hardware access
 static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
-static auto reg_XOSC32K = MakeRegisterGuard(&reg_SYSCTRL->data.XOSC32K);
-static auto reg_PCLKSR  = MakeRegisterGuard(&reg_SYSCTRL->data.PCLKSR);
+static auto reg_XOSC32K = MakeRegisterGuard(&reg_SYSCTRL->Get().XOSC32K);
+static auto reg_PCLKSR  = MakeRegisterGuard(&reg_SYSCTRL->Get().PCLKSR);
 
 template<typename CONFIG>
 XOSC32K<CONFIG>::XOSC32K(gclk_id_t id) : ClockSourceGeneric(id), CONFIG()
@@ -35,17 +35,17 @@ error_t XOSC32K<CONFIG>::Start()
     // TODO: Disable interrupts between reads and writes?
     RegisterGuard<SYSCTRL_XOSC32K_Type> tmp_XOSC32K(*reg_XOSC32K);
 
-    tmp_XOSC32K.data.bit.STARTUP  = CONFIG::Startup;
-    tmp_XOSC32K.data.bit.XTALEN   = CONFIG::ExternalEnabled;
-    tmp_XOSC32K.data.bit.EN32K    = 1;
-    tmp_XOSC32K.data.bit.RUNSTDBY = CONFIG::RunStandby;
-    tmp_XOSC32K.data.bit.ONDEMAND = CONFIG::OnDemand;
-    tmp_XOSC32K.data.bit.WRTLOCK  = CONFIG::WriteLock;
+    tmp_XOSC32K.Get().bit.STARTUP  = CONFIG::Startup;
+    tmp_XOSC32K.Get().bit.XTALEN   = CONFIG::ExternalEnabled;
+    tmp_XOSC32K.Get().bit.EN32K    = 1;
+    tmp_XOSC32K.Get().bit.RUNSTDBY = CONFIG::RunStandby;
+    tmp_XOSC32K.Get().bit.ONDEMAND = CONFIG::OnDemand;
+    tmp_XOSC32K.Get().bit.WRTLOCK  = CONFIG::WriteLock;
 
     *reg_XOSC32K = tmp_XOSC32K;
 
-    // Separate write to Enable bit as per Datasheet
-    tmp_XOSC32K.data.bit.ENABLE = 1;
+    // Separate write to Enable bit as per Get()
+    tmp_XOSC32K.Get().bit.ENABLE = 1;
     *reg_XOSC32K                = tmp_XOSC32K;
 
     return 0;
@@ -56,7 +56,7 @@ error_t XOSC32K<CONFIG>::Stop()
 {
     // Leave Factory Values for FRANGE and CALIB
     RegisterGuard<SYSCTRL_XOSC32K_Type> tmp_XOSC32K(*reg_XOSC32K);
-    tmp_XOSC32K.data.bit.ENABLE = 0;
+    tmp_XOSC32K.Get().bit.ENABLE = 0;
     *reg_XOSC32K                = tmp_XOSC32K;
 
     return 0;
@@ -71,7 +71,7 @@ frequency_t XOSC32K<CONFIG>::GetFrequency() const
 template<typename CONFIG>
 bool XOSC32K<CONFIG>::PollIsRunning() const
 {
-    return reg_PCLKSR->data.bit.XOSC32KRDY;
+    return reg_PCLKSR->Get().bit.XOSC32KRDY;
 }
 
 template<typename CONFIG>
