@@ -13,6 +13,7 @@ add_library(samd21_hal STATIC)
 
 target_sources(samd21_hal
     PRIVATE
+        # TODO: Remove c files
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/gclk.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port.c
@@ -23,6 +24,8 @@ target_sources(samd21_hal
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/dfll48m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin_configuration.cpp
+
 )
 
 target_compile_features(samd21_hal
