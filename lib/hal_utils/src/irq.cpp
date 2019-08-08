@@ -8,9 +8,7 @@
 #include "hal_utils/irq.hpp"
 #include "common/error.hpp"
 
-#if BUILD_TARGET
 #include <samd21.h>
-#endif
 
 namespace SAMD
 {
