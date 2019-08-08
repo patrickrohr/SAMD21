@@ -16,7 +16,7 @@ PinConfiguration::PinConfiguration(pin_id_t pin, Type type) :
 {
 }
 
-PinConfiguration::pin_id_t PinConfiguration::GetPin() const
+pin_id_t PinConfiguration::GetPin() const
 {
     return m_pin;
 }
