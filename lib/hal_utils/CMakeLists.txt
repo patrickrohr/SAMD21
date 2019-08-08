@@ -26,7 +26,7 @@ target_link_libraries(samd21_hal_utils
         common_utils)
 
 target_link_libraries(samd21_hal_utils
-    PRIVATE
+    PUBLIC
         cmsis_samd21
 )
 
