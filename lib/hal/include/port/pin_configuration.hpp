@@ -12,6 +12,9 @@
 namespace SAMD
 {
 
+class PinConfiguration;
+using pin_id_t = id_traits<PinConfiguration>;
+
 /**
  * @brief      Class for pin configuration.
  * @details    For now, this class just serves as a holder for pin configurations.
@@ -37,8 +40,6 @@ public:
         eAnalog,         // Analog I/O
         eReset = eAnalog // Reset state
     };
-
-    using pin_id_t = id_traits<PinConfiguration>;
 
 public:
     // TODO: move to cpp
