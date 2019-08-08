@@ -7,9 +7,9 @@ namespace SAMD
 {
 
 static auto reg_GCLK    = MakeRegisterGuard(GCLK);
-static auto reg_CLKCTRL = MakeRegisterGuard(&reg_GCLK->Get().CLKCTRL);
-static auto reg_GENCTRL = MakeRegisterGuard(&reg_GCLK->Get().GENCTRL);
-static auto reg_GENDIV  = MakeRegisterGuard(&reg_GCLK->Get().GENDIV);
+static auto reg_CLKCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().CLKCTRL);
+static auto reg_GENCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().GENCTRL);
+static auto reg_GENDIV  = MakeSharedRegisterGuard(&reg_GCLK->Get().GENDIV);
 
 ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
 {
@@ -40,7 +40,7 @@ error_t RegisterSync()
 
 error_t ClockSourceGeneric::Enable(uint32_t uDivisionFactor)
 {
-    RegisterGuard<GCLK_GENDIV_Type> tmp_GENDIV;
+    RegisterGuard<GCLK_GENDIV_Type, true> tmp_GENDIV;
     tmp_GENDIV.Get().bit.ID  = static_cast<uint8_t>(m_uGclkId);
     tmp_GENDIV.Get().bit.DIV = uDivisionFactor;
 
@@ -51,7 +51,7 @@ error_t ClockSourceGeneric::Enable(uint32_t uDivisionFactor)
     // TODO: Could Register_Guard provide support to do this directly?
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+    auto tmp_GENCTRL = *reg_GENCTRL;
 
     tmp_GENCTRL.Get().bit.GENEN = 1;
     tmp_GENCTRL.Get().bit.SRC   = static_cast<uint32_t>(GetClockSourceType());
@@ -66,7 +66,7 @@ error_t ClockSourceGeneric::Disable()
 {
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+    auto tmp_GENCTRL = *reg_GENCTRL;
 
     tmp_GENCTRL.Get().bit.GENEN = 0;
     *reg_GENCTRL               = tmp_GENCTRL;
@@ -81,7 +81,7 @@ bool ClockSourceGeneric::IsEnabled() const
     // check hardware
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+    auto tmp_GENCTRL = *reg_GENCTRL;
 
     return tmp_GENCTRL.Get().bit.GENEN;
 }
@@ -104,7 +104,7 @@ void ClockSourceGeneric::SetOutput(ClockOutput eOutput, bool enable)
         static_cast<unsigned>(ClockOutput::eCount),
         "Invalid ClockOutput %u", static_cast<unsigned>(eOutput));
 
-    RegisterGuard<GCLK_CLKCTRL_Type> tmp_CLKCTRL;
+    RegisterGuard<GCLK_CLKCTRL_Type, true> tmp_CLKCTRL;
 
     tmp_CLKCTRL.Get().bit.ID = m_uGclkId.Get();
     tmp_CLKCTRL.Get().bit.GEN = static_cast<unsigned>(eOutput);
@@ -124,11 +124,11 @@ unsigned ClockSourceGeneric::GetDivisionFactor() const
 {
     *reinterpret_cast<volatile uint8_t*>(reg_GENDIV) =
         static_cast<uint8_t>(m_uGclkId);
-    RegisterGuard<GCLK_GENDIV_Type> tmp_GENDIV(*reg_GENDIV);
+    auto tmp_GENDIV = *reg_GENDIV;
 
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    RegisterGuard<GCLK_GENCTRL_Type> tmp_GENCTRL(*reg_GENCTRL);
+    auto tmp_GENCTRL = *reg_GENCTRL;
 
     uint32_t uDivisionFactor = tmp_GENDIV.Get().bit.DIV;
 
