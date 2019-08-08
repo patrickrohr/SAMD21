@@ -59,5 +59,3 @@ target_compile_features(samd21_hal PRIVATE c_static_assert)
 if(Kconfiglib_FOUND)
     add_dependencies(samd21_hal genconfig)
 endif()
-
-add_test_directory(tests)
