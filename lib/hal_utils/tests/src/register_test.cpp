@@ -76,15 +76,15 @@ TEST(RegisterGuardTest, TargetTest)
         MakeRegisterGuard<FakeWideRegister, Environment::eTarget>(
             &fakeRegisterWide);
 
-    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->data), fakeRegister);
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()), fakeRegister);
     EXPECT_EQ(
-        const_cast<FakeWideRegister&>(reg_FAKEWIDE->data), fakeRegisterWide);
+        const_cast<FakeWideRegister&>(reg_FAKEWIDE->Get()), fakeRegisterWide);
 
     RegisterGuard<FakeRegister> tmp_FAKE(*reg_FAKE);
     RegisterGuard<FakeWideRegister> tmp_FAKEWIDE(*reg_FAKEWIDE);
 
-    EXPECT_EQ(tmp_FAKE.data, fakeRegister);
-    EXPECT_EQ(tmp_FAKEWIDE.data, fakeRegisterWide);
+    EXPECT_EQ(tmp_FAKE.Get(), fakeRegister);
+    EXPECT_EQ(tmp_FAKEWIDE.Get(), fakeRegisterWide);
 }
 
 TEST(RegisterGuardTest, SimTest)
@@ -98,17 +98,56 @@ TEST(RegisterGuardTest, SimTest)
         MakeRegisterGuard<FakeWideRegister, Environment::eSimulation>(
             &fakeRegisterWide);
 
-    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->data), FakeRegister());
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()), FakeRegister());
     EXPECT_EQ(
-        const_cast<FakeWideRegister&>(reg_FAKEWIDE->data), FakeWideRegister());
+        const_cast<FakeWideRegister&>(reg_FAKEWIDE->Get()), FakeWideRegister());
 
-    const_cast<FakeRegister&>(reg_FAKE->data) = CreateFakeRegister();
-    const_cast<FakeWideRegister&>(reg_FAKEWIDE->data) =
+    const_cast<FakeRegister&>(reg_FAKE->Get()) = CreateFakeRegister();
+    const_cast<FakeWideRegister&>(reg_FAKEWIDE->Get()) =
         CreateFakeWideRegister();
 
-    RegisterGuard<FakeRegister> tmp_FAKE(*reg_FAKE);
-    RegisterGuard<FakeWideRegister> tmp_FAKEWIDE(*reg_FAKEWIDE);
+    RegisterGuard<FakeRegister, false, Environment::eSimulation> tmp_FAKE(
+        *reg_FAKE);
+    RegisterGuard<FakeWideRegister, false, Environment::eSimulation>
+        tmp_FAKEWIDE(*reg_FAKEWIDE);
 
-    EXPECT_EQ(tmp_FAKE.data, fakeRegister);
-    EXPECT_EQ(tmp_FAKEWIDE.data, fakeRegisterWide);
+    EXPECT_EQ(tmp_FAKE.Get(), fakeRegister);
+    EXPECT_EQ(tmp_FAKEWIDE.Get(), fakeRegisterWide);
+}
+
+TEST(RegisterGuardTest, SharedSimTest)
+{
+    // For the simulation, the underlying data structure shouldn't matter
+    FakeRegister fakeRegister = CreateFakeRegister();
+
+    auto* reg_FAKE =
+        MakeSharedRegisterGuard<FakeRegister, Environment::eSimulation>(
+            &fakeRegister);
+
+    // Write ID 15
+    *reinterpret_cast<volatile uint8_t*>(reg_FAKE) = 15;
+    auto tmp_FAKE = *reg_FAKE;
+    tmp_FAKE.Get().a = 1;
+    tmp_FAKE.Get().b = 2;
+    tmp_FAKE.Get().c = 37;
+
+    *reg_FAKE = tmp_FAKE;
+
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()), tmp_FAKE.Get());
+
+    // Write ID 20
+    *reinterpret_cast<volatile uint8_t*>(reg_FAKE) = 20;
+    auto tmp_FAKE2 = *reg_FAKE;
+    tmp_FAKE2.Get().b = 46;
+
+    *reg_FAKE = tmp_FAKE2;
+
+    // ID Field of Shared register is equivalent to the a member here
+    *reinterpret_cast<volatile uint8_t*>(reg_FAKE) = static_cast<uint8_t>(15);
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()).a, 15u);
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()).c, 37u);
+
+    *reinterpret_cast<volatile uint8_t*>(reg_FAKE) = static_cast<uint8_t>(20);
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()).a, 20u);
+    EXPECT_EQ(const_cast<FakeRegister&>(reg_FAKE->Get()).b, 46u);
 }

@@ -63,7 +63,7 @@ class RegisterGuard : register_traits_t<T>
 public:
     RegisterGuard() = default;
 
-    explicit RegisterGuard(const volatile RegisterGuard& rhs)
+    RegisterGuard(const volatile RegisterGuard& rhs)
     {
         operator=(rhs);
     }
@@ -108,24 +108,36 @@ public:
 template<typename T>
 class RegisterGuard<T, true, Environment::eSimulation> : register_traits_t<T>
 {
+    static constexpr unsigned g_dataSize = 256;
+
 public:
-    RegisterGuard() : data(), m_arrData()
+    RegisterGuard() : m_uId(), m_arrData()
     {
+    }
+
+    RegisterGuard(const RegisterGuard&) = default;
+    RegisterGuard& operator=(const RegisterGuard&) = default;
+
+    RegisterGuard(const volatile RegisterGuard& rhs)
+    {
+        operator=(rhs);
+    }
+
+    void operator=(
+        const volatile RegisterGuard& rhs) volatile
+    {
+        const_cast<RegisterGuard*>(this)->operator=(
+            const_cast<const RegisterGuard&>(rhs));
     }
 
     const volatile T& Get() const volatile
     {
-        // TODO: I am not sure if this is going to work everywhere
-        uint8_t id = static_cast<uint8_t>(data);
-
-        // clear out last 8 bits
-        // TODO: Make sure this agrees with endianness
-        m_arrData[id] &= ~0xFF;
-        m_arrData[id] |= id;
+        // Set ID on actual register
+        *reinterpret_cast<volatile uint8_t*>(&m_arrData[m_uId]) = m_uId;
 
         // Before returning the data, we need to copy it from
         // m_arrData to data
-        return m_arrData[id];
+        return m_arrData[m_uId];
     }
 
     volatile T& Get() volatile
@@ -148,10 +160,12 @@ public:
 
 private:
     // This is only going to hold the id
-    uint8_t data;
+    // Usually a RegisterGuard* is converted to a uint8_t* and then the write is
+    // performed.
+    uint8_t m_uId;
 
 private:
-    T m_arrData[256];
+    mutable T m_arrData[g_dataSize];
 };
 
 /**
@@ -172,9 +186,11 @@ struct RegisterGuardHelper
 template<typename T, bool IsShared>
 struct RegisterGuardHelper<T, IsShared, Environment::eSimulation>
 {
-    static volatile RegisterGuard<T, IsShared, Environment::eSimulation>* FromPointer(volatile T* pReg)
+    static volatile RegisterGuard<T, IsShared, Environment::eSimulation>*
+    FromPointer(volatile T* pReg)
     {
-        static volatile RegisterGuard<T, IsShared, Environment::eSimulation> data;
+        static volatile RegisterGuard<T, IsShared, Environment::eSimulation>
+            data;
         return &data;
     }
 };
