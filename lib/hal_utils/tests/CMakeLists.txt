@@ -6,7 +6,6 @@ add_executable(hal_utils_test)
 
 target_sources(hal_utils_test
     PRIVATE
-        src/io_port_test.cpp
         src/main.cpp
         src/register_test.cpp
 )
