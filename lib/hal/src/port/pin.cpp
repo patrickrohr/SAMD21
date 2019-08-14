@@ -18,48 +18,53 @@ auto reg_PORT = MakeRegisterGuard(PORT);
 
 void Pin::Configure(Configuration eConfig)
 {
-    volatile auto& pPortGroup = GetPortGroup()->Get();
+    volatile auto& portGroup = GetPortGroup()->Get();
 
     switch (eConfig)
     {
     case Pin::Configuration::eInputStandard:
-        pPortGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_INEN;
-        pPortGroup.DIRCLR.reg                    = (1 << m_localId.Get());
+        portGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_INEN;
+        portGroup.DIRCLR.reg                  = (1 << m_localId.Get());
         break;
 
     case Pin::Configuration::eInputPull:
-        pPortGroup.PINCFG[m_localId.Get()].reg =
+        portGroup.PINCFG[m_localId.Get()].reg =
             PORT_PINCFG_PULLEN | PORT_PINCFG_INEN;
-        pPortGroup.DIRCLR.reg = (1 << m_localId.Get());
+        portGroup.DIRCLR.reg = (1 << m_localId.Get());
         break;
 
     case Pin::Configuration::eTotemPoleDisabledIn:
-        pPortGroup.PINCFG[m_localId.Get()].reg = 0;
-        pPortGroup.DIRSET.reg                    = (1 << m_localId.Get());
+        portGroup.PINCFG[m_localId.Get()].reg = 0;
+        portGroup.DIRSET.reg                  = (1 << m_localId.Get());
         break;
 
     case Pin::Configuration::eTotemPoleEnabledIn:
-        pPortGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_INEN;
-        pPortGroup.DIRSET.reg                    = (1 << m_localId.Get());
+        portGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_INEN;
+        portGroup.DIRSET.reg                  = (1 << m_localId.Get());
         break;
 
     case Pin::Configuration::eOutputPull:
-        pPortGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_PULLEN;
-        pPortGroup.DIRCLR.reg                    = (1 << m_localId.Get());
+        portGroup.PINCFG[m_localId.Get()].reg = PORT_PINCFG_PULLEN;
+        portGroup.DIRCLR.reg                  = (1 << m_localId.Get());
         break;
 
     case Pin::Configuration::eAnalog:
-        pPortGroup.PINCFG[m_localId.Get()].reg = 0;
-        pPortGroup.DIRCLR.reg                    = (1 << m_localId.Get());
+        portGroup.PINCFG[m_localId.Get()].reg = 0;
+        portGroup.DIRCLR.reg                  = (1 << m_localId.Get());
         break;
     }
 }
 
 void Pin::SetMultiplexingMode(MultiplexingMode eMode)
 {
+    volatile auto& portGroup = GetPortGroup()->Get();
 
-    // first pincfg.pmuxen
-    //
+    portGroup.PINCFG[m_localId.Get()].reg |= PORT_PINCFG_PMUXEN;
+    // TODO: Weirdly, I used to have this the other way round.
+    // Double check if this doesn't work.
+    portGroup.PMUX[m_localId.Get() / 2].reg |=
+        (m_localId.Get() % 2) ? PORT_PMUX_PMUXE(static_cast<unsigned>(eMode))
+                              : PORT_PMUX_PMUXO(static_cast<unsigned>(eMode));
 }
 
 volatile RegisterGuard<PortGroup>* Pin::GetPortGroup()
