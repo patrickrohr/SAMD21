@@ -50,9 +50,22 @@ public:
         eModeC,
         eModeD,
         eModeE,
+        eModeF,
+        eModeG,
+        eModeH,
 
+        eEIC = eModeA,
+        eREF = eModeB,
+        eADC = eModeB,
+        eAC = eModeB,
+        ePTC = eModeB,
+        eDAC = eModeB,
         eSercom = eModeC,
-        eSercomAlt = eModeD
+        eSercomAlt = eModeD,
+        eTC = eModeE, // also TCC
+        eTCC = eModeF,
+        eCOM = eModeG,
+        eGCLK = eModeH // also AC
     };
 
 public:
@@ -89,7 +102,7 @@ public:
     }
 
 private:
-    volatile RegisterGuard<::PortGroup>* GetPortGroup();
+    volatile RegisterGuard<PortGroup>* GetPortGroup();
 
 private:
     unsigned m_uGlobalId;
