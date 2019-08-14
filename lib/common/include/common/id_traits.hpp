@@ -44,12 +44,12 @@ public:
         return m_id > rhs.m_id;
     }
 
-    type Get() const
+    constexpr type Get() const
     {
         return m_id;
     }
 
-    explicit operator type() const
+    constexpr explicit operator type() const
     {
         return m_id;
     }
