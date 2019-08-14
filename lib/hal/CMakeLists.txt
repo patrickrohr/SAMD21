@@ -24,7 +24,7 @@ target_sources(samd21_hal
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/dfll48m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin_configuration.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port/port_manager.cpp
 )
 
