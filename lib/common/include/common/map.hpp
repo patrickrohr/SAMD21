@@ -7,11 +7,13 @@
 
 #pragma once
 
+#include "common/sequence_iterator.hpp"
+
 namespace SAMD
 {
 
 template<typename K, typename V, unsigned SIZE>
-class Map
+class Map final
 {
     static_assert(SIZE > 0, "Size must be larger than 0");
 
@@ -30,26 +32,53 @@ public:
         V value;
     };
 
-    using iterator_type = Node*;
     using index_type    = unsigned;
+    using iterator_type = SequenceIterator<Map<K, V, SIZE>>;
     using size_type     = unsigned;
+    using element_type  = Node;
 
 public:
-    Map() : m_uSize(), m_arrData(), m_arrIsInitialized()
+    Map() : m_arrData(), m_uSize(), m_itBegin(this, 0), m_itEnd(this, 0), m_arrIsInitialized()
     {
+        // Could directly initialize m_itEnd but this is safer
+        RightChildUnsafe(m_itEnd);
     }
 
     bool Insert(const Node& newNode)
     {
         // Traverse tree, start at root = 0
-        index_type index   = 0;
-        bool isResultValid = FindImpl(newNode.key, index);
+        iterator_type it(this, 0);
+        bool result = FindImpl(newNode.key, it);
 
-        if (isResultValid && !m_arrIsInitialized[index])
+        if (!result)
         {
-            m_arrData[index]          = newNode;
-            m_arrIsInitialized[index] = true;
+            // overflow
+            return false;
+        }
+
+        if (!m_arrIsInitialized[it.m_index])
+        {
+            m_arrData[it.m_index]          = newNode;
+            m_arrIsInitialized[it.m_index] = true;
             ++m_uSize;
+
+            // Update iterators
+            if (m_uSize == 1)
+            {
+                m_itBegin = it;
+                RightChildUnsafe(it);
+                m_itEnd = it;
+            }
+            else if (m_itEnd == it)
+            {
+                RightChildUnsafe(it);
+                m_itEnd = it;
+            }
+            else if (it->key < m_itBegin->key)
+            {
+                m_itBegin = it;
+            }
+
             return true;
         }
 
@@ -58,15 +87,15 @@ public:
 
     iterator_type Find(const K& key)
     {
-        index_type index   = 0;
-        bool isResultValid = FindImpl(key, index);
+        iterator_type it(this, 0);
+        bool isResultValid = FindImpl(key, it);
 
-        if (isResultValid && m_arrIsInitialized[index])
+        if (isResultValid && m_arrIsInitialized[it.m_index])
         {
-            return &m_arrData[index];
+            return it;
         }
 
-        return End();
+        return m_itEnd;
     }
 
     size_type Size()
@@ -76,40 +105,77 @@ public:
 
     iterator_type Begin()
     {
-        // TODO
-        return nullptr;
+        return m_itBegin;
     }
 
     iterator_type End()
     {
-        // TODO
-        return nullptr;
+        return m_itEnd;
     }
 
 private:
-    // could be uninitialized
-    // returns false when index is out of range
-    bool FindImpl(const K& key, index_type& index)
-    {
-        index = 0;
+    // SequenceIterator support
+    friend iterator_type;
 
-        while (m_arrIsInitialized[index])
+    void Next(iterator_type& it)
+    {
+        // calling next on end iterator is undefined!
+
+        if (RightChild(it))
         {
-            bool isOkay = true;
-            if (key == m_arrData[index].key)
+            while (LeftChild(it)) {}
+            return;
+        }
+
+        while (!IsLeftChild(it) && !IsRoot(it)) { Parent(it); }
+
+        bool isEnd = !Parent(it);
+
+        if (isEnd)
+        {
+            it = m_itEnd;
+        }
+    }
+
+    void Prev(iterator_type& it)
+    {
+        // calling prev on begin iterator is undefined!
+
+        if (LeftChild(it))
+        {
+            while (RightChild(it)) {}
+            return;
+        }
+
+        while (!IsRightChild(it) && !IsRoot(it)) { Parent(it); }
+    }
+
+    const element_type& operator[](unsigned index)
+    {
+        return m_arrData[index];
+    }
+
+private:
+    // returns true if found, false if out of range.
+    bool FindImpl(const K& key, iterator_type& it)
+    {
+        while (m_arrIsInitialized[it.m_index])
+        {
+            bool isInRange = true;
+            if (key == it->key)
             {
                 return true;
             }
-            else if (key < m_arrData[index].key)
+            else if (key < it->key)
             {
-                isOkay = LeftChild(index);
+                isInRange = LeftChild(it, true);
             }
             else
             {
-                isOkay = RightChild(index);
+                isInRange = RightChild(it, true);
             }
 
-            if (!isOkay)
+            if (!isInRange)
             {
                 // index overflow
                 return false;
@@ -120,27 +186,76 @@ private:
         return true;
     }
 
-    static bool LeftChild(index_type& index)
+    static bool IsRoot(const iterator_type& it)
     {
-        // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10
-        // 0, l0, r0, l1, r1, l2, r2, l3, r3, l4, r4
-        // (i * 2) + 1
-        index = (index * 2) + 1;
-
-        return index < SIZE;
+        return it.m_index == 0;
     }
 
-    static bool RightChild(index_type& index)
+    static bool IsLeftChild(const iterator_type& it)
     {
-        // (i + 1) * 2
-        index = (index + 1) * 2;
+        return it.m_index % 2;
+    }
 
-        return index < SIZE;
+    static bool IsRightChild(const iterator_type& it)
+    {
+        return !IsLeftChild(it) && !IsRoot(it);
+    }
+
+    static bool Parent(iterator_type& it)
+    {
+        if (IsRoot(it))
+        {
+            return false;
+        }
+
+        it.m_index = (it.m_index - 1) / 2;
+        return true;
+    }
+
+    bool UpdateIndex(iterator_type& it, unsigned newIndex, bool allowEmpty)
+    {
+        if (newIndex >= SIZE)
+        {
+            return false;
+        }
+
+        if (!allowEmpty && !m_arrIsInitialized[newIndex])
+        {
+            return false;
+        }
+
+        it.m_index = newIndex;
+    }
+
+    bool LeftChild(iterator_type& it, bool allowEmpty = false)
+    {
+        auto newIndex = (it.m_index * 2) + 1;
+        return UpdateIndex(it, newIndex, allowEmpty);
+    }
+
+    // DANGEROUS
+    static void LeftChildUnsafe(iterator_type& it)
+    {
+        it.m_index = (it.m_index * 2) + 1;
+    }
+
+    bool RightChild(iterator_type& it, bool allowEmpty = false)
+    {
+        auto newIndex = (it.m_index + 1) * 2;
+        return UpdateIndex(it, newIndex, allowEmpty);
+    }
+
+    // DANGEROUS
+    static void RightChildUnsafe(iterator_type& it)
+    {
+        it.m_index = (it.m_index + 1) * 2;
     }
 
 private:
-    unsigned m_uSize;
     Node m_arrData[SIZE];
+    unsigned m_uSize;
+    iterator_type m_itBegin;
+    iterator_type m_itEnd;
     bool m_arrIsInitialized[SIZE];
 };
 

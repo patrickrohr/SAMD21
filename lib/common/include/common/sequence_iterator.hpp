@@ -18,19 +18,27 @@ class SequenceIterator
     friend T;
 
 public:
-    SequenceIterator(T& obj, unsigned index) : m_obj(obj), m_index(index)
+    SequenceIterator(T* obj, unsigned index) : m_pObj(obj), m_index(index)
     {
     }
 
-    typename T::element_type& operator->()
+    SequenceIterator(const SequenceIterator&) = default;
+    SequenceIterator& operator=(const SequenceIterator&) = default;
+
+    bool operator==(const SequenceIterator& rhs) const
     {
-        return m_obj[m_index];
+        return m_pObj == rhs.m_pObj && m_index == rhs.m_index;
+    }
+
+    const typename T::element_type* operator->() const
+    {
+        return &(*m_pObj)[m_index];
     }
 
     SequenceIterator& operator++()
     {
         // pre increment
-        m_obj.Next(*this);
+        m_pObj->Next(*this);
         return *this;
     }
 
@@ -44,7 +52,7 @@ public:
 
     SequenceIterator& operator--()
     {
-        m_obj.Prev(*this);
+        m_pObj->Prev(*this);
         return *this;
     }
 
@@ -56,7 +64,7 @@ public:
     }
 
 private:
-    T& m_obj;
+    T* m_pObj;
     unsigned m_index;
 };
 
