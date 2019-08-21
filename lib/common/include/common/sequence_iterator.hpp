@@ -40,6 +40,11 @@ public:
         return &(*m_pObj)[m_index];
     }
 
+    const typename T::element_type& operator*() const
+    {
+        return *operator->();
+    }
+
     SequenceIterator& operator++()
     {
         // pre increment

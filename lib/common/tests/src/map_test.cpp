@@ -54,4 +54,11 @@ TEST(MapTest, FindTest)
     ASSERT_EQ(itFound, map.End());
 
     ASSERT_EQ(7u, map.Size());
+
+    int lastKey = map.Begin()->key;
+    for (const auto& item : map)
+    {
+        ASSERT_GE(item.key, lastKey);
+        lastKey = item.key;
+    }
 }
