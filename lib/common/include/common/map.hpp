@@ -225,6 +225,7 @@ private:
         }
 
         it.m_index = newIndex;
+        return true;
     }
 
     bool LeftChild(iterator_type& it, bool allowEmpty = false)

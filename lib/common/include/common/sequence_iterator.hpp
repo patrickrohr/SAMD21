@@ -30,6 +30,11 @@ public:
         return m_pObj == rhs.m_pObj && m_index == rhs.m_index;
     }
 
+    bool operator!=(const SequenceIterator& rhs) const
+    {
+        return !operator==(rhs);
+    }
+
     const typename T::element_type* operator->() const
     {
         return &(*m_pObj)[m_index];
