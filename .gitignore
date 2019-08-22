@@ -8,3 +8,6 @@ REMOVE_*
 # Sublime
 *.sublime-project
 *.sublime-workspace
+
+# Tools
+.clangd
