@@ -43,6 +43,7 @@ public:
 
 protected:
     volatile RegisterGuard<Sercom>* GetRegister();
+    sercom_id_t GetId() const;
 
 private:
     sercom_id_t m_id;

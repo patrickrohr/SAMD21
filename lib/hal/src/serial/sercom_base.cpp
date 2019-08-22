@@ -45,6 +45,9 @@ SercomBase::SercomBase(
 
     // TODO: setup port
 
+    // TODO: Do I really need this?
+    reg_PM->Get().APBCMASK.reg |= PM_APBCMASK_PAC2;
+
     // Route clock output to peripheral
     switch (m_id.Get())
     {
@@ -64,15 +67,7 @@ SercomBase::SercomBase(
         reg_PM->Get().APBCMASK.reg |= PM_APBCMASK_SERCOM3;
         sourceClock.AddOutput(ClockOutput::eGCLK_SERCOM3_CORE);
         break;
-    // TODO: There are more???
-    case 4:
-        reg_PM->Get().APBCMASK.reg |= PM_APBCMASK_SERCOM4;
-        sourceClock.AddOutput(ClockOutput::eGCLK_SERCOM4_CORE);
-        break;
-    case 5:
-        reg_PM->Get().APBCMASK.reg |= PM_APBCMASK_SERCOM5;
-        sourceClock.AddOutput(ClockOutput::eGCLK_SERCOM5_CORE);
-        break;
+    // The SAMD21G18A only has 4 serial communication interfaces.
     }
 
     // TODO: Do I need the slow clock??
@@ -88,6 +83,11 @@ SercomBase::~SercomBase() = default;
 volatile RegisterGuard<Sercom>* SercomBase::GetRegister()
 {
     return reg_SERCOM[m_id.Get()];
+}
+
+sercom_id_t SercomBase::GetId() const
+{
+    return m_id;
 }
 
 } // namespace SAMD
