@@ -71,8 +71,8 @@ public:
 public:
     constexpr Pin(Port ePort, pin_id_t pinId) :
         m_uGlobalId(pinId.Get() + ((ePort == Port::ePortA) ? 32 : 0)),
-        m_ePort(ePort),
-        m_localId(pinId)
+        m_localId(pinId),
+        m_ePort(ePort)
     {
     }
 
@@ -91,6 +91,11 @@ public:
         return m_uGlobalId == rhs.m_uGlobalId;
     }
 
+    constexpr bool operator<(const Pin& rhs) const
+    {
+        return m_uGlobalId < rhs.m_uGlobalId;
+    }
+
     constexpr Port GetPort() const
     {
         return m_ePort;
@@ -106,8 +111,8 @@ private:
 
 private:
     unsigned m_uGlobalId;
-    Port m_ePort;
     pin_id_t m_localId;
+    Port m_ePort;
 };
 
 } // namespace SAMD
