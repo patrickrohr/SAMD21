@@ -32,13 +32,19 @@ public:
         V value;
     };
 
-    using index_type    = unsigned;
     using iterator_type = SequenceIterator<Map<K, V, SIZE>>;
     using size_type     = unsigned;
     using element_type  = Node;
 
 public:
-    Map() : m_arrData(), m_uSize(), m_itBegin(this, 0), m_itEnd(this, 0), m_arrIsInitialized()
+    static constexpr unsigned RootNode = 0;
+
+    Map() :
+        m_arrData(),
+        m_uSize(),
+        m_itBegin(this, RootNode),
+        m_itEnd(this, RootNode),
+        m_arrIsInitialized()
     {
         // Could directly initialize m_itEnd but this is safer
         RightChildUnsafe(m_itEnd);
@@ -47,7 +53,7 @@ public:
     bool Insert(const Node& newNode)
     {
         // Traverse tree, start at root = 0
-        iterator_type it(this, 0);
+        iterator_type it(this, RootNode);
         bool result = FindImpl(newNode.key, it);
 
         if (!result)
@@ -60,10 +66,9 @@ public:
         {
             m_arrData[it.m_index]          = newNode;
             m_arrIsInitialized[it.m_index] = true;
-            ++m_uSize;
 
             // Update iterators
-            if (m_uSize == 1)
+            if (m_uSize++ == 0)
             {
                 m_itBegin = it;
                 RightChildUnsafe(it);
@@ -87,7 +92,7 @@ public:
 
     iterator_type Find(const K& key)
     {
-        iterator_type it(this, 0);
+        iterator_type it(this, RootNode);
         bool isResultValid = FindImpl(key, it);
 
         if (isResultValid && m_arrIsInitialized[it.m_index])
@@ -159,9 +164,9 @@ private:
     // returns true if found, false if out of range.
     bool FindImpl(const K& key, iterator_type& it)
     {
-        while (m_arrIsInitialized[it.m_index])
+        bool isInRange = true;
+        while (isInRange && m_arrIsInitialized[it.m_index])
         {
-            bool isInRange = true;
             if (key == it->key)
             {
                 return true;
@@ -174,16 +179,10 @@ private:
             {
                 isInRange = RightChild(it, true);
             }
-
-            if (!isInRange)
-            {
-                // index overflow
-                return false;
-            }
         }
 
-        // node not found but the index is still valid
-        return true;
+        // Node not found, but as long as the iterator is in range we are golden
+        return isInRange;
     }
 
     static bool IsRoot(const iterator_type& it)
@@ -234,7 +233,6 @@ private:
         return UpdateIndex(it, newIndex, allowEmpty);
     }
 
-    // DANGEROUS
     static void LeftChildUnsafe(iterator_type& it)
     {
         it.m_index = (it.m_index * 2) + 1;
@@ -246,7 +244,6 @@ private:
         return UpdateIndex(it, newIndex, allowEmpty);
     }
 
-    // DANGEROUS
     static void RightChildUnsafe(iterator_type& it)
     {
         it.m_index = (it.m_index + 1) * 2;
