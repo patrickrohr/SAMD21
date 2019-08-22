@@ -26,6 +26,7 @@ target_sources(samd21_hal
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/sercom_base.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/usart.cpp
 )
 
 target_compile_features(samd21_hal

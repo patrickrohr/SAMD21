@@ -8,6 +8,7 @@
 #pragma once
 
 #include "serial/sercom_base.hpp"
+#include "port/pin.hpp"
 
 namespace SAMD
 {
@@ -16,53 +17,96 @@ struct UsartConfiguration
 {
     enum class Mode
     {
-        eExternalClk = static_cast<unsigned>(SercomBase::Mode::eSercomUsartExternalClk),
-        eInternalClk = static_cast<unsigned>(SercomBase::Mode::eSercomUsartInternalClk)
+        eExternalClk =
+            static_cast<unsigned>(SercomBase::Mode::eSercomUsartExternalClk),
+        eInternalClk =
+            static_cast<unsigned>(SercomBase::Mode::eSercomUsartInternalClk)
     };
 
     enum class CommMode
     {
-        eAsync,
-        eSync
-    };
-
-    enum class RxPad
-    {
-        eTODO,
+        eAsync = 0,
+        eSync  = 1
     };
 
     enum class DataOrder
     {
-        eMsbFirst,
-        eLsbFirst,
+        eMsbFirst = 0,
+        eLsbFirst = 1,
+    };
+
+    enum class StopBitMode
+    {
+        eOneStopBit  = 0,
+        eTwoStopBits = 1
     };
 
     enum class CharacterSize
     {
-        eTODO
+        e5Bits = 5,
+        e6Bits = 6,
+        e7Bits = 7,
+        e8Bits = 0,
+        e9Bits = 1
     };
 
     // Add Configuration options here
-    static constexpr Mode Mode = Mode::eExternalClk;
-    static constexpr CommMode CommMode = CommMode::eAsync;
-    static constexpr RxPad RxPad = RxPad::eTODO;
-    static constexpr DataOrder DataOrder = DataOrder::eMsbFirst;
-    static constexpr CharacterSize CharacterSize = CharacterSize::eTODO;
+    static constexpr Mode Mode                   = Mode::eExternalClk;
+    static constexpr CommMode CommMode           = CommMode::eAsync;
+    static constexpr DataOrder DataOrder         = DataOrder::eMsbFirst;
+    static constexpr StopBitMode StopBitMode     = StopBitMode::eOneStopBit;
+    static constexpr CharacterSize CharacterSize = CharacterSize::e8Bits;
+
+    // TODO: There are a whole lot more configurations that I have left out now.
+    // The goal is to get a minimum viable serial port working before adding full
+    // feature support.
 };
 
 template<typename CONFIG = UsartConfiguration>
 class Usart : public SercomBase
 {
 public:
+    enum class RxPad : uint8_t
+    {
+        eRxPad0 = 0,
+        eRxPad1 = 1,
+        eRxPad2 = 2,
+        eRxPad3 = 3,
+
+        eInvalid = 255
+    };
+
+    enum class TxPad : uint8_t
+    {
+        eTxdPad0    = 0,
+        eTxdPad2    = 1,
+        eTxdPad0Alt = 2,
+        eXckPad1    = 0,
+        eXckPad3    = 1,
+        eRtsPad2    = 2,
+        eCtsPad3    = 2,
+
+        eInvalid = 255
+    };
+
+public:
     // I like the idea of compile time configuration here,
     // so really, this could support RAII. Init will be called from constructor.
-    Usart(sercom_id_t id, ClockSourceGeneric& sourceClock);
+    Usart(sercom_id_t id, ClockSourceGeneric& sourceClock,
+        Pin& objTxPin, Pin& objRxPin);
     ~Usart() override;
 
 private:
     void Init();
     void Enable();
     void Disable();
+
+    void ConfigureTxPin(Pin& objTxPin);
+    void ConfigureRxPin(Pin& objRxPin);
+
+private:
+    TxPad m_eTxPad;
+    RxPad m_eRxPad;
 };
 
 } // namespace SAMD
