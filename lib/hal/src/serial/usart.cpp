@@ -6,8 +6,9 @@
  *************************************************************/
 
 #include "serial/usart.hpp"
-#include "common/map.hpp"
+#include "common/array.hpp"
 #include "common/pair.hpp"
+#include "common/vector.hpp"
 
 namespace SAMD
 {
@@ -23,8 +24,7 @@ Usart<CONFIG>::Usart(
     m_eRxPad(RxPad::eInvalid)
 {
     // Implements RAII
-    ConfigureTxPin(objTxPin);
-    ConfigureRxPin(objRxPin);
+    ConfigurePins(objTxPin, objRxPin);
     Init();
     Enable();
 }
@@ -76,6 +76,8 @@ void Usart<CONFIG>::Init()
 template<typename CONFIG>
 void Usart<CONFIG>::Enable()
 {
+    // TODO: Enable interrupts
+
     GetRegister()->Get().USART.CTRLA.bit.ENABLE = 1;
     while (GetRegister()->Get().USART.SYNCBUSY.bit.ENABLE) {}
 }
@@ -88,61 +90,89 @@ void Usart<CONFIG>::Disable()
 }
 
 template<typename CONFIG>
-void Usart<CONFIG>::ConfigureTxPin(Pin& objTxPin)
+void Usart<CONFIG>::ConfigurePins(Pin& objTxPin, Pin& objRxPin)
 {
-    // figure out which pads match these pins for a given SERCOM
-    // Introduce map data structure: [pin] -> [multiplexing mode], [pad]
+    const auto& pinConfigs = GetPinConfigurations();
 
-    // TX
-    Map<Pin, Pair<Pin::MultiplexingMode, Usart::TxPad>, 32> mapTx;
+    SercomPinConfig* pTxPinConfig = nullptr;
+    SercomPinConfig* pRxPinConfig = nullptr;
 
-    switch (GetId().Get())
+    for (const auto& pinConfig : pinConfigs)
     {
-    case 0: // Sercom 0
-    {
-        mapTx.Insert({ { Pin::Port::ePortA, 8 },
-                     { Pin::MultiplexingMode::eSercom, TxPad::eTxdPad0 } });
-        mapTx.Insert({ { Pin::Port::ePortA, 10 },
-                     { Pin::MultiplexingMode::eSercom, TxPad::eTxdPad2 } });
-        mapTx.Insert({ { Pin::Port::ePortA, 4 },
-                     { Pin::MultiplexingMode::eSercomAlt, TxPad::eTxdPad0 } });
-        mapTx.Insert({ { Pin::Port::ePortA, 6 },
-                     { Pin::MultiplexingMode::eSercomAlt, TxPad::eTxdPad2 } });
-    }
-    }
-
-    // Configure TX Pin
-    auto it = mapTx.Find(objTxPin);
-
-    samd_assert(it != mapTx.End(), "TX Pin not found");
-
-    objTxPin.Configure(Pin::Configuration::eOutputPull);
-    objTxPin.SetMultiplexingMode(it->value.first);
-
-    GetRegister()->Get().USART.CTRLA.bit.TXPO = static_cast<unsigned>(it->value.second);
-}
-
-template<typename CONFIG>
-void Usart<CONFIG>::ConfigureRxPin(Pin& objRxPin)
-{
-    Map<Pin, Pair<Pin::MultiplexingMode, Usart::TxPad>, 32> mapRx;
-
-    switch (GetId().Get())
-    {
-        case 0:
+        if (pinConfig.SercomId == GetId())
         {
-            // TODO
+
+            if (pinConfig.PinId == objTxPin)
+            {
+                pTxPinConfig = &pinConfig;
+            }
+
+            if (pinConfig.PinId == objRxPin)
+            {
+                pRxPinConfig = &pinConfig;
+            }
         }
     }
 
-    auto it = mapRx.Find(objRxPin);
+    samd_assert(pTxPinConfig != nullptr, "TX Pin Config not found");
+    samd_assert(pRxPinConfig != nullptr, "RX Pin Config not found");
 
-    samd_assert(it != mapRx.End(), "RX Pin not found");
-
+    objTxPin.Configure(Pin::Configuration::eOutputPull);
     objRxPin.Configure(Pin::Configuration::eInputPull);
-    objRxPin.SetMultiplexingMode(it->value.first);
 
-    GetRegister()->Get().USART.CTRLA.bit.RXPO = static_cast<unsigned>(it->value.second);
+    objTxPin.SetMultiplexingMode(pTxPinConfig->MultiplexingMode);
+    objRxPin.SetMultiplexingMode(pRxPinConfig->MultiplexingMode);
+
+    TxPad eTxPad = TxPad::eInvalid;
+    RxPad eRxPad = RxPad::eInvalid;
+
+    switch (pTxPinConfig->PadNumber)
+    {
+    case 0:
+        eTxPad = TxPad::eTxdPad0;
+    case 2:
+        eTxPad = TxPad::eTxdPad2;
+    case 1:
+    case 3:
+    default:
+        samd_assert(false, "Wrong TX Pad Number!");
+    }
+
+    switch (pRxPinConfig->PadNumber)
+    {
+    case 0:
+        eRxPad = RxPad::eRxPad0;
+    case 1:
+        eRxPad = RxPad::eRxPad1;
+    case 2:
+        eRxPad = RxPad::eRxPad2;
+    case 3:
+        eRxPad = RxPad::eRxPad3;
+    default:
+        samd_assert(false, "Wrong RX Pad Number!");
+    }
+
+    GetRegister()->Get().USART.CTRLA.bit.TXPO = static_cast<unsigned>(eTxPad);
+    GetRegister()->Get().USART.CTRLA.bit.RXPO = static_cast<unsigned>(eRxPad);
+}
+
+template<typename CONFIG>
+void Usart<CONFIG>::WriteSync(uint8_t data)
+{
+    while (!GetRegister()->Get().USART.INTFLAG.bit.DRE) {}
+    GetRegister()->Get().USART.DATA.reg = data;
+}
+
+template<typename CONFIG>
+void Usart<CONFIG>::WriteAsync(const uint8_t* pData, unsigned dataLength)
+{
+    // TODO: implement
+}
+
+template<typename CONFIG>
+uint8_t Usart<CONFIG>::ReadSync()
+{
+    return 0;
 }
 
 // TODO: Go back and understand pin multiplexing

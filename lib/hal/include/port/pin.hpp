@@ -8,8 +8,8 @@
 #pragma once
 
 #include <common/id_traits.hpp>
-#include <hal_utils/register.hpp>
 #include <cstdint>
+#include <hal_utils/register.hpp>
 #include <samd21.h>
 
 namespace SAMD
@@ -22,8 +22,9 @@ public:
 
     enum class Port : uint8_t
     {
-        ePortA = 0,
-        ePortB = 1
+        ePortA   = 0,
+        ePortB   = 1,
+        eInvalid = 255
     };
 
     enum class Direction
@@ -43,8 +44,9 @@ public:
         eReset = eAnalog // Reset state
     };
 
-    enum class MultiplexingMode
+    enum class MultiplexingMode : uint8_t
     {
+        eInvalid = 0,
         eModeA,
         eModeB,
         eModeC,
@@ -54,25 +56,27 @@ public:
         eModeG,
         eModeH,
 
-        eEIC = eModeA,
-        eREF = eModeB,
-        eADC = eModeB,
-        eAC = eModeB,
-        ePTC = eModeB,
-        eDAC = eModeB,
-        eSercom = eModeC,
+        eEIC       = eModeA,
+        eREF       = eModeB,
+        eADC       = eModeB,
+        eAC        = eModeB,
+        ePTC       = eModeB,
+        eDAC       = eModeB,
+        eSercom    = eModeC,
         eSercomAlt = eModeD,
-        eTC = eModeE, // also TCC
-        eTCC = eModeF,
-        eCOM = eModeG,
-        eGCLK = eModeH // also AC
+        eTC        = eModeE, // also TCC
+        eTCC       = eModeF,
+        eCOM       = eModeG,
+        eGCLK      = eModeH, // also AC
     };
 
 public:
-    constexpr Pin(Port ePort, pin_id_t pinId) :
-        m_uGlobalId(pinId.Get() + ((ePort == Port::ePortA) ? 32 : 0)),
-        m_localId(pinId),
-        m_ePort(ePort)
+    // TODO: I don't know if I like having a default constructor here.
+    constexpr Pin() : m_localId(255), m_ePort(Port::eInvalid)
+    {
+    }
+
+    constexpr Pin(Port ePort, pin_id_t pinId) : m_localId(pinId), m_ePort(ePort)
     {
     }
 
@@ -83,22 +87,27 @@ public:
 
     constexpr operator unsigned()
     {
-        return m_uGlobalId;
+        return GetGlobalId();
     }
 
     constexpr bool operator==(const Pin& rhs) const
     {
-        return m_uGlobalId == rhs.m_uGlobalId;
+        return GetGlobalId() == rhs.GetGlobalId();
     }
 
     constexpr bool operator<(const Pin& rhs) const
     {
-        return m_uGlobalId < rhs.m_uGlobalId;
+        return GetGlobalId() < rhs.GetGlobalId();
     }
 
     constexpr Port GetPort() const
     {
         return m_ePort;
+    }
+
+    constexpr unsigned GetGlobalId() const
+    {
+        return m_localId.Get() + ((m_ePort == Port::ePortA) ? 32 : 0);
     }
 
     constexpr pin_id_t GetLocalId() const
@@ -110,7 +119,6 @@ private:
     volatile RegisterGuard<PortGroup>* GetPortGroup();
 
 private:
-    unsigned m_uGlobalId;
     pin_id_t m_localId;
     Port m_ePort;
 };

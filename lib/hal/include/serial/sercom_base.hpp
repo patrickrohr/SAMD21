@@ -8,7 +8,9 @@
 #pragma once
 
 #include "clock/clock_source_generic.hpp"
+#include "port/pin.hpp"
 #include <common/id_traits.hpp>
+#include <common/vector.hpp>
 #include <cstdint>
 #include <hal_utils/register.hpp>
 #include <samd21.h>
@@ -37,6 +39,33 @@ public:
         eSercomI2cMaster,
     };
 
+protected:
+    struct SercomPinConfig
+    {
+        using pad_number_t = unsigned;
+
+        SercomPinConfig() : PadNumber(), PinId(), MultiplexingMode(), SercomId()
+        {
+        }
+
+        SercomPinConfig(
+            Pin pin,
+            Pin::MultiplexingMode eMode,
+            sercom_id_t sercomId,
+            pad_number_t padNumber) :
+            PadNumber(padNumber),
+            PinId(pin),
+            MultiplexingMode(eMode),
+            SercomId(sercomId)
+        {
+        }
+
+        pad_number_t PadNumber;
+        Pin PinId;
+        Pin::MultiplexingMode MultiplexingMode;
+        sercom_id_t SercomId;
+    };
+
 public:
     SercomBase(sercom_id_t id, Mode eMode, ClockSourceGeneric& sourceClock);
     virtual ~SercomBase() = 0;
@@ -44,6 +73,7 @@ public:
 protected:
     volatile RegisterGuard<Sercom>* GetRegister();
     sercom_id_t GetId() const;
+    const Vector<SercomPinConfig, 62>& GetPinConfigurations() const;
 
 private:
     sercom_id_t m_id;

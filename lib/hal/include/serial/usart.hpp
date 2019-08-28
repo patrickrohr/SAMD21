@@ -96,13 +96,16 @@ public:
         Pin& objTxPin, Pin& objRxPin);
     ~Usart() override;
 
+    void WriteSync(uint8_t data);
+    void WriteAsync(const uint8_t* pData, unsigned dataLength);
+    uint8_t ReadSync();
+
 private:
     void Init();
     void Enable();
     void Disable();
 
-    void ConfigureTxPin(Pin& objTxPin);
-    void ConfigureRxPin(Pin& objRxPin);
+    void ConfigurePins(Pin& objTxPin, Pin& objRxPin);
 
 private:
     TxPad m_eTxPad;
