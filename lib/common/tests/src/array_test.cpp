@@ -25,6 +25,7 @@ TEST(ArrayTest, Test)
     unsigned count = 0;
     for (const auto& item : arr)
     {
+        (void) item;
         ++count;
     }
 

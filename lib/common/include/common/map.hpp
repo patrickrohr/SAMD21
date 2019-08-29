@@ -8,6 +8,7 @@
 #pragma once
 
 #include "common/sequence_iterator.hpp"
+#include "common/allocator.hpp"
 
 namespace SAMD
 {
@@ -40,7 +41,7 @@ public:
     static constexpr unsigned RootNode = 0;
 
     Map() :
-        m_arrData(),
+        m_objMemory(),
         m_uSize(),
         m_itBegin(this, RootNode),
         m_itEnd(this, RootNode),
@@ -64,7 +65,7 @@ public:
 
         if (!m_arrIsInitialized[it.m_index])
         {
-            m_arrData[it.m_index]          = newNode;
+            m_objMemory.Construct(it.m_index, newNode);
             m_arrIsInitialized[it.m_index] = true;
 
             // Update iterators
@@ -157,7 +158,7 @@ private:
 
     const element_type& operator[](unsigned index)
     {
-        return m_arrData[index];
+        return m_objMemory[index];
     }
 
 private:
@@ -250,7 +251,7 @@ private:
     }
 
 private:
-    Node m_arrData[SIZE];
+    PreallocatedMemory<Node, SIZE>  m_objMemory;
     unsigned m_uSize;
     iterator_type m_itBegin;
     iterator_type m_itEnd;

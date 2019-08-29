@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "common/allocator.hpp"
 #include "common/array.hpp"
 #include "common/sequence_iterator.hpp"
 
@@ -19,28 +20,28 @@ class Vector
 public:
     static constexpr unsigned SizeAllocated = SIZE;
 
-    using element_type  = T;
-    using iterator_type = SequenceIterator<Vector<T, SIZE>>;
+    using element_type        = T;
+    using iterator_type       = SequenceIterator<Vector<T, SIZE>>;
     using const_iterator_type = SequenceIterator<const Vector<T, SIZE>>;
-    using index_type    = unsigned;
+    using index_type          = unsigned;
 
 private:
     friend iterator_type;
 
 public:
-    Vector() : m_arrData(), m_uSizeUsed()
+    Vector() : m_objMemory(), m_uSizeUsed()
     {
     }
 
     T* Data()
     {
-        return m_arrData.Data();
+        return m_objMemory[0];
     }
 
     T& operator[](const index_type& index)
     {
         samd_assert(index < m_uSizeUsed, "Vector Index Overflow");
-        return m_arrData[index];
+        return m_objMemory[index];
     }
 
     const T& operator[](const index_type& index) const
@@ -48,24 +49,11 @@ public:
         return const_cast<Vector<T, SIZE>*>(this)->operator[](index);
     }
 
-    void Resize(unsigned newSize)
-    {
-        samd_assert(newSize < SIZE, "Resize failed.");
-
-        if (m_uSizeUsed > newSize)
-        {
-            // de-allocate objects, is there a better option than replacing with
-            // a default-constructed object?
-            for (unsigned i = m_uSizeUsed; i > newSize; --i)
-            { m_arrData[i] = T(); } }
-        m_uSizeUsed = newSize;
-    }
-
     void PushBack(const T& obj)
     {
         samd_assert(m_uSizeUsed < SIZE, "Vector full.");
 
-        operator[](m_uSizeUsed++) = obj;
+        m_objMemory.Construct(m_uSizeUsed++, obj);
     }
 
     void PopBack()
@@ -74,7 +62,7 @@ public:
 
         if (m_uSizeUsed > 0)
         {
-            operator[](--m_uSizeUsed) = T();
+            m_objMemory.Destroy(--m_uSizeUsed);
         }
     }
 
@@ -115,7 +103,7 @@ private:
     }
 
 private:
-    Array<T, SIZE> m_arrData;
+    PreallocatedMemory<T, SIZE> m_objMemory;
     unsigned m_uSizeUsed;
 };
 

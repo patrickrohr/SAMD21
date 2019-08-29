@@ -10,6 +10,16 @@
 
 using namespace SAMD;
 
+struct TestWithNoDefaultConstructor
+{
+    TestWithNoDefaultConstructor(int a_) : a(a_)
+    {
+
+    }
+
+    int a;
+};
+
 TEST(VectorTest, Test)
 {
     Vector<int, 3> vec;
@@ -30,4 +40,24 @@ TEST(VectorTest, Test)
     }
 
     ASSERT_EQ(vec.Size(), count);
+}
+
+TEST(VectorTest, TestAllocator)
+{
+    Vector<TestWithNoDefaultConstructor, 10> vec;
+
+    vec.PushBack(5);
+    vec.PushBack(6);
+    vec.PushBack(7);
+    vec.PopBack();
+
+    unsigned count = 0;
+    for (const auto& it : vec)
+    {
+        (void) it;
+        ++count;
+    }
+
+    ASSERT_EQ(count, 2);
+    ASSERT_EQ(vec.Size(), 2);
 }
