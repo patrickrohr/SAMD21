@@ -41,7 +41,7 @@ public:
         return m_arrData[index];
     }
 
-    unsigned Size()
+    constexpr unsigned Size()
     {
         return SizeAllocated;
     }
