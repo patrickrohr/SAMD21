@@ -44,10 +44,6 @@ protected:
     {
         using pad_number_t = unsigned;
 
-        SercomPinConfig() : PadNumber(), PinId(), MultiplexingMode(), SercomId()
-        {
-        }
-
         SercomPinConfig(
             Pin pin,
             Pin::MultiplexingMode eMode,

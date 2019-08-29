@@ -71,11 +71,6 @@ public:
     };
 
 public:
-    // TODO: I don't know if I like having a default constructor here.
-    constexpr Pin() : m_localId(255), m_ePort(Port::eInvalid)
-    {
-    }
-
     constexpr Pin(Port ePort, pin_id_t pinId) : m_localId(pinId), m_ePort(ePort)
     {
     }
