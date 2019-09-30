@@ -19,6 +19,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcpu=cortex-m0 -mthumb")
 
 # Apps
 add_subdirectory(app/example-app)
+add_subdirectory(app/hal-test)
 
 # Libraries
 add_subdirectory(lib/BufferPool)

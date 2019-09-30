@@ -21,3 +21,11 @@ function(add_test_directory dir)
         add_subdirectory(${dir})
     endif()
 endfunction()
+
+function(samd_target_install_binary target install_dir)
+    add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O binary -S ${CMAKE_CURRENT_BINARY_DIR}/${target} ${install_dir}/${target}.bin
+    )
+endfunction()
