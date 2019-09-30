@@ -67,6 +67,24 @@ void Pin::SetMultiplexingMode(MultiplexingMode eMode)
                               : PORT_PMUX_PMUXO(static_cast<unsigned>(eMode));
 }
 
+void Pin::SetOutput()
+{
+    volatile auto& portGroup = GetPortGroup()->Get();
+    portGroup.OUTSET.reg = (1 << m_localId.Get());
+}
+
+void Pin::ClearOutput()
+{
+    volatile auto& portGroup = GetPortGroup()->Get();
+    portGroup.OUTCLR.reg = (1 << m_localId.Get());
+}
+
+void Pin::ToggleOutput()
+{
+    volatile auto& portGroup = GetPortGroup()->Get();
+    portGroup.OUTTGL.reg = (1 << m_localId.Get());
+}
+
 volatile RegisterGuard<PortGroup>* Pin::GetPortGroup()
 {
     return MakeRegisterGuard(

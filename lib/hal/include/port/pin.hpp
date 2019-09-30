@@ -80,6 +80,12 @@ public:
 
     void SetMultiplexingMode(MultiplexingMode eMode);
 
+    void SetOutput();
+
+    void ClearOutput();
+
+    void ToggleOutput();
+
     constexpr operator unsigned()
     {
         return GetGlobalId();
