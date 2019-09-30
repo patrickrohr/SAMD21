@@ -172,28 +172,24 @@ void Usart<CONFIG>::WriteAsync(const uint8_t* pData, unsigned dataLength)
 template<typename CONFIG>
 uint8_t Usart<CONFIG>::ReadSync()
 {
+    // TODO: Do this tomorrow...
     return 0;
 }
 
-// TODO: Go back and understand pin multiplexing
-// we need to configure the pin function as shown in table 6-1
-// as far as we are concerned here, we want to configure it either under Sercom
-// mode or Sercom-alt mode.
+// Some more TODO's:
+// Remove the RegisterGuard template, it's really not needed.
+// In order to support simulation, let's write a simuluation HAL.
+// So the folder structure in the hal will look like:
+// hal
+//      include
+//      src
+//      sim
 //
-// I am not sure what's the best way of selecting the mode.
-// I could:
-// a. Pass in the pins that I want to use together with the sercom_id
-//      I could then configure the pins accordingly and complain if the
-//      configuration is impossible. But this kind of sucks, as the
-//      configuration should already be known at compile time.
-//
-// b. leverage my compile-time CONFIG template design.
-//      At compile-time we want to define the pins as well as the sercom id.
-//      I have to options for every pin per compile time, either to configure
-//      the pin as regular Sercom, or as Sercom-Alt.
-//      I can create the mapping in code, and could even create it in a
-//      compile-time evaluated structure (future)
-
-// TODO: now is the time to start working with interrupts
+// Then let's just select sim during simulation builds, and src during Target
+// builds. RegisterGuards were an interesting idea, but I don't think I can get
+// around actually testing the HAL on real hardware. The benefit of this system
+// though, is that once the code breaks on the hardware, I can work on breaking
+// it in sim as well. A fix should then address both configurations
+// simultaneously.
 
 } // namespace SAMD
