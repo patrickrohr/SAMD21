@@ -80,4 +80,7 @@ ClockType XOSC32K<CONFIG>::GetClockSourceType() const
     return ClockType::eXOSC32K;
 }
 
+// TODO: come up with a better solution
+template class XOSC32K<Xosc32kConfiguration>;
+
 } // namespace SAMD

@@ -86,7 +86,7 @@ error_t DFLL48M<CONFIG>::Start()
 
     // Per Get() sheet, write enable bit separately
     tmp_DFLLCTRL.Get().bit.ENABLE = 1;
-    *reg_DFLLCTRL                = tmp_DFLLCTRL;
+    *reg_DFLLCTRL                 = tmp_DFLLCTRL;
 
     // Wait for locks in closed loop
     if (CONFIG::Mode == DfllMode::eClosedLoop)
@@ -111,7 +111,7 @@ error_t DFLL48M<CONFIG>::Stop()
     // Disable
     RegisterGuard<SYSCTRL_DFLLCTRL_Type> tmp_DFLLCTRL;
     tmp_DFLLCTRL.Get().bit.ENABLE = 1;
-    *reg_DFLLCTRL                = tmp_DFLLCTRL;
+    *reg_DFLLCTRL                 = tmp_DFLLCTRL;
 
     return 0;
 }
@@ -141,5 +141,9 @@ error_t DFLL48M<CONFIG>::RegisterSync()
     while (!reg_PCLKSR->Get().bit.DFLLRDY) {}
     return 0;
 }
+
+// TODO: This needs to be fixed differently as users can create their own
+// configuration classes
+template class DFLL48M<Dfll48mConfiguration>;
 
 } // namespace SAMD
