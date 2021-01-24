@@ -113,6 +113,7 @@ SECTIONS
     {
         . = ALIGN(4);
         __end__ = . ;
+        end = __end__;
         . = ORIGIN(ram) + LENGTH(ram) - STACK_SIZE;
     } > ram
 
