@@ -6,11 +6,6 @@
 namespace SAMD
 {
 
-static auto reg_GCLK    = MakeRegisterGuard(GCLK);
-static auto reg_CLKCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().CLKCTRL);
-static auto reg_GENCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().GENCTRL);
-static auto reg_GENDIV  = MakeSharedRegisterGuard(&reg_GCLK->Get().GENDIV);
-
 GenericClock::GenericClock(gclk_id_t id) : ClockBase(id)
 {
 }
@@ -37,34 +32,34 @@ void RegisterSync()
 
 void GenericClock::Enable(uint32_t uDivisionFactor)
 {
-    RegisterGuard<GCLK_GENDIV_Type, true> tmp_GENDIV;
-    tmp_GENDIV.Get().bit.ID  = static_cast<uint8_t>(m_uGclkId);
-    tmp_GENDIV.Get().bit.DIV = uDivisionFactor;
+    GCLK_GENDIV_Type tmp_GENDIV{};
+    tmp_GENDIV.bit.ID  = static_cast<uint8_t>(m_uGclkId);
+    tmp_GENDIV.bit.DIV = uDivisionFactor;
 
-    *reg_GENDIV = tmp_GENDIV;
+    GCLK->GENDIV.reg = tmp_GENDIV.reg;
     RegisterSync();
 
     // Write first byte of GEN CTRL before reading
     // TODO: Could Register_Guard provide support to do this directly?
-    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+    *reinterpret_cast<volatile uint8_t*>(&GCLK->GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    auto tmp_GENCTRL = *reg_GENCTRL;
+    GCLK_GENCTRL_Type tmp_GENCTRL{ .reg = GCLK->GENCTRL.reg };
 
-    tmp_GENCTRL.Get().bit.GENEN = 1;
-    tmp_GENCTRL.Get().bit.SRC   = static_cast<uint32_t>(GetClockSourceType());
+    tmp_GENCTRL.bit.GENEN = 1;
+    tmp_GENCTRL.bit.SRC   = static_cast<uint32_t>(GetClockSourceType());
 
-    *reg_GENCTRL = tmp_GENCTRL;
+    GCLK->GENCTRL.reg = tmp_GENCTRL.reg;
     RegisterSync();
 }
 
 void GenericClock::Disable()
 {
-    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+    *reinterpret_cast<volatile uint8_t*>(&GCLK->GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    auto tmp_GENCTRL = *reg_GENCTRL;
+    GCLK_GENCTRL_Type tmp_GENCTRL{ .reg = GCLK->GENCTRL.reg };
 
-    tmp_GENCTRL.Get().bit.GENEN = 0;
-    *reg_GENCTRL                = tmp_GENCTRL;
+    tmp_GENCTRL.bit.GENEN = 0;
+    GCLK->GENCTRL.reg     = tmp_GENCTRL.reg;
 
     RegisterSync();
 }
@@ -72,11 +67,11 @@ void GenericClock::Disable()
 bool GenericClock::IsEnabled() const
 {
     // check hardware
-    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+    *reinterpret_cast<volatile uint8_t*>(&GCLK->GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    auto tmp_GENCTRL = *reg_GENCTRL;
+    GCLK_GENCTRL_Type tmp_GENCTRL{ .reg = GCLK->GENCTRL.reg };
 
-    return tmp_GENCTRL.Get().bit.GENEN;
+    return tmp_GENCTRL.bit.GENEN;
 }
 
 void GenericClock::AddOutput(ClockOutput eOutput)
@@ -97,13 +92,13 @@ void GenericClock::SetOutput(ClockOutput eOutput, bool enable)
         "Invalid ClockOutput %u",
         static_cast<unsigned>(eOutput));
 
-    RegisterGuard<GCLK_CLKCTRL_Type, true> tmp_CLKCTRL;
+    GCLK_CLKCTRL_Type tmp_CLKCTRL{};
 
-    tmp_CLKCTRL.Get().bit.ID    = m_uGclkId.Get();
-    tmp_CLKCTRL.Get().bit.GEN   = static_cast<unsigned>(eOutput);
-    tmp_CLKCTRL.Get().bit.CLKEN = static_cast<unsigned>(enable);
+    tmp_CLKCTRL.bit.ID    = m_uGclkId.Get();
+    tmp_CLKCTRL.bit.GEN   = static_cast<unsigned>(eOutput);
+    tmp_CLKCTRL.bit.CLKEN = static_cast<unsigned>(enable);
 
-    *reg_CLKCTRL = tmp_CLKCTRL;
+    GCLK->CLKCTRL.reg = tmp_CLKCTRL.reg;
     RegisterSync();
 }
 
@@ -114,15 +109,15 @@ void GenericClock::WaitOnClockIsRunning() const
 
 unsigned GenericClock::GetDivisionFactor() const
 {
-    *reinterpret_cast<volatile uint8_t*>(reg_GENDIV) =
+    *reinterpret_cast<volatile uint8_t*>(&GCLK->GENDIV) =
         static_cast<uint8_t>(m_uGclkId);
-    auto tmp_GENDIV = *reg_GENDIV;
+    GCLK_GENDIV_Type tmp_GENDIV{ .reg = GCLK->GENDIV.reg };
 
-    *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
+    *reinterpret_cast<volatile uint8_t*>(&GCLK->GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
-    auto tmp_GENCTRL = *reg_GENCTRL;
+    GCLK_GENCTRL_Type tmp_GENCTRL{ .reg = GCLK->GENCTRL.reg };
 
-    uint32_t uDivisionFactor = tmp_GENDIV.Get().bit.DIV;
+    uint32_t uDivisionFactor = tmp_GENDIV.bit.DIV;
 
     enum class DivisionSelector
     {
@@ -131,7 +126,7 @@ unsigned GenericClock::GetDivisionFactor() const
     };
 
     DivisionSelector eDivisionSelector =
-        static_cast<DivisionSelector>(tmp_GENCTRL.Get().bit.DIVSEL);
+        static_cast<DivisionSelector>(tmp_GENCTRL.bit.DIVSEL);
 
     if (DivisionSelector::eExponential == eDivisionSelector)
     {
