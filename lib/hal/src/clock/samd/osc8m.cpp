@@ -1,6 +1,6 @@
 // Copyright 2019, Patrick Rohr
 
-#include "clock/impl/osc8m.hpp"
+#include "clock/samd/osc8m.hpp"
 #include "config.h"
 
 namespace SAMD

@@ -5,7 +5,7 @@
  *                                                            *
  *************************************************************/
 
-#include "clock/impl/xosc32k.hpp"
+#include "clock/samd/xosc32k.hpp"
 #include "config.h"
 
 namespace SAMD

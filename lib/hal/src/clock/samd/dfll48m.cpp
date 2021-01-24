@@ -5,7 +5,7 @@
  *                                                            *
  *************************************************************/
 
-#include "clock/impl/dfll48m.hpp"
+#include "clock/samd/dfll48m.hpp"
 #include "config.h"
 
 namespace SAMD

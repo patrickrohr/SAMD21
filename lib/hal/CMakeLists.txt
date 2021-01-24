@@ -21,10 +21,10 @@ target_sources(samd21_hal
         #        ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_base.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/dfll48m.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/generic_clock.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/dfll48m.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/generic_clock.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/osc8m.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/xosc32k.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/sercom_base.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/usart.cpp

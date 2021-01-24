@@ -5,7 +5,7 @@
  *                                                            *
  *************************************************************/
 
-#include <clock/clock_definitions.hpp>
+#include <platform/definitions.hpp>
 #include <port/pin.hpp>
 
 using namespace SAMD;

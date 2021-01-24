@@ -1,6 +1,6 @@
 // Copyright 2021, Patrick Rohr
 
-#include "clock/impl/generic_clock.hpp"
+#include "clock/samd/generic_clock.hpp"
 #include <cmath>
 
 namespace SAMD

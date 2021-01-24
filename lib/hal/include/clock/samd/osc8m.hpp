@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "clock/impl/generic_clock.hpp"
+#include "clock/samd/generic_clock.hpp"
 
 #include <samd21.h>
 

@@ -7,34 +7,27 @@
 
 #pragma once
 
-#include "clock/impl/generic_clock.hpp"
+#include "clock/samd/generic_clock.hpp"
+
+#include <samd21.h>
 
 namespace SAMD
 {
 
-enum class DfllMode
-{
-    eOpenLoop,
-    eClosedLoop
-};
-
-class DFLL48M : public GenericClock
+class XOSC32K : public GenericClock
 {
 public:
-    DFLL48M(gclk_id_t id, const ClockBase& sourceClock);
-    ~DFLL48M() override;
+    XOSC32K(gclk_id_t id);
+    ~XOSC32K() override;
 
     using ClockBase::Enable;
 
 private:
     error_t Start();
     error_t Stop();
-    error_t RegisterSync();
     frequency_t GetFrequency() const override;
     bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;
-
-private:
-    const ClockBase& m_objSourceClock;
 };
+
 } // namespace SAMD
