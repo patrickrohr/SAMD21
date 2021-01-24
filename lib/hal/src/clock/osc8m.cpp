@@ -1,56 +1,53 @@
 // Copyright 2019, Patrick Rohr
 
-#include "clock/osc8m.hpp"
+#include "clock/impl/osc8m.hpp"
 #include "config.h"
 
 namespace SAMD
 {
+static constexpr unsigned gPrescaler  = CONFIG_OSC8M_PRESC;
+static constexpr unsigned gOnDemand   = CONFIG_OSC8M_ONDEMAND;
+static constexpr unsigned gRunStandby = CONFIG_OSC8M_RUNSTDBY;
 
 static auto reg_SYSCTRL = MakeRegisterGuard(SYSCTRL);
-static auto reg_OSC8M = MakeRegisterGuard(&reg_SYSCTRL->Get().OSC8M);
-static auto reg_PCLKSR = MakeRegisterGuard(&reg_SYSCTRL->Get().PCLKSR);
+static auto reg_OSC8M   = MakeRegisterGuard(&reg_SYSCTRL->Get().OSC8M);
+static auto reg_PCLKSR  = MakeRegisterGuard(&reg_SYSCTRL->Get().PCLKSR);
 
-template<typename CONFIG>
-OSC8M<CONFIG>::OSC8M(gclk_id_t id) :
-    ClockSourceGeneric(id),
-    CONFIG()
+OSC8M::OSC8M(gclk_id_t id) : GenericClock(id)
 {
     Start();
 }
 
-template<typename CONFIG>
-OSC8M<CONFIG>::~OSC8M() {
+OSC8M::~OSC8M()
+{
     Stop();
 }
 
-template<typename CONFIG>
-error_t OSC8M<CONFIG>::Start()
+error_t OSC8M::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
     RegisterGuard<SYSCTRL_OSC8M_Type> tmp_OSC8M(*reg_OSC8M);
 
     tmp_OSC8M.Get().bit.ENABLE   = 1;
-    tmp_OSC8M.Get().bit.PRESC    = CONFIG::Prescaler; // prescaler of 1
-    tmp_OSC8M.Get().bit.ONDEMAND = CONFIG::OnDemand;
-    tmp_OSC8M.Get().bit.RUNSTDBY = CONFIG::RunStandby;
+    tmp_OSC8M.Get().bit.PRESC    = gPrescaler; // prescaler of 1
+    tmp_OSC8M.Get().bit.ONDEMAND = gOnDemand;
+    tmp_OSC8M.Get().bit.RUNSTDBY = gRunStandby;
 
     *reg_OSC8M = tmp_OSC8M;
 
     return 0;
 }
 
-template<typename CONFIG>
-error_t OSC8M<CONFIG>::Stop()
+error_t OSC8M::Stop()
 {
     RegisterGuard<SYSCTRL_OSC8M_Type> tmp_OSC8M(*reg_OSC8M);
     tmp_OSC8M.Get().bit.ENABLE = 0;
-    *reg_OSC8M = tmp_OSC8M;
+    *reg_OSC8M                 = tmp_OSC8M;
 
     return 0;
 }
 
-template<typename CONFIG>
-frequency_t OSC8M<CONFIG>::GetFrequency() const
+frequency_t OSC8M::GetFrequency() const
 {
     // TODO: get the value from the actual clock register.
     // Using Upper Values
@@ -79,14 +76,12 @@ frequency_t OSC8M<CONFIG>::GetFrequency() const
     }
 }
 
-template<typename CONFIG>
-bool OSC8M<CONFIG>::PollIsRunning() const
+bool OSC8M::PollIsRunning() const
 {
     return reg_PCLKSR->Get().bit.OSC8MRDY;
 }
 
-template<typename CONFIG>
-ClockType OSC8M<CONFIG>::GetClockSourceType() const
+ClockType OSC8M::GetClockSourceType() const
 {
     return ClockType::eOSC8M;
 }

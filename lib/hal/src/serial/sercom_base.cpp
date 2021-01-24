@@ -24,12 +24,8 @@ volatile RegisterGuard<Sercom>* reg_SERCOM[SERCOM_INST_NUM] = {
 
 auto reg_PM = MakeRegisterGuard(PM);
 
-SercomBase::SercomBase(
-    sercom_id_t id,
-    Mode eMode,
-    ClockSourceGeneric& sourceClock) :
-    m_id(id),
-    m_eMode(eMode)
+SercomBase::SercomBase(sercom_id_t id, Mode eMode, ClockBase& sourceClock) :
+    m_id(id), m_eMode(eMode)
 {
     samd_assert(
         m_id.Get() < SERCOM_INST_NUM,
@@ -92,7 +88,8 @@ sercom_id_t SercomBase::GetId() const
     return m_id;
 }
 
-const Vector<SercomBase::SercomPinConfig, 62>& SercomBase::GetPinConfigurations() const
+const Vector<SercomBase::SercomPinConfig, 62>&
+SercomBase::GetPinConfigurations() const
 {
     static bool isInitialized = false;
     static Vector<SercomPinConfig, 62> vPinConfig;

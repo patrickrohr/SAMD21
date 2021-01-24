@@ -1,6 +1,6 @@
-// Copyright 2019, Patrick Rohr
+// Copyright 2021, Patrick Rohr
 
-#include "clock/clock_source_generic.hpp"
+#include "clock/impl/generic_clock.hpp"
 #include <cmath>
 
 namespace SAMD
@@ -11,13 +11,11 @@ static auto reg_CLKCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().CLKCTRL);
 static auto reg_GENCTRL = MakeSharedRegisterGuard(&reg_GCLK->Get().GENCTRL);
 static auto reg_GENDIV  = MakeSharedRegisterGuard(&reg_GCLK->Get().GENDIV);
 
-ClockSourceGeneric::ClockSourceGeneric(gclk_id_t id) : m_uGclkId(id)
+GenericClock::GenericClock(gclk_id_t id) : ClockBase(id)
 {
-    static constexpr gclk_id_t g_uGclkIdMax(9);
-    samd_assert(m_uGclkId < g_uGclkIdMax, "GCLK ID out of range: %u", uGclkId);
 }
 
-ClockSourceGeneric::~ClockSourceGeneric()
+GenericClock::~GenericClock()
 {
     bool isEnabled = IsEnabled();
     samd_assert(
@@ -38,7 +36,7 @@ error_t RegisterSync()
     return 0;
 }
 
-error_t ClockSourceGeneric::Enable(uint32_t uDivisionFactor)
+error_t GenericClock::Enable(uint32_t uDivisionFactor)
 {
     RegisterGuard<GCLK_GENDIV_Type, true> tmp_GENDIV;
     tmp_GENDIV.Get().bit.ID  = static_cast<uint8_t>(m_uGclkId);
@@ -62,21 +60,21 @@ error_t ClockSourceGeneric::Enable(uint32_t uDivisionFactor)
     return 0;
 }
 
-error_t ClockSourceGeneric::Disable()
+error_t GenericClock::Disable()
 {
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
     auto tmp_GENCTRL = *reg_GENCTRL;
 
     tmp_GENCTRL.Get().bit.GENEN = 0;
-    *reg_GENCTRL               = tmp_GENCTRL;
+    *reg_GENCTRL                = tmp_GENCTRL;
 
     RegisterSync();
 
     return 0;
 }
 
-bool ClockSourceGeneric::IsEnabled() const
+bool GenericClock::IsEnabled() const
 {
     // check hardware
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
@@ -86,41 +84,41 @@ bool ClockSourceGeneric::IsEnabled() const
     return tmp_GENCTRL.Get().bit.GENEN;
 }
 
-void ClockSourceGeneric::AddOutput(ClockOutput eOutput)
+void GenericClock::AddOutput(ClockOutput eOutput)
 {
     SetOutput(eOutput, true);
 }
 
-
-void ClockSourceGeneric::RemoveOutput(ClockOutput eOutput)
+void GenericClock::RemoveOutput(ClockOutput eOutput)
 {
     SetOutput(eOutput, false);
 }
 
-void ClockSourceGeneric::SetOutput(ClockOutput eOutput, bool enable)
+void GenericClock::SetOutput(ClockOutput eOutput, bool enable)
 {
     samd_assert(
         static_cast<unsigned>(eOutput) <
-        static_cast<unsigned>(ClockOutput::eCount),
-        "Invalid ClockOutput %u", static_cast<unsigned>(eOutput));
+            static_cast<unsigned>(ClockOutput::eCount),
+        "Invalid ClockOutput %u",
+        static_cast<unsigned>(eOutput));
 
     RegisterGuard<GCLK_CLKCTRL_Type, true> tmp_CLKCTRL;
 
-    tmp_CLKCTRL.Get().bit.ID = m_uGclkId.Get();
-    tmp_CLKCTRL.Get().bit.GEN = static_cast<unsigned>(eOutput);
+    tmp_CLKCTRL.Get().bit.ID    = m_uGclkId.Get();
+    tmp_CLKCTRL.Get().bit.GEN   = static_cast<unsigned>(eOutput);
     tmp_CLKCTRL.Get().bit.CLKEN = static_cast<unsigned>(enable);
 
     *reg_CLKCTRL = tmp_CLKCTRL;
     RegisterSync();
 }
 
-error_t ClockSourceGeneric::WaitOnClockIsRunning() const
+error_t GenericClock::WaitOnClockIsRunning() const
 {
     while (!PollIsRunning()) {}
     return 0;
 }
 
-unsigned ClockSourceGeneric::GetDivisionFactor() const
+unsigned GenericClock::GetDivisionFactor() const
 {
     *reinterpret_cast<volatile uint8_t*>(reg_GENDIV) =
         static_cast<uint8_t>(m_uGclkId);
@@ -155,7 +153,7 @@ unsigned ClockSourceGeneric::GetDivisionFactor() const
     return uDivisionFactor;
 }
 
-frequency_t ClockSourceGeneric::GetOutputFrequency() const
+frequency_t GenericClock::GetOutputFrequency() const
 {
     // Division factor never returns 0.
     frequency_t result = GetFrequency() / GetDivisionFactor();

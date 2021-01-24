@@ -14,14 +14,15 @@ add_library(samd21_hal STATIC)
 target_sources(samd21_hal
     PRIVATE
         # TODO: Remove c files
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/gclk.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/port.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/sercom.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
+        #        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock.c
+        #        ${CMAKE_CURRENT_SOURCE_DIR}/src/gclk.c
+        #        ${CMAKE_CURRENT_SOURCE_DIR}/src/port.c
+        #        ${CMAKE_CURRENT_SOURCE_DIR}/src/sercom.c
+        #        ${CMAKE_CURRENT_SOURCE_DIR}/src/usart.c
 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_source_generic.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/clock_base.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/dfll48m.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/generic_clock.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/xosc32k.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin.cpp

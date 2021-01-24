@@ -6,6 +6,7 @@
  *************************************************************/
 
 #include "hal_utils/irq.hpp"
+#include "cmakeconfig.h"
 #include "common/error.hpp"
 
 #include <samd21.h>

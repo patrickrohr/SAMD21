@@ -16,7 +16,7 @@ namespace SAMD
 template<typename CONFIG>
 Usart<CONFIG>::Usart(
     sercom_id_t id,
-    ClockSourceGeneric& sourceClock,
+    ClockBase& sourceClock,
     Pin& objTxPin,
     Pin& objRxPin) :
     SercomBase(id, CONFIG::Mode, sourceClock),

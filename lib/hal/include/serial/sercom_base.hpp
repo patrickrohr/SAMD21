@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "clock/clock_source_generic.hpp"
+#include "clock/clock_base.hpp"
 #include "port/pin.hpp"
 #include <common/id_traits.hpp>
 #include <common/vector.hpp>
@@ -63,7 +63,7 @@ protected:
     };
 
 public:
-    SercomBase(sercom_id_t id, Mode eMode, ClockSourceGeneric& sourceClock);
+    SercomBase(sercom_id_t id, Mode eMode, ClockBase& sourceClock);
     virtual ~SercomBase() = 0;
 
 protected:

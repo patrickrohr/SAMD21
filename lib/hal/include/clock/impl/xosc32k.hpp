@@ -7,28 +7,20 @@
 
 #pragma once
 
-#include "config.h"
-
-#include "clock/clock_source_generic.hpp"
+#include "clock/impl/generic_clock.hpp"
 
 #include <samd21.h>
 
 namespace SAMD
 {
 
-struct Osc8mConfiguration
-{
-    static constexpr unsigned Prescaler  = CONFIG_OSC8M_PRESC;
-    static constexpr unsigned OnDemand   = CONFIG_OSC8M_ONDEMAND;
-    static constexpr unsigned RunStandby = CONFIG_OSC8M_RUNSTDBY;
-};
-
-template<typename CONFIG = Osc8mConfiguration>
-class OSC8M final : public ClockSourceGeneric, private CONFIG
+class XOSC32K : public GenericClock
 {
 public:
-    OSC8M(gclk_id_t id);
-    ~OSC8M() override;
+    XOSC32K(gclk_id_t id);
+    ~XOSC32K() override;
+
+    using ClockBase::Enable;
 
 private:
     error_t Start();

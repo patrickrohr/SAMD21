@@ -39,7 +39,7 @@ enum class ClockType
  * @date       January 10, 2019
  * @author     Patrick Rohr
  * @todo       These enums are awkwardly named, rename them.
-**************************************************************/
+ **************************************************************/
 enum class ClockOutput
 {
     eGCLK_DFLL48M_REF,
@@ -87,10 +87,10 @@ enum class ClockOutput
 // TODO: change this to something else probably
 using frequency_t = unsigned;
 
-class ClockSourceGeneric;
-using gclk_id_t = id_traits<ClockSourceGeneric, uint8_t>;
+class ClockBase;
+using gclk_id_t = id_traits<ClockBase, uint8_t>;
 
-class ClockSourceGeneric
+class ClockBase
 {
 public:
     /**
@@ -100,69 +100,54 @@ public:
      *             TODO: Or does it?
      * @param[in]  id  The gclk identifier
      */
-    ClockSourceGeneric(gclk_id_t id);
+    ClockBase(gclk_id_t id);
 
-    virtual ~ClockSourceGeneric();
+    /**
+     * @brief      Convenience function to call with a division factor of 0.
+     */
+    error_t Enable();
+
+    virtual ~ClockBase() = default;
 
     // GCLK Interface
-    error_t Enable(uint32_t uDivisionFactor = 0);
+    virtual error_t Enable(uint32_t uDivisionFactor) = 0;
 
-    error_t Disable();
+    virtual error_t Disable() = 0;
 
     /**
      * @brief      Adds a peripheral to the clock output.
      * @param[in]  eOutput  The e output
      * @todo       In the future, all peripherals that need a clock source,
      *             need to inherit from an interface that forces them to take a
-     *             clock source in their constructor. The peripheral constructor will
-     *             then automatically add the output to that clock.
+     *             clock source in their constructor. The peripheral constructor
+     * will then automatically add the output to that clock.
      */
-    void AddOutput(ClockOutput eOutput);
+    virtual void AddOutput(ClockOutput eOutput) = 0;
 
     /**
      * @brief      Removes an output.
      * @param[in]  eOutput  The e output
      */
-    void RemoveOutput(ClockOutput eOutput);
+    virtual void RemoveOutput(ClockOutput eOutput) = 0;
 
-    bool IsEnabled() const;
+    virtual bool IsEnabled() const = 0;
 
     // Clock Source
-    error_t WaitOnClockIsRunning() const;
+    virtual error_t WaitOnClockIsRunning() const = 0;
 
     /**
      * @brief      Gets the divided (actual) output frequency.
      *
      * @return     The output frequency.
      */
-    frequency_t GetOutputFrequency() const;
+    virtual frequency_t GetOutputFrequency() const = 0;
 
 protected:
-    error_t WaitOnClockReady();
-
-    /**
-     * @brief      Gets the frequency of the clock source.
-     * @details    This does not equal the output frequency as this function
-     *             returns the frequency before dividing.
-     *
-     * @return     The frequency.
-     */
-    virtual frequency_t GetFrequency() const = 0;
-
-private:
-    void SetOutput(ClockOutput eOutput, bool enable);
-    unsigned GetDivisionFactor() const;
-
-    // purely virtuals
-    virtual bool PollIsRunning() const           = 0;
-    virtual ClockType GetClockSourceType() const = 0;
-
-private:
     gclk_id_t m_uGclkId;
 
 public:
-    ClockSourceGeneric(const ClockSourceGeneric&) = delete;
-    ClockSourceGeneric& operator=(const ClockSourceGeneric&) = delete;
+    ClockBase(const ClockBase&) = delete;
+    ClockBase& operator=(const ClockBase&) = delete;
 };
 
 } // namespace SAMD

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "serial/sercom_base.hpp"
 #include "port/pin.hpp"
+#include "serial/sercom_base.hpp"
 
 namespace SAMD
 {
@@ -58,8 +58,8 @@ struct UsartConfiguration
     static constexpr CharacterSize CharacterSize = CharacterSize::e8Bits;
 
     // TODO: There are a whole lot more configurations that I have left out now.
-    // The goal is to get a minimum viable serial port working before adding full
-    // feature support.
+    // The goal is to get a minimum viable serial port working before adding
+    // full feature support.
 };
 
 template<typename CONFIG = UsartConfiguration>
@@ -92,8 +92,7 @@ public:
 public:
     // I like the idea of compile time configuration here,
     // so really, this could support RAII. Init will be called from constructor.
-    Usart(sercom_id_t id, ClockSourceGeneric& sourceClock,
-        Pin& objTxPin, Pin& objRxPin);
+    Usart(sercom_id_t id, ClockBase& sourceClock, Pin& objTxPin, Pin& objRxPin);
     ~Usart() override;
 
     void WriteSync(uint8_t data);
