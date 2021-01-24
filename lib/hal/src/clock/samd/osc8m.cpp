@@ -19,7 +19,7 @@ OSC8M::~OSC8M()
     Stop();
 }
 
-error_t OSC8M::Start()
+void OSC8M::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_OSC8M_Type tmp_OSC8M{};
@@ -31,16 +31,13 @@ error_t OSC8M::Start()
     tmp_OSC8M.bit.RUNSTDBY = gRunStandby;
 
     SYSCTRL->OSC8M.reg = tmp_OSC8M.reg;
-
-    return 0;
 }
 
-error_t OSC8M::Stop()
+void OSC8M::Stop()
 {
     SYSCTRL_OSC8M_Type tmp_OSC8M{ .reg = SYSCTRL->OSC8M.reg };
     tmp_OSC8M.bit.ENABLE = 0;
     SYSCTRL->OSC8M.reg   = tmp_OSC8M.reg;
-    return 0;
 }
 
 frequency_t OSC8M::GetFrequency() const

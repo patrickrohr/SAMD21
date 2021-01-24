@@ -46,7 +46,7 @@ DFLL48M::~DFLL48M()
 
 // This can probably be optimized quite a bit, since we have to sync registers 3
 // times
-error_t DFLL48M::Start()
+void DFLL48M::Start()
 {
     // Calculate the multiplier
     // Frequency is guaranteed to never be 0.
@@ -104,18 +104,14 @@ error_t DFLL48M::Start()
 
     // Finally, wait for clock to become ready
     RegisterSync();
-
-    return 0;
 }
 
-error_t DFLL48M::Stop()
+void DFLL48M::Stop()
 {
     // Disable
     SYSCTRL_DFLLCTRL_Type tmp_DFLLCTRL{};
     tmp_DFLLCTRL.bit.ENABLE = 1;
     SYSCTRL->DFLLCTRL.reg   = tmp_DFLLCTRL.reg;
-
-    return 0;
 }
 
 frequency_t DFLL48M::GetFrequency() const
@@ -134,10 +130,9 @@ ClockType DFLL48M::GetClockSourceType() const
     return ClockType::eDFLL48M;
 }
 
-error_t DFLL48M::RegisterSync()
+void DFLL48M::RegisterSync()
 {
     while (!SYSCTRL->PCLKSR.bit.DFLLRDY) {}
-    return 0;
 }
 
 } // namespace SAMD

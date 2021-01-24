@@ -21,8 +21,8 @@ public:
     ~XOSC32K() override;
 
 private:
-    error_t Start();
-    error_t Stop();
+    void Start();
+    void Stop();
     frequency_t GetFrequency() const override;
     bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;

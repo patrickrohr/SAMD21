@@ -25,9 +25,9 @@ public:
     ~DFLL48M() override;
 
 private:
-    error_t Start();
-    error_t Stop();
-    error_t RegisterSync();
+    void Start();
+    void Stop();
+    void RegisterSync();
     frequency_t GetFrequency() const override;
     bool PollIsRunning() const override;
     ClockType GetClockSourceType() const override;

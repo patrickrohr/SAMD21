@@ -26,7 +26,7 @@ XOSC32K::~XOSC32K()
     Stop();
 }
 
-error_t XOSC32K::Start()
+void XOSC32K::Start()
 {
     // Leave Factory Values for FRANGE and CALIB
     // TODO: Disable interrupts between reads and writes?
@@ -44,18 +44,14 @@ error_t XOSC32K::Start()
     // Separate write to Enable bit as per Get()
     tmp_XOSC32K.bit.ENABLE = 1;
     SYSCTRL->XOSC32K.reg   = tmp_XOSC32K.reg;
-
-    return 0;
 }
 
-error_t XOSC32K::Stop()
+void XOSC32K::Stop()
 {
     // Leave Factory Values for FRANGE and CALIB
     SYSCTRL_XOSC32K_Type tmp_XOSC32K{ .reg = SYSCTRL->XOSC32K.reg };
     tmp_XOSC32K.bit.ENABLE = 0;
     SYSCTRL->XOSC32K.reg   = tmp_XOSC32K.reg;
-
-    return 0;
 }
 
 frequency_t XOSC32K::GetFrequency() const
