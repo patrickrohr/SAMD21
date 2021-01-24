@@ -29,14 +29,13 @@ GenericClock::~GenericClock()
     }
 }
 
-error_t RegisterSync()
+void RegisterSync()
 {
     // TODO: Protect register for simulation purposes
     while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) {}
-    return 0;
 }
 
-error_t GenericClock::Enable(uint32_t uDivisionFactor)
+void GenericClock::Enable(uint32_t uDivisionFactor)
 {
     RegisterGuard<GCLK_GENDIV_Type, true> tmp_GENDIV;
     tmp_GENDIV.Get().bit.ID  = static_cast<uint8_t>(m_uGclkId);
@@ -56,11 +55,9 @@ error_t GenericClock::Enable(uint32_t uDivisionFactor)
 
     *reg_GENCTRL = tmp_GENCTRL;
     RegisterSync();
-
-    return 0;
 }
 
-error_t GenericClock::Disable()
+void GenericClock::Disable()
 {
     *reinterpret_cast<volatile uint8_t*>(reg_GENCTRL) =
         static_cast<uint8_t>(m_uGclkId);
@@ -70,8 +67,6 @@ error_t GenericClock::Disable()
     *reg_GENCTRL                = tmp_GENCTRL;
 
     RegisterSync();
-
-    return 0;
 }
 
 bool GenericClock::IsEnabled() const
@@ -112,10 +107,9 @@ void GenericClock::SetOutput(ClockOutput eOutput, bool enable)
     RegisterSync();
 }
 
-error_t GenericClock::WaitOnClockIsRunning() const
+void GenericClock::WaitOnClockIsRunning() const
 {
     while (!PollIsRunning()) {}
-    return 0;
 }
 
 unsigned GenericClock::GetDivisionFactor() const

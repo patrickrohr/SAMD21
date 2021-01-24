@@ -20,8 +20,6 @@ public:
     OSC8M(gclk_id_t id);
     ~OSC8M() override;
 
-    using ClockBase::Enable;
-
 private:
     error_t Start();
     error_t Stop();

@@ -13,12 +13,12 @@ using namespace SAMD;
 int main()
 {
     ReferenceClock slowClock(gclk_id_t(1));
-    slowClock.Enable();
+    slowClock.Enable(0);
     slowClock.WaitOnClockIsRunning();
     slowClock.AddOutput(ClockOutput::eGCLK_DFLL48M_REF);
 
     DfllClock fastClock(gclk_id_t(0), slowClock);
-    fastClock.Enable();
+    fastClock.Enable(0);
     fastClock.WaitOnClockIsRunning();
 
     Pin ledPin(Pin::Port::ePortA, Pin::pin_id_t(17));

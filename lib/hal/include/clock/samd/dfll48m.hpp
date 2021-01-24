@@ -24,8 +24,6 @@ public:
     DFLL48M(gclk_id_t id, const ClockBase& sourceClock);
     ~DFLL48M() override;
 
-    using ClockBase::Enable;
-
 private:
     error_t Start();
     error_t Stop();

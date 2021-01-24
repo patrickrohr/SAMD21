@@ -20,8 +20,6 @@ public:
     XOSC32K(gclk_id_t id);
     ~XOSC32K() override;
 
-    using ClockBase::Enable;
-
 private:
     error_t Start();
     error_t Stop();

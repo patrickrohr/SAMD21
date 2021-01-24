@@ -27,9 +27,9 @@ public:
     virtual ~GenericClock();
 
     // GCLK Interface
-    error_t Enable(uint32_t uDivisionFactor) override;
+    void Enable(uint32_t uDivisionFactor) override;
 
-    error_t Disable() override;
+    void Disable() override;
 
     /**
      * @brief      Adds a peripheral to the clock output.
@@ -50,7 +50,7 @@ public:
     bool IsEnabled() const override;
 
     // Clock Source
-    error_t WaitOnClockIsRunning() const override;
+    void WaitOnClockIsRunning() const override;
 
     /**
      * @brief      Gets the divided (actual) output frequency.
@@ -60,8 +60,11 @@ public:
     frequency_t GetOutputFrequency() const override;
 
 protected:
-    error_t WaitOnClockReady();
+private:
+    void SetOutput(ClockOutput eOutput, bool enable);
+    unsigned GetDivisionFactor() const;
 
+    // purely virtuals
     /**
      * @brief      Gets the frequency of the clock source.
      * @details    This does not equal the output frequency as this function
@@ -71,11 +74,6 @@ protected:
      */
     virtual frequency_t GetFrequency() const = 0;
 
-private:
-    void SetOutput(ClockOutput eOutput, bool enable);
-    unsigned GetDivisionFactor() const;
-
-    // purely virtuals
     virtual bool PollIsRunning() const           = 0;
     virtual ClockType GetClockSourceType() const = 0;
 

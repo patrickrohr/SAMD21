@@ -35,11 +35,8 @@ SercomBase::SercomBase(sercom_id_t id, Mode eMode, ClockBase& sourceClock) :
         sourceClock.IsEnabled(),
         "Sercom needs a running clock. Clock is disabled.");
 
-    if (sourceClock.WaitOnClockIsRunning())
-    {
-        // error
-        samd_assert(false, "Clock never started");
-    }
+    // Block until clock is running
+    sourceClock.WaitOnClockIsRunning();
 
     // TODO: setup port
 

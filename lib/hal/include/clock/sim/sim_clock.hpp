@@ -15,50 +15,23 @@ namespace SAMD
 class SimClock : public ClockBase
 {
 public:
-    SimClock(gclk_id_t id) : ClockBase(id), m_isEnabled(false)
-    {
-    }
+    SimClock(gclk_id_t id);
     // for DFLL support
-    SimClock(gclk_id_t id, const ClockBase& sourceClock) :
-        ClockBase(id), m_isEnabled(false)
-    {
-    }
+    SimClock(gclk_id_t id, const ClockBase& sourceClock);
     ~SimClock() override = default;
 
-    using ClockBase::Enable;
-    error_t Enable(uint32_t uDivisionFactor) override
-    {
-        m_isEnabled = true;
-        return 0;
-    }
+    void Enable(uint32_t uDivisionFactor) override;
+    void Disable() override;
 
-    error_t Disable() override
-    {
-        m_isEnabled = false;
-        return 0;
-    }
+    void AddOutput(ClockOutput eOutput) override;
+    void RemoveOutput(ClockOutput eOutput) override;
 
-    void AddOutput(ClockOutput eOutput) override
-    {
-    }
-    void RemoveOutput(ClockOutput eOutput) override
-    {
-    }
+    bool IsEnabled() const override;
 
-    bool IsEnabled() const override
-    {
-        return m_isEnabled;
-    }
     // consider adding a template parameter for more accurate simulation
-    frequency_t GetOutputFrequency() const override
-    {
-        return 8000000; /* 8MHz */
-    }
+    frequency_t GetOutputFrequency() const override;
 
-    error_t WaitOnClockIsRunning() const override
-    {
-        return 0;
-    }
+    void WaitOnClockIsRunning() const override;
 
 private:
     bool m_isEnabled;

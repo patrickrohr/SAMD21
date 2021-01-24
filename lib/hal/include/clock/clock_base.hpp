@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <common/error.hpp>
 #include <common/id_traits.hpp>
 #include <hal_utils/register.hpp>
 #include <samd21.h>
@@ -100,19 +99,16 @@ public:
      *             TODO: Or does it?
      * @param[in]  id  The gclk identifier
      */
-    ClockBase(gclk_id_t id);
-
-    /**
-     * @brief      Convenience function to call with a division factor of 0.
-     */
-    error_t Enable();
+    ClockBase(gclk_id_t id) : m_uGclkId(id)
+    {
+    }
 
     virtual ~ClockBase() = default;
 
     // GCLK Interface
-    virtual error_t Enable(uint32_t uDivisionFactor) = 0;
+    virtual void Enable(uint32_t uDivisionFactor) = 0;
 
-    virtual error_t Disable() = 0;
+    virtual void Disable() = 0;
 
     /**
      * @brief      Adds a peripheral to the clock output.
@@ -133,7 +129,7 @@ public:
     virtual bool IsEnabled() const = 0;
 
     // Clock Source
-    virtual error_t WaitOnClockIsRunning() const = 0;
+    virtual void WaitOnClockIsRunning() const = 0;
 
     /**
      * @brief      Gets the divided (actual) output frequency.
