@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "sequence_iterator.hpp"
+#include "iterator.hpp"
 
 namespace SAMD
 {
@@ -18,12 +18,9 @@ class Array
 public:
     static constexpr unsigned SizeAllocated = SIZE;
 
-    using element_type  = T;
-    using iterator_type = SequenceIterator<Array<T, SIZE>>;
+    using value_type    = T;
     using index_type    = unsigned;
-
-private:
-    friend iterator_type;
+    using iterator_type = SequenceIterator<Array<T, SIZE>, index_type>;
 
 public:
     Array() : m_arrData()
@@ -57,14 +54,22 @@ public:
     }
 
 private:
+    // iterator support
+    friend iterator_type;
+
+    value_type* Access(const iterator_type& it)
+    {
+        return &operator[](it.m_identifier);
+    }
+
     void Next(iterator_type& it)
     {
-        ++it.m_index;
+        ++it.m_identifier;
     }
 
     void Prev(iterator_type& it)
     {
-        --it.m_index;
+        --it.m_identifier;
     }
 
 private:

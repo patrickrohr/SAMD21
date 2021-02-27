@@ -15,7 +15,7 @@ namespace SAMD
 {
 
 template<typename T, unsigned SIZE>
-class PreallocatedMemory
+class PreallocatedMemory final
 {
 public:
     using value_type = T;

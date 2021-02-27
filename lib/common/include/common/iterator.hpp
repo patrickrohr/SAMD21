@@ -12,13 +12,14 @@
 namespace SAMD
 {
 
-template<typename T>
+template<typename T, typename ID>
 class SequenceIterator
 {
     friend T;
 
 public:
-    SequenceIterator(T* obj, unsigned index) : m_pObj(obj), m_index(index)
+    SequenceIterator(T* obj, ID identifier) :
+        m_pObj(obj), m_identifier(identifier)
     {
     }
 
@@ -27,7 +28,7 @@ public:
 
     bool operator==(const SequenceIterator& rhs) const
     {
-        return m_pObj == rhs.m_pObj && m_index == rhs.m_index;
+        return m_pObj == rhs.m_pObj && m_identifier == rhs.m_identifier;
     }
 
     bool operator!=(const SequenceIterator& rhs) const
@@ -35,12 +36,22 @@ public:
         return !operator==(rhs);
     }
 
-    const typename T::element_type* operator->() const
+    const typename T::value_type* operator->() const
     {
-        return &(*m_pObj)[m_index];
+        return m_pObj->Access(*this);
     }
 
-    const typename T::element_type& operator*() const
+    const typename T::value_type& operator*() const
+    {
+        return *operator->();
+    }
+
+    typename T::value_type* operator->()
+    {
+        return m_pObj->Access(*this);
+    }
+
+    typename T::value_type& operator*()
     {
         return *operator->();
     }
@@ -75,7 +86,7 @@ public:
 
 private:
     T* m_pObj;
-    unsigned m_index;
+    ID m_identifier;
 };
 
 } // namespace SAMD

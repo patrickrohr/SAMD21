@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "common/sequence_iterator.hpp"
 #include "common/allocator.hpp"
+#include "common/iterator.hpp"
 
 namespace SAMD
 {
@@ -19,6 +19,7 @@ class Map final
     static_assert(SIZE > 0, "Size must be larger than 0");
 
 public:
+    // TODO: replace with Pair
     struct Node
     {
         Node() : key(), value()
@@ -33,9 +34,9 @@ public:
         V value;
     };
 
-    using iterator_type = SequenceIterator<Map<K, V, SIZE>>;
+    using iterator_type = SequenceIterator<Map<K, V, SIZE>, unsigned>;
     using size_type     = unsigned;
-    using element_type  = Node;
+    using value_type    = Node;
 
 public:
     static constexpr unsigned RootNode = 0;
@@ -63,10 +64,10 @@ public:
             return false;
         }
 
-        if (!m_arrIsInitialized[it.m_index])
+        if (!m_arrIsInitialized[it.m_identifier])
         {
-            m_objMemory.Construct(it.m_index, newNode);
-            m_arrIsInitialized[it.m_index] = true;
+            m_objMemory.Construct(it.m_identifier, newNode);
+            m_arrIsInitialized[it.m_identifier] = true;
 
             // Update iterators
             if (m_uSize++ == 0)
@@ -96,7 +97,7 @@ public:
         iterator_type it(this, RootNode);
         bool isResultValid = FindImpl(key, it);
 
-        if (isResultValid && m_arrIsInitialized[it.m_index])
+        if (isResultValid && m_arrIsInitialized[it.m_identifier])
         {
             return it;
         }
@@ -122,6 +123,11 @@ public:
 private:
     // SequenceIterator support
     friend iterator_type;
+
+    value_type* Access(const iterator_type& it)
+    {
+        return &operator[](it.m_identifier);
+    }
 
     void Next(iterator_type& it)
     {
@@ -156,7 +162,12 @@ private:
         while (!IsRightChild(it) && !IsRoot(it)) { Parent(it); }
     }
 
-    const element_type& operator[](unsigned index)
+    const value_type& operator[](unsigned index) const
+    {
+        return m_objMemory[index];
+    }
+
+    value_type& operator[](unsigned index)
     {
         return m_objMemory[index];
     }
@@ -166,7 +177,7 @@ private:
     bool FindImpl(const K& key, iterator_type& it)
     {
         bool isInRange = true;
-        while (isInRange && m_arrIsInitialized[it.m_index])
+        while (isInRange && m_arrIsInitialized[it.m_identifier])
         {
             if (key == it->key)
             {
@@ -188,12 +199,12 @@ private:
 
     static bool IsRoot(const iterator_type& it)
     {
-        return it.m_index == 0;
+        return it.m_identifier == 0;
     }
 
     static bool IsLeftChild(const iterator_type& it)
     {
-        return it.m_index % 2;
+        return it.m_identifier % 2;
     }
 
     static bool IsRightChild(const iterator_type& it)
@@ -208,7 +219,7 @@ private:
             return false;
         }
 
-        it.m_index = (it.m_index - 1) / 2;
+        it.m_identifier = (it.m_identifier - 1) / 2;
         return true;
     }
 
@@ -224,34 +235,34 @@ private:
             return false;
         }
 
-        it.m_index = newIndex;
+        it.m_identifier = newIndex;
         return true;
     }
 
     bool LeftChild(iterator_type& it, bool allowEmpty = false)
     {
-        auto newIndex = (it.m_index * 2) + 1;
+        auto newIndex = (it.m_identifier * 2) + 1;
         return UpdateIndex(it, newIndex, allowEmpty);
     }
 
     static void LeftChildUnsafe(iterator_type& it)
     {
-        it.m_index = (it.m_index * 2) + 1;
+        it.m_identifier = (it.m_identifier * 2) + 1;
     }
 
     bool RightChild(iterator_type& it, bool allowEmpty = false)
     {
-        auto newIndex = (it.m_index + 1) * 2;
+        auto newIndex = (it.m_identifier + 1) * 2;
         return UpdateIndex(it, newIndex, allowEmpty);
     }
 
     static void RightChildUnsafe(iterator_type& it)
     {
-        it.m_index = (it.m_index + 1) * 2;
+        it.m_identifier = (it.m_identifier + 1) * 2;
     }
 
 private:
-    PreallocatedMemory<Node, SIZE>  m_objMemory;
+    PreallocatedMemory<Node, SIZE> m_objMemory;
     unsigned m_uSize;
     iterator_type m_itBegin;
     iterator_type m_itEnd;

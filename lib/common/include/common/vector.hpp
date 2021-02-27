@@ -9,7 +9,7 @@
 
 #include "common/allocator.hpp"
 #include "common/array.hpp"
-#include "common/sequence_iterator.hpp"
+#include "common/iterator.hpp"
 
 namespace SAMD
 {
@@ -20,13 +20,11 @@ class Vector
 public:
     static constexpr unsigned SizeAllocated = SIZE;
 
-    using element_type        = T;
-    using iterator_type       = SequenceIterator<Vector<T, SIZE>>;
-    using const_iterator_type = SequenceIterator<const Vector<T, SIZE>>;
-    using index_type          = unsigned;
-
-private:
-    friend iterator_type;
+    using value_type    = T;
+    using iterator_type = SequenceIterator<Vector<T, SIZE>, unsigned>;
+    using const_iterator_type =
+        SequenceIterator<const Vector<T, SIZE>, unsigned>;
+    using index_type = unsigned;
 
 public:
     Vector() : m_objMemory(), m_uSizeUsed()
@@ -92,14 +90,22 @@ public:
     }
 
 private:
+    // iterator support
+    friend iterator_type;
+
+    value_type* Access(const iterator_type& it)
+    {
+        return &operator[](it.m_identifier);
+    }
+
     void Next(iterator_type& it)
     {
-        ++it.m_index;
+        ++it.m_identifier;
     }
 
     void Prev(iterator_type& it)
     {
-        --it.m_index;
+        --it.m_identifier;
     }
 
 private:
