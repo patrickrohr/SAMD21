@@ -30,3 +30,11 @@ First, build and tag the docker image:
 Then, start an interactive docker container session:
 
     docker run -it -v $(pwd):~/Repos/samd21-firmware patrickrohr/samd21-toolchain
+
+
+## Debug on Target Using JLink
+
+1. Start  gdb server: `JLinkGDBServer -if SWD - device ATSAMD21G18`
+2. Attach gdb client: `gdb-multiarch -ex "target extended-remote :2331"
+   app/hal-test/hal_test_app`
+
