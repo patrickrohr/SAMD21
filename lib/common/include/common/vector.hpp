@@ -84,7 +84,7 @@ public:
         return iterator_type(this, m_uSizeUsed);
     }
 
-    const_iterator_type ConstEnd()
+    const_iterator_type ConstEnd() const
     {
         return const_iterator_type(this, m_uSizeUsed);
     }
@@ -126,13 +126,13 @@ typename Vector<T, SIZE>::iterator_type end(Vector<T, SIZE>& vec)
 }
 
 template<typename T, unsigned SIZE>
-typename Vector<T, SIZE>::iterator_type begin(const Vector<T, SIZE>& vec)
+typename Vector<T, SIZE>::const_iterator_type begin(const Vector<T, SIZE>& vec)
 {
     return vec.ConstBegin();
 }
 
 template<typename T, unsigned SIZE>
-typename Vector<T, SIZE>::iterator_type end(const Vector<T, SIZE>& vec)
+typename Vector<T, SIZE>::const_iterator_type end(const Vector<T, SIZE>& vec)
 {
     return vec.ConstEnd();
 }
