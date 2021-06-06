@@ -25,6 +25,7 @@ target_sources(samd21_hal
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/osc8m.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/samd/xosc32k.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/clock/sim/sim_clock.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/irq/samd/interrupt_manager_samd.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/port/pin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/sercom_base.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/serial/usart.cpp
