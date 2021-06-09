@@ -64,7 +64,7 @@ public:
         }
     }
 
-    unsigned Size()
+    unsigned Size() const
     {
         return m_uSizeUsed;
     }
@@ -92,13 +92,24 @@ public:
 private:
     // iterator support
     friend iterator_type;
+    friend const_iterator_type;
 
     value_type* Access(const iterator_type& it)
     {
         return &operator[](it.m_identifier);
     }
 
+    const value_type* Access(const const_iterator_type& it) const
+    {
+        return &operator[](it.m_identifier);
+    }
+
     void Next(iterator_type& it)
+    {
+        ++it.m_identifier;
+    }
+
+    void Next(const const_iterator_type& it) const
     {
         ++it.m_identifier;
     }

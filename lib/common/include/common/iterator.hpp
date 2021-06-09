@@ -36,22 +36,12 @@ public:
         return !operator==(rhs);
     }
 
-    const typename T::value_type* operator->() const
+    auto operator->()
     {
         return m_pObj->Access(*this);
     }
 
-    const typename T::value_type& operator*() const
-    {
-        return *operator->();
-    }
-
-    typename T::value_type* operator->()
-    {
-        return m_pObj->Access(*this);
-    }
-
-    typename T::value_type& operator*()
+    auto operator*()
     {
         return *operator->();
     }
@@ -85,8 +75,8 @@ public:
     }
 
 private:
-    T* m_pObj;
-    ID m_identifier;
+    mutable T* m_pObj;
+    mutable ID m_identifier;
 };
 
 } // namespace SAMD
